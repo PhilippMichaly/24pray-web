@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
-export default function VerifyPage() {
+function VerifyInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -60,5 +60,20 @@ export default function VerifyPage() {
         </>
       )}
     </main>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-brand-100 border-t-brand-400" />
+          <p className="text-[var(--text-muted)]">Link wird verifiziert...</p>
+        </main>
+      }
+    >
+      <VerifyInner />
+    </Suspense>
   );
 }

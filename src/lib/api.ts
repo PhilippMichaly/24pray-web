@@ -26,7 +26,10 @@ class ApiClient {
       throw new Error(error.message || `HTTP ${res.status}`);
     }
 
-    return res.json();
+    // 204 No Content (logout, slot-cancel) and empty bodies have no JSON to parse.
+    if (res.status === 204) return undefined as T;
+    const text = await res.text();
+    return (text ? JSON.parse(text) : undefined) as T;
   }
 
   get<T>(path: string) {

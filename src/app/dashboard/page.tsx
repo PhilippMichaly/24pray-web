@@ -22,7 +22,12 @@ export default function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-2xl p-8">
-      <h1 className="mb-6 text-2xl font-bold">Deine Gebetsprojekte</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Deine Gebetsprojekte</h1>
+        <Link href="/projects/new" className="rounded bg-blue-600 px-4 py-2 text-white">
+          Neues Projekt
+        </Link>
+      </div>
       {error && <p className="mb-4 text-red-600">{error}</p>}
       <ul className="space-y-3">
         {projects.map((p) => (

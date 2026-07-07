@@ -3,21 +3,22 @@
 @tailwind utilities;
 
 :root {
-  /* ---- Farbe: Light „Morgenlicht auf Papier" (HSL-Triple) ---- */
-  --bg: 40 33% 97%;
+  /* ---- Farbe: Light „Morgenröte" — hell, hoffnungsvoll, kraftvoll (2026-07-07) ----
+     Sonnenhelles Weiß + blaustündige Tinte (Indigo statt Sepia) + Sonnenaufgangs-Orange. */
+  --bg: 48 70% 98%;
   --surface: 0 0% 100%;
-  --surface-sunken: 40 25% 94%;
-  --border: 38 18% 87%;
-  --ink: 35 20% 10%;
-  --ink-muted: 35 8% 38%;          /* L 40→38 für AA auf --bg (§3.3) */
-  --accent: 32 72% 36%;            /* L 38→36 für AA-Fill mit weißem Text (§3.3) */
-  --accent-strong: 32 74% 28%;
-  --accent-soft: 36 64% 92%;
-  --gold: 40 85% 55%;
-  --night: 250 22% 42%;
-  --positive: 150 40% 28%;
-  --danger: 12 62% 40%;
-  --focus: 32 72% 36%;
+  --surface-sunken: 46 45% 94%;
+  --border: 44 25% 87%;
+  --ink: 232 30% 13%;
+  --ink-muted: 230 12% 38%;
+  --accent: 24 94% 37%;            /* Sonnenaufgang; L→37 für AA-Fill mit hellem Text (5.0:1) */
+  --accent-strong: 22 95% 30%;
+  --accent-soft: 30 95% 93%;
+  --gold: 43 96% 54%;
+  --night: 243 50% 52%;
+  --positive: 152 55% 30%;
+  --danger: 8 70% 42%;
+  --focus: 24 94% 37%;
 
   /* ---- Komponenten-Tokens (zweite Ebene, White-Label-Hebel) ---- */
   --slot-free-bg: var(--surface);
@@ -56,48 +57,49 @@
   --ease-exit: ease-in;
 }
 
-/* Dark „Nachtwache" — warmes Anthrazit. Nur Farb-Tokens werden überschrieben. */
+/* Dark „Nachtwache" — blaue Stunde unterm Sternenhimmel (statt Braun-Schwarz).
+   Nur Farb-Tokens werden überschrieben. */
 [data-theme="dark"] {
-  --bg: 30 12% 8%;
-  --surface: 30 12% 12%;
-  --surface-sunken: 30 12% 10%;
-  --border: 32 10% 22%;
-  --ink: 38 28% 92%;
-  --ink-muted: 36 10% 64%;         /* L 62→64 für AA auf dunklem --bg */
-  --accent: 36 78% 60%;
-  --accent-strong: 36 82% 68%;
-  --accent-soft: 34 40% 18%;
-  --gold: 42 90% 62%;
-  --night: 250 26% 60%;
-  --positive: 150 35% 55%;
-  --danger: 12 70% 62%;
-  --focus: 36 78% 60%;
-  --shadow-1: 0 1px 2px hsl(0 0% 0% / 0.2);
-  --shadow-2: 0 2px 8px hsl(0 0% 0% / 0.28);
-  --shadow-3: 0 8px 32px hsl(0 0% 0% / 0.4);
+  --bg: 230 24% 9%;
+  --surface: 230 20% 13%;
+  --surface-sunken: 230 22% 11%;
+  --border: 228 14% 24%;
+  --ink: 45 40% 94%;
+  --ink-muted: 230 12% 68%;
+  --accent: 32 96% 60%;
+  --accent-strong: 36 98% 68%;
+  --accent-soft: 28 50% 20%;
+  --gold: 45 96% 62%;
+  --night: 243 55% 68%;
+  --positive: 152 45% 55%;
+  --danger: 8 75% 62%;
+  --focus: 32 96% 60%;
+  --shadow-1: 0 1px 2px hsl(230 40% 2% / 0.3);
+  --shadow-2: 0 2px 8px hsl(230 40% 2% / 0.38);
+  --shadow-3: 0 8px 32px hsl(230 40% 2% / 0.5);
 }
 
 /* System-Default vor Hydration / bei JS-off. next-themes stempelt data-theme
    synchron; dieser Block deckt nur das Millisekunden-Fenster ab (Dark-Tokens dupliziert). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: 30 12% 8%;
-    --surface: 30 12% 12%;
-    --surface-sunken: 30 12% 10%;
-    --border: 32 10% 22%;
-    --ink: 38 28% 92%;
-    --ink-muted: 36 10% 64%;
-    --accent: 36 78% 60%;
-    --accent-strong: 36 82% 68%;
-    --accent-soft: 34 40% 18%;
-    --gold: 42 90% 62%;
-    --night: 250 26% 60%;
-    --positive: 150 35% 55%;
-    --danger: 12 70% 62%;
-    --focus: 36 78% 60%;
-    --shadow-1: 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-2: 0 2px 8px hsl(0 0% 0% / 0.28);
-    --shadow-3: 0 8px 32px hsl(0 0% 0% / 0.4);
+    --bg: 230 24% 9%;
+    --surface: 230 20% 13%;
+    --surface-sunken: 230 22% 11%;
+    --border: 228 14% 24%;
+    --ink: 45 40% 94%;
+    --ink-muted: 230 12% 68%;
+    --accent: 32 96% 60%;
+    --accent-strong: 36 98% 68%;
+    --accent-soft: 28 50% 20%;
+    --gold: 45 96% 62%;
+    --night: 243 55% 68%;
+    --positive: 152 45% 55%;
+    --danger: 8 75% 62%;
+    --focus: 32 96% 60%;
+    --shadow-1: 0 1px 2px hsl(230 40% 2% / 0.3);
+    --shadow-2: 0 2px 8px hsl(230 40% 2% / 0.38);
+    --shadow-3: 0 8px 32px hsl(230 40% 2% / 0.5);
   }
 }
 

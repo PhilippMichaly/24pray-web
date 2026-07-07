@@ -28,6 +28,9 @@ export default function JoinPage() {
       .catch(() => setError(true));
   }, [token]);
 
+  // Invite-Token weiterreichen: so öffnet sich auch eine PRIVATE-Kette für Gäste (W3-Gap-Fix).
+  const projectHref = project ? `/projects/${project.id}?invite=${encodeURIComponent(token)}` : '#';
+
   if (error) {
     return (
       <CenterShell>
@@ -60,7 +63,7 @@ export default function JoinPage() {
             </div>
 
             <Button asChild size="lg" className="mt-6 w-full">
-              <Link href={`/projects/${project.id}`}>{t('toProjectTakeSlot')}</Link>
+              <Link href={projectHref}>{t('toProjectTakeSlot')}</Link>
             </Button>
             <p className="mt-3 text-xs text-ink-muted">
               {t('noAccountNeeded')} ·{' '}

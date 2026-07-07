@@ -44,6 +44,10 @@ class ApiClient {
     return this.request<T>('PATCH', path, body);
   }
 
+  put<T>(path: string, body?: unknown) {
+    return this.request<T>('PUT', path, body);
+  }
+
   delete<T>(path: string) {
     return this.request<T>('DELETE', path);
   }
@@ -51,11 +55,14 @@ class ApiClient {
 
 export const api = new ApiClient(API_URL);
 
-// ── Slot-Helper (Welle 2) ──────────────────────
-import type { PrayerSlot, SlotView } from '@/types';
+// ── Slot-Helper (Welle 2/3) ────────────────────
+import type { PrayerSlot, SlotView, PrayerRequestView, ProjectStats } from '@/types';
 
-export function getSlotGrid(projectId: string) {
-  return api.get<SlotView[]>(`/projects/${projectId}/slots`);
+/** Query-Suffix für den Invite-Token (PRIVATE-Ketten per Einladungslink, W3). */
+const inviteQ = (invite?: string) => (invite ? `?invite=${encodeURIComponent(invite)}` : '');
+
+export function getSlotGrid(projectId: string, invite?: string) {
+  return api.get<SlotView[]>(`/projects/${projectId}/slots${inviteQ(invite)}`);
 }
 
 export function bookSlot(
@@ -72,4 +79,35 @@ export function bookSlot(
 export function cancelSlot(slotId: string, guestToken?: string) {
   const q = guestToken ? `?guestToken=${encodeURIComponent(guestToken)}` : '';
   return api.delete<void>(`/slots/${slotId}${q}`);
+}
+
+// ── Welle 3 ────────────────────────────────────
+
+/** „Jede Woche übernehmen" — materialisiert Folgewochen aus dem eigenen Slot. */
+export function recurSlot(slotId: string) {
+  return api.post<{ recurringId: string; createdSlotIds: string[] }>(`/slots/${slotId}/recur`);
+}
+
+export function getRequests(projectId: string, invite?: string) {
+  return api.get<PrayerRequestView[]>(`/projects/${projectId}/requests${inviteQ(invite)}`);
+}
+
+export function postRequest(
+  projectId: string,
+  body: { text: string; authorName?: string },
+  invite?: string,
+) {
+  return api.post<PrayerRequestView>(`/projects/${projectId}/requests${inviteQ(invite)}`, body);
+}
+
+export function getProjectStats(projectId: string, invite?: string) {
+  return api.get<ProjectStats>(`/projects/${projectId}/stats${inviteQ(invite)}`);
+}
+
+export function getReminderPref() {
+  return api.get<{ minutesBefore: number; channel: string }>('/me/reminder');
+}
+
+export function putReminderPref(minutesBefore: number) {
+  return api.put<{ minutesBefore: number; channel: string }>('/me/reminder', { minutesBefore });
 }

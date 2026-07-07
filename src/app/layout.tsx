@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Fraunces, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
@@ -21,6 +21,14 @@ export const metadata: Metadata = {
   title: '24pray — Gemeinsam beten',
   description:
     'Organisiere Gebetsketten, buche deinen Slot und bete gemeinsam mit deiner Gemeinde.',
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: [
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: '/icons/icon-192.png',
+  },
   openGraph: {
     title: '24pray — Gemeinsam beten',
     description: 'Organisiere Gebetsketten und buche deinen Gebets-Slot.',
@@ -29,6 +37,13 @@ export const metadata: Metadata = {
     locale: 'de_DE',
     type: 'website',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FDFCF4' },
+    { media: '(prefers-color-scheme: dark)', color: '#12141F' },
+  ],
 };
 
 export default function RootLayout({

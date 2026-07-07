@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import { CalendarClock } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { ProjectWithStats } from '@/types';
@@ -20,11 +20,15 @@ import { ChainProgress } from '@/components/slots/ChainProgress';
 import { ChainBand } from '@/components/slots/ChainBand';
 import { SlotList } from '@/components/slots/SlotList';
 import { SlotSheet, type SlotSheetMode } from '@/components/slots/SlotSheet';
+import { RequestsFeed } from '@/components/slots/RequestsFeed';
+import { StatsPanel } from '@/components/slots/StatsPanel';
 import type { SlotViewModel } from '@/components/slots/types';
 import { t } from '@/lib/i18n';
 
-export default function ProjectPage() {
+function ProjectPageInner() {
   const { id } = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+  const invite = searchParams.get('invite') ?? undefined; // PRIVATE-Kette per Einladungslink (W3)
   const { user } = useAuth();
   const currentUserId = user?.id ?? null;
 
@@ -38,13 +42,14 @@ export default function ProjectPage() {
   });
 
   useEffect(() => {
+    const q = invite ? `?invite=${encodeURIComponent(invite)}` : '';
     api
-      .get<ProjectWithStats>(`/projects/${id}`)
+      .get<ProjectWithStats>(`/projects/${id}${q}`)
       .then(setProject)
       .catch((e) => setLoadError((e as Error).message));
-  }, [id]);
+  }, [id, invite]);
 
-  const grid = useSlotGrid(project, currentUserId);
+  const grid = useSlotGrid(project, currentUserId, invite);
 
   const scrollToSlot = useCallback((startTime: string) => {
     const el = document.getElementById(`s-${startTime}`);
@@ -144,8 +149,8 @@ export default function ProjectPage() {
             onValueChange={setTab}
             tabs={[
               { id: 'chain', label: t('chainTab') },
-              { id: 'requests', label: t('requestsTab'), disabled: true },
-              { id: 'stats', label: t('statsTab'), disabled: true },
+              { id: 'requests', label: t('requestsTab') },
+              { id: 'stats', label: t('statsTab') },
             ]}
           >
             <TabPanel value="chain" className="pt-5">
@@ -160,6 +165,12 @@ export default function ProjectPage() {
                   <SlotList days={grid.days} projectTz={grid.tz} onBook={onBook} onOpenSheet={onOpenSheet} />
                 </>
               )}
+            </TabPanel>
+            <TabPanel value="requests" className="pt-5">
+              <RequestsFeed projectId={project.id} projectTz={grid.tz} isLoggedIn={!!currentUserId} invite={invite} />
+            </TabPanel>
+            <TabPanel value="stats" className="pt-5">
+              <StatsPanel projectId={project.id} invite={invite} />
             </TabPanel>
           </Tabs>
 
@@ -176,9 +187,19 @@ export default function ProjectPage() {
               // Sheet bleibt offen (Erfolgs-State + .ics im Formular); Grid im Hintergrund aktualisieren.
               void grid.reload();
             }}
+            onRecurred={() => void grid.reload()}
           />
         </>
       )}
     </AppShell>
+  );
+}
+
+export default function ProjectPage() {
+  // useSearchParams braucht eine Suspense-Boundary (Next 14 Prerender).
+  return (
+    <Suspense fallback={null}>
+      <ProjectPageInner />
+    </Suspense>
   );
 }

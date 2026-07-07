@@ -69,3 +69,17 @@ export interface BookSlotRequest {
   guestEmail?: string;
   notifyChannel: NotificationChannel;
 }
+
+// ── Welle 3 ────────────────────────────────────
+
+export interface PrayerRequestView {
+  id: string;
+  authorName: string | null; // für Anonyme serverseitig maskiert (§E5)
+  text: string;
+  createdAt: string;
+}
+
+export interface ProjectStats {
+  completedHours: number;
+  perPerson: { name: string | null; hours: number }[];
+}

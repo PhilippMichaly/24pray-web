@@ -39,7 +39,11 @@ export const useSlotGridStore = create<SlotGridState>((set) => ({
 }));
 
 /** Hook: lädt Grid, liefert ViewModels (mit tickendem „now") + Buchungs-/Storno-Flow. */
-export function useSlotGrid(project: ProjectWithStats | null, currentUserId: string | null) {
+export function useSlotGrid(
+  project: ProjectWithStats | null,
+  currentUserId: string | null,
+  invite?: string, // Einladungslink-Token für PRIVATE-Ketten (W3)
+) {
   const { slots, pendingKeys, conflictKey, setSlots, setPending, setConflict, patchSlot } =
     useSlotGridStore();
   const [now, setNow] = useState(() => Date.now());
@@ -54,11 +58,11 @@ export function useSlotGrid(project: ProjectWithStats | null, currentUserId: str
   const reload = useCallback(async () => {
     if (!project) return;
     try {
-      setSlots(await getSlotGrid(project.id));
+      setSlots(await getSlotGrid(project.id, invite));
     } catch (e) {
       setError((e as Error).message);
     }
-  }, [project, setSlots]);
+  }, [project, invite, setSlots]);
 
   useEffect(() => {
     void reload();
@@ -97,6 +101,17 @@ export function useSlotGrid(project: ProjectWithStats | null, currentUserId: str
         const created = await bookSlot(project.id, { startTime: key });
         patchSlot(key, { slotId: created.id });
         setPending(key, false);
+        // W3.1 Ketten-Glow: das neue Glied leuchtet kurz gold auf.
+        if (typeof document !== 'undefined' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.getElementById(`s-${key}`)?.animate(
+            [
+              { boxShadow: '0 0 0 0 hsl(var(--gold) / 0.0)' },
+              { boxShadow: '0 0 18px 4px hsl(var(--gold) / 0.55)' },
+              { boxShadow: '0 0 0 0 hsl(var(--gold) / 0.0)' },
+            ],
+            { duration: 900, easing: 'ease-out' },
+          );
+        }
         toast({
           message: t('slotBookedToast'),
           variant: 'positive',

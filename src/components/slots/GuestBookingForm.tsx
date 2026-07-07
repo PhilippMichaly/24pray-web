@@ -82,7 +82,7 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: Gu
         </Button>
         <p className="mt-4 text-xs text-ink-muted">
           {t('guestAccountOffer')}{' '}
-          <Link href="/auth/login" className="text-accent underline underline-offset-2">
+          <Link href="/auth/login" className="text-accent-strong underline underline-offset-2">
             {t('login')}
           </Link>
         </p>

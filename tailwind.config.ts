@@ -18,6 +18,7 @@ const config: Config = {
         },
         accent: {
           DEFAULT: 'hsl(var(--accent) / <alpha-value>)',
+          ink: 'hsl(var(--accent-ink) / <alpha-value>)',
           strong: 'hsl(var(--accent-strong) / <alpha-value>)',
           soft: 'hsl(var(--accent-soft) / <alpha-value>)',
         },

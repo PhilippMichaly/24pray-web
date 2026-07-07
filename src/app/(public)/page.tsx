@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { LogIn, HeartHandshake, PlusCircle, type LucideIcon } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Sheet } from '@/components/ui/Sheet';
 import { Brand } from '@/components/patterns/Brand';
 import { ThemeToggle } from '@/components/patterns/ThemeToggle';
 import { Globe } from '@/components/patterns/Globe';
@@ -13,10 +13,40 @@ import { t } from '@/lib/i18n';
 interface PublicStats {
   activeChains: number;
   heldSlots: number;
+  points?: { lat: number; lon: number }[];
+}
+
+function PrayOption({
+  icon: Icon,
+  label,
+  desc,
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  desc: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full items-center gap-4 rounded-md border bg-surface px-4 py-4 text-left transition-colors hover:border-accent hover:bg-accent-soft/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+    >
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
+        <Icon size={22} aria-hidden />
+      </span>
+      <span className="min-w-0">
+        <span className="block font-semibold text-ink">{label}</span>
+        <span className="block text-sm text-ink-muted">{desc}</span>
+      </span>
+    </button>
+  );
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const [stats, setStats] = useState<PublicStats | null>(null);
+  const [choiceOpen, setChoiceOpen] = useState(false);
 
   useEffect(() => {
     api
@@ -26,50 +56,60 @@ export default function HomePage() {
   }, []);
 
   return (
-    // Der Hero spielt im Weltall → bewusst immer Nachtwache-Tokens (data-theme).
-    <div data-theme="dark" className="relative flex min-h-screen flex-col items-center overflow-hidden bg-bg px-6 text-ink">
-      <header className="z-10 flex w-full max-w-5xl items-center justify-between py-5">
+    // Weltall = immer Nachtwache-Tokens (data-theme), Rest der App bleibt theme-frei.
+    <div data-theme="dark" className="relative flex min-h-screen flex-col items-center overflow-hidden bg-bg px-4 text-ink">
+      <header className="z-10 flex w-full max-w-5xl items-center justify-between py-4">
         <Brand size="sm" />
         <ThemeToggle />
       </header>
 
-      <main className="z-10 flex w-full max-w-xl flex-1 flex-col items-center justify-center text-center">
-        <div className="relative w-full max-w-[420px]">
-          <Globe activeChains={stats?.activeChains ?? 5} />
+      {/* Nur die Erde, groß — und ein Button. */}
+      <main className="z-10 flex w-full flex-1 flex-col items-center justify-center">
+        <div className="w-full max-w-[min(78vh,700px)]">
+          <Globe activeChains={stats?.activeChains ?? 5} points={stats?.points} />
         </div>
 
-        <h1 className="mt-2 font-display text-3xl font-semibold leading-tight tracking-tight">
-          {t('heroTitle')}
-        </h1>
-        <p className="mt-3 max-w-[340px] text-base leading-relaxed text-ink-muted">
-          {t('heroSubtitle')}
-        </p>
+        <button
+          onClick={() => setChoiceOpen(true)}
+          className="-mt-4 rounded-full bg-accent px-14 py-4 font-display text-2xl font-semibold text-accent-ink shadow-3 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-bg"
+        >
+          {t('prayCta')}
+        </button>
 
         {stats && stats.activeChains > 0 && (
-          <p className="mt-4 text-sm text-gold tnum" aria-live="polite">
+          <p className="mt-5 text-sm text-gold tnum" aria-live="polite">
             {t('statsChainsActive', { n: stats.activeChains })}
             {stats.heldSlots > 0 && <> · {t('statsHoursHeld', { n: stats.heldSlots })}</>}
           </p>
         )}
-
-        <div className="mt-8 flex w-full max-w-[320px] flex-col gap-3">
-          <Button asChild size="lg">
-            <Link href="/auth/login">{t('login')}</Link>
-          </Button>
-          <Button asChild size="lg" variant="secondary">
-            <Link href="/dashboard">{t('exploreProjects')}</Link>
-          </Button>
-        </div>
-
-        <Badge variant="accent" className="mt-7">
-          {t('noAccountNeeded')}
-        </Badge>
       </main>
 
-      <footer className="z-10 pb-6 pt-8 text-center text-xs text-ink-muted">
-        24pray · {t('tagline')}
-        <span className="mt-1 block opacity-60">{t('earthCredit')}</span>
+      <footer className="z-10 pb-4 pt-4 text-center text-xs text-ink-muted opacity-70">
+        24pray · {t('earthCredit')}
       </footer>
+
+      <Sheet open={choiceOpen} onOpenChange={setChoiceOpen} title={t('prayChoiceTitle')}>
+        <div className="space-y-2.5">
+          <PrayOption
+            icon={LogIn}
+            label={t('optLogin')}
+            desc={t('optLoginDesc')}
+            onClick={() => router.push('/auth/login')}
+          />
+          <PrayOption
+            icon={HeartHandshake}
+            label={t('optBrowse')}
+            desc={t('optBrowseDesc')}
+            onClick={() => router.push('/dashboard')}
+          />
+          <PrayOption
+            icon={PlusCircle}
+            label={t('optCreate')}
+            desc={t('optCreateDesc')}
+            onClick={() => router.push('/projects/new')}
+          />
+        </div>
+      </Sheet>
     </div>
   );
 }

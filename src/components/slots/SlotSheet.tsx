@@ -94,7 +94,7 @@ function MineExtras({ slot, project, onRecurred }: { slot: SlotViewModel; projec
           ) : (
             <>
               <span>{t('reminderNote', { min: minutes })}</span>
-              <button onClick={() => setEditing(true)} className="text-accent underline underline-offset-2">
+              <button onClick={() => setEditing(true)} className="text-accent-strong underline underline-offset-2">
                 {t('reminderChange')}
               </button>
             </>

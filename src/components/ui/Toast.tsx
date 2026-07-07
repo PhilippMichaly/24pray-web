@@ -34,7 +34,7 @@ export function Toaster() {
                 toast.action!.onClick();
                 dismiss(toast.id);
               }}
-              className="shrink-0 text-sm font-semibold text-accent hover:text-accent-strong"
+              className="shrink-0 text-sm font-semibold text-accent-strong hover:opacity-80"
             >
               {toast.action.label}
             </button>

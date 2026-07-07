@@ -15,11 +15,10 @@ import { useEffect, useRef } from 'react';
 const TEX_W = 1024;
 const TEX_H = 512;
 
-// Plausible Städte für die Ketten-Punkte (dekorativ — Projekte haben noch keine Geo-Daten).
-const CITY_POINTS: [number, number][] = [
+// Fallback-Deko, falls (noch) keine Kette einen echten Standort hat (W3.4).
+const FALLBACK_POINTS: [number, number][] = [
   [52.5, 13.4], [48.1, 11.6], [51.5, -0.1], [40.7, -74.0], [-23.5, -46.6],
   [6.5, 3.4], [-1.3, 36.8], [28.6, 77.2], [14.6, 121.0], [-33.9, 151.2],
-  [55.8, 37.6], [41.0, 28.9], [19.4, -99.1], [37.6, 127.0], [50.9, 6.96],
 ];
 
 // Sonnenstand „Morgenröte": Licht kommt von rechts-vorn (Osten), leicht erhöht.
@@ -43,11 +42,12 @@ async function loadTexture(src: string): Promise<Uint8ClampedArray> {
 }
 
 export interface GlobeProps {
-  activeChains: number; // echte Anzahl laufender Ketten (Punkt-Anzahl, min 3 fürs Bild)
+  activeChains: number; // echte Anzahl laufender Ketten (für Fallback-Punktzahl)
+  points?: { lat: number; lon: number }[]; // echte Standorte aktiver Ketten (W3.4)
   className?: string;
 }
 
-export function Globe({ activeChains, className }: GlobeProps) {
+export function Globe({ activeChains, points, className }: GlobeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -123,8 +123,11 @@ export function Globe({ activeChains, className }: GlobeProps) {
       s: (0.4 + ((i * 29) % 10) / 12) * dpr,
     }));
 
-    const nPoints = Math.max(3, Math.min(CITY_POINTS.length, activeChains));
-    const chainPts = CITY_POINTS.slice(0, nPoints);
+    // Echte Standorte, wenn vorhanden — sonst Deko-Fallback in Ketten-Anzahl.
+    const chainPts: [number, number][] =
+      points && points.length > 0
+        ? points.map((p) => [p.lat, p.lon] as [number, number])
+        : FALLBACK_POINTS.slice(0, Math.max(3, Math.min(FALLBACK_POINTS.length, activeChains)));
 
     let day: Uint8ClampedArray | null = null;
     let night: Uint8ClampedArray | null = null;
@@ -260,7 +263,7 @@ export function Globe({ activeChains, className }: GlobeProps) {
       cancelled = true;
       cancelAnimationFrame(raf);
     };
-  }, [activeChains]);
+  }, [activeChains, points]);
 
   return (
     <canvas

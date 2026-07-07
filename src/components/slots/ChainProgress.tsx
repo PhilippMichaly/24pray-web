@@ -29,7 +29,7 @@ export function ChainProgress({ booked, total, largestGap, onGapClick }: ChainPr
       {!complete && largestGap && (
         <button
           onClick={() => onGapClick?.(largestGap.startTime)}
-          className="mt-3 inline-flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-accent"
+          className="mt-3 inline-flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-accent-strong"
         >
           <span>{t('largestGap', { gap: largestGap.label })}</span>
           <ArrowRight size={14} aria-hidden />

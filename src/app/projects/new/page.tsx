@@ -16,6 +16,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FolderHeart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { browserTz, formatDayHeader } from '@/lib/time';
+import { CITIES, findCity } from '@/lib/cities';
 import { t } from '@/lib/i18n';
 
 const DURATIONS = [
@@ -35,6 +36,7 @@ export default function NewProjectPage() {
   const [startDate, setStartDate] = useState('');
   const [hours, setHours] = useState<number>(48);
   const [visibility, setVisibility] = useState<ProjectVisibility>('PRIVATE');
+  const [locationInput, setLocationInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -51,6 +53,8 @@ export default function NewProjectPage() {
     const start = new Date(startDate);
     setSubmitting(true);
     try {
+      // Standort nur mitschicken, wenn er in der Städte-Liste auflösbar ist (W3.4)
+      const city = findCity(locationInput);
       const project = await api.post<ProjectWithStats>('/projects', {
         title: title.trim(),
         description: description.trim() || undefined,
@@ -58,6 +62,9 @@ export default function NewProjectPage() {
         endDate: new Date(start.getTime() + hours * 3600_000).toISOString(),
         timezone: tz,
         visibility,
+        ...(city
+          ? { locationName: city.name, locationLat: city.lat, locationLon: city.lon }
+          : {}),
       });
       router.push(`/projects/${project.id}`);
     } catch (err) {
@@ -136,6 +143,26 @@ export default function NewProjectPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="location">
+                {t('fieldLocation')} <span className="text-ink-muted">({t('optional')})</span>
+              </Label>
+              <Input
+                id="location"
+                list="city-list"
+                value={locationInput}
+                onChange={(e) => setLocationInput(e.target.value)}
+                placeholder={t('fieldLocationPlaceholder')}
+                autoComplete="off"
+              />
+              <datalist id="city-list">
+                {CITIES.map((c) => (
+                  <option key={c.name} value={c.name} />
+                ))}
+              </datalist>
+              <p className="mt-1 text-xs text-ink-muted">{t('fieldLocationHint')}</p>
             </div>
 
             <div>

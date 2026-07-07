@@ -3,22 +3,25 @@
 @tailwind utilities;
 
 :root {
-  /* ---- Farbe: Light „Morgenröte" — hell, hoffnungsvoll, kraftvoll (2026-07-07) ----
-     Sonnenhelles Weiß + blaustündige Tinte (Indigo statt Sepia) + Sonnenaufgangs-Orange. */
-  --bg: 48 70% 98%;
+  /* ---- Farbe: Light „Kraft der Morgenröte" — hoffnungsvoll, energetisch (V3, 2026-07-07) ----
+     Sonnenhelles Weiß + Indigo-Tinte + LEUCHTENDES Sonnenaufgangs-Orange.
+     Fills sind strahlend (--accent) mit dunkler Schrift (--accent-ink);
+     Akzent-TEXT auf hellen Flächen nutzt --accent-strong (AA). */
+  --bg: 48 80% 98%;
   --surface: 0 0% 100%;
-  --surface-sunken: 46 45% 94%;
-  --border: 44 25% 87%;
-  --ink: 232 30% 13%;
-  --ink-muted: 230 12% 38%;
-  --accent: 24 94% 37%;            /* Sonnenaufgang; L→37 für AA-Fill mit hellem Text (5.0:1) */
-  --accent-strong: 22 95% 30%;
-  --accent-soft: 30 95% 93%;
-  --gold: 43 96% 54%;
-  --night: 243 50% 52%;
-  --positive: 152 55% 30%;
-  --danger: 8 70% 42%;
-  --focus: 24 94% 37%;
+  --surface-sunken: 46 60% 94%;
+  --border: 42 30% 86%;
+  --ink: 235 32% 12%;
+  --ink-muted: 233 14% 36%;
+  --accent: 25 96% 49%;            /* strahlender Sonnenaufgang (Fill) */
+  --accent-ink: 235 35% 10%;       /* Schrift AUF Accent-Fills */
+  --accent-strong: 22 96% 33%;     /* Akzent als Text/Hover, AA auf hell */
+  --accent-soft: 30 100% 92%;
+  --gold: 45 98% 52%;
+  --night: 250 65% 56%;            /* elektrisches Violett */
+  --positive: 152 70% 28%;         /* energetisches Hoffnungsgrün */
+  --danger: 5 75% 42%;
+  --focus: 25 96% 42%;
 
   /* ---- Komponenten-Tokens (zweite Ebene, White-Label-Hebel) ---- */
   --slot-free-bg: var(--surface);
@@ -60,20 +63,21 @@
 /* Dark „Nachtwache" — blaue Stunde unterm Sternenhimmel (statt Braun-Schwarz).
    Nur Farb-Tokens werden überschrieben. */
 [data-theme="dark"] {
-  --bg: 230 24% 9%;
-  --surface: 230 20% 13%;
-  --surface-sunken: 230 22% 11%;
-  --border: 228 14% 24%;
-  --ink: 45 40% 94%;
-  --ink-muted: 230 12% 68%;
-  --accent: 32 96% 60%;
-  --accent-strong: 36 98% 68%;
-  --accent-soft: 28 50% 20%;
-  --gold: 45 96% 62%;
-  --night: 243 55% 68%;
-  --positive: 152 45% 55%;
-  --danger: 8 75% 62%;
-  --focus: 32 96% 60%;
+  --bg: 232 26% 9%;
+  --surface: 232 22% 13%;
+  --surface-sunken: 232 24% 11%;
+  --border: 230 16% 25%;
+  --ink: 46 50% 95%;
+  --ink-muted: 231 14% 70%;
+  --accent: 30 100% 60%;
+  --accent-ink: 232 26% 9%;
+  --accent-strong: 36 100% 70%;
+  --accent-soft: 28 60% 21%;
+  --gold: 47 100% 62%;
+  --night: 250 70% 72%;
+  --positive: 152 55% 55%;
+  --danger: 5 80% 64%;
+  --focus: 30 100% 60%;
   --shadow-1: 0 1px 2px hsl(230 40% 2% / 0.3);
   --shadow-2: 0 2px 8px hsl(230 40% 2% / 0.38);
   --shadow-3: 0 8px 32px hsl(230 40% 2% / 0.5);
@@ -83,20 +87,21 @@
    synchron; dieser Block deckt nur das Millisekunden-Fenster ab (Dark-Tokens dupliziert). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: 230 24% 9%;
-    --surface: 230 20% 13%;
-    --surface-sunken: 230 22% 11%;
-    --border: 228 14% 24%;
-    --ink: 45 40% 94%;
-    --ink-muted: 230 12% 68%;
-    --accent: 32 96% 60%;
-    --accent-strong: 36 98% 68%;
-    --accent-soft: 28 50% 20%;
-    --gold: 45 96% 62%;
-    --night: 243 55% 68%;
-    --positive: 152 45% 55%;
-    --danger: 8 75% 62%;
-    --focus: 32 96% 60%;
+    --bg: 232 26% 9%;
+    --surface: 232 22% 13%;
+    --surface-sunken: 232 24% 11%;
+    --border: 230 16% 25%;
+    --ink: 46 50% 95%;
+    --ink-muted: 231 14% 70%;
+    --accent: 30 100% 60%;
+    --accent-ink: 232 26% 9%;
+    --accent-strong: 36 100% 70%;
+    --accent-soft: 28 60% 21%;
+    --gold: 47 100% 62%;
+    --night: 250 70% 72%;
+    --positive: 152 55% 55%;
+    --danger: 5 80% 64%;
+    --focus: 30 100% 60%;
     --shadow-1: 0 1px 2px hsl(230 40% 2% / 0.3);
     --shadow-2: 0 2px 8px hsl(230 40% 2% / 0.38);
     --shadow-3: 0 8px 32px hsl(230 40% 2% / 0.5);

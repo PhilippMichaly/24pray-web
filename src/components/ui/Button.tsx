@@ -13,7 +13,8 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-accent text-bg hover:bg-accent-strong',
+        // V3 „Kraft der Morgenröte": strahlender Fill + dunkle Schrift (beide Themes)
+        primary: 'bg-accent text-accent-ink hover:brightness-110 active:brightness-95',
         secondary: 'bg-surface-sunken text-ink hover:bg-border',
         ghost: 'bg-transparent text-ink hover:bg-surface-sunken',
         danger: 'bg-transparent text-danger hover:bg-danger/10',

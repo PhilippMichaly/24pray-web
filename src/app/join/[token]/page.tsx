@@ -67,7 +67,7 @@ export default function JoinPage() {
             </Button>
             <p className="mt-3 text-xs text-ink-muted">
               {t('noAccountNeeded')} ·{' '}
-              <Link href="/auth/login" className="text-accent underline underline-offset-2">
+              <Link href="/auth/login" className="text-accent-strong underline underline-offset-2">
                 {t('login')}
               </Link>
             </p>

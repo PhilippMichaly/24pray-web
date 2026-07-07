@@ -23,7 +23,7 @@ export function NextSlotCard({ slot, projectTimezone, now = Date.now() }: NextSl
           <Flame size={20} className={soon ? 'animate-breathe' : ''} aria-hidden />
         </span>
         <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-accent">{t('nextSlotTitle')}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-accent-strong">{t('nextSlotTitle')}</p>
           <p className="truncate text-sm text-ink tnum">
             {formatDayHeader(slot.startTime, projectTimezone)},{' '}
             {formatSlotRange(slot.startTime, slot.endTime, projectTimezone)} {t('oclock')}

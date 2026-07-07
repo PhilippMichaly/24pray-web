@@ -2,7 +2,7 @@
 // Lebt NUR im localStorage des Geräts; wird bei Buchungen (falls gesetzt)
 // als reine Koordinate mitgeschickt — nie der Name.
 
-import { findCity, type City } from './cities';
+import { matchCity, type City } from './cities';
 
 const KEY = '24pray:mycity';
 
@@ -18,7 +18,7 @@ export function getMyCity(): City | null {
 }
 
 export function setMyCityByName(name: string): City | null {
-  const city = findCity(name);
+  const city = matchCity(name);
   try {
     if (city) localStorage.setItem(KEY, JSON.stringify(city));
     else if (!name.trim()) localStorage.removeItem(KEY);

@@ -137,3 +137,14 @@ export function findCity(name: string): City | undefined {
   const n = name.trim().toLowerCase();
   return CITIES.find((c) => c.name.toLowerCase() === n);
 }
+
+/** Tolerantes Matching: exakt → beginnt-mit → enthält („Frankfurt" → „Frankfurt am Main"). */
+export function matchCity(input: string): City | undefined {
+  const n = input.trim().toLowerCase();
+  if (n.length < 2) return undefined;
+  return (
+    CITIES.find((c) => c.name.toLowerCase() === n) ??
+    CITIES.find((c) => c.name.toLowerCase().startsWith(n)) ??
+    CITIES.find((c) => c.name.toLowerCase().includes(n))
+  );
+}

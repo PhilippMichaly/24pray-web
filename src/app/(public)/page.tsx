@@ -49,10 +49,14 @@ export default function HomePage() {
   const [choiceOpen, setChoiceOpen] = useState(false);
 
   useEffect(() => {
-    api
-      .get<PublicStats>('/stats/public')
-      .then(setStats)
-      .catch(() => setStats(null));
+    const load = () =>
+      api
+        .get<PublicStats>('/stats/public')
+        .then(setStats)
+        .catch(() => setStats(null));
+    load();
+    const id = setInterval(load, 60_000); // Punkte/Zahlen bleiben frisch
+    return () => clearInterval(id);
   }, []);
 
   return (

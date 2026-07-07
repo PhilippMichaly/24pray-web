@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { AppShell } from '@/components/patterns/AppShell';
 import { TimezoneHint } from '@/components/patterns/TimezoneHint';
 import { InviteCard } from '@/components/patterns/InviteCard';
+import { LocationCard } from '@/components/patterns/LocationCard';
 import { NextSlotCard } from '@/components/patterns/NextSlotCard';
 import { Tabs, TabPanel } from '@/components/ui/Tabs';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -139,7 +140,8 @@ function ProjectPageInner() {
           )}
 
           {inviteUrl && (
-            <div className="mb-6">
+            <div className="mb-6 space-y-3">
+              <LocationCard project={project} onUpdated={setProject} />
               <InviteCard inviteUrl={inviteUrl} />
             </div>
           )}

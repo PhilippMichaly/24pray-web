@@ -16,7 +16,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FolderHeart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { browserTz, formatDayHeader } from '@/lib/time';
-import { CITIES, findCity } from '@/lib/cities';
+import { CITIES, matchCity } from '@/lib/cities';
 import { t } from '@/lib/i18n';
 
 const DURATIONS = [
@@ -54,7 +54,7 @@ export default function NewProjectPage() {
     setSubmitting(true);
     try {
       // Standort nur mitschicken, wenn er in der Städte-Liste auflösbar ist (W3.4)
-      const city = findCity(locationInput);
+      const city = matchCity(locationInput);
       const project = await api.post<ProjectWithStats>('/projects', {
         title: title.trim(),
         description: description.trim() || undefined,
@@ -162,7 +162,17 @@ export default function NewProjectPage() {
                   <option key={c.name} value={c.name} />
                 ))}
               </datalist>
-              <p className="mt-1 text-xs text-ink-muted">{t('fieldLocationHint')}</p>
+              {locationInput.trim().length >= 2 ? (
+                matchCity(locationInput) ? (
+                  <p className="mt-1 text-xs text-positive">
+                    {t('locationMatched', { city: matchCity(locationInput)!.name })}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-danger">{t('locationUnknown')}</p>
+                )
+              ) : (
+                <p className="mt-1 text-xs text-ink-muted">{t('fieldLocationHint')}</p>
+              )}
             </div>
 
             <div>

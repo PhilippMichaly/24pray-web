@@ -66,8 +66,9 @@ export default function HomePage() {
         </Badge>
       </main>
 
-      <footer className="z-10 pb-6 pt-8 text-xs text-ink-muted">
+      <footer className="z-10 pb-6 pt-8 text-center text-xs text-ink-muted">
         24pray · {t('tagline')}
+        <span className="mt-1 block opacity-60">{t('earthCredit')}</span>
       </footer>
     </div>
   );

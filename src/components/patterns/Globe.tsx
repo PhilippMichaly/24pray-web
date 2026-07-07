@@ -3,46 +3,17 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * Gepunktete Erde im Weltall (Landing-Signature, W3.1).
- * Canvas 2D, orthografische Projektion, langsame Rotation, Morgenröte-Schimmer
- * an der Ostkante, pulsierende Gold-Punkte = laufende Gebetsketten.
- * prefers-reduced-motion → statisches Bild (ein Frame, kein Puls).
+ * Realistische Erde (Landing-Signature, W3.1) — echte NASA-Texturen:
+ * Blue Marble (Tag) + Black Marble (Nachtlichter), public domain, lokal unter
+ * /earth/*.jpg. Canvas-Pixel-Mapping (orthografische Projektion), fester
+ * Morgenröte-Sonnenstand mit weichem Terminator; auf der Nachtseite leuchten
+ * die echten Stadtlichter. Geometrie wird einmal vorberechnet, pro Frame
+ * rotiert nur der Längengrad (kein WebGL, keine Dependency).
+ * prefers-reduced-motion → statisches Bild. Fallback ohne Texturen: blaue Kugel.
  */
 
-// Landmassen als Disk-Approximation (lat, lon, radius°) — bei Punkt-Auflösung
-// liest sich das als Erde, ohne GeoJSON-Dependency.
-const LAND: [number, number, number][] = [
-  // Europa
-  [50, 10, 8], [60, 25, 6], [45, 25, 5], [40, -4, 4], [54, -3, 3], [63, 15, 6],
-  // Russland / Asien
-  [60, 60, 12], [60, 90, 12], [65, 120, 10], [62, 145, 8], [50, 80, 8], [46, 100, 8],
-  [34, 104, 9], [23, 80, 7], [14, 102, 5], [36, 138, 3], [30, 60, 6], [40, 50, 5],
-  // Naher Osten
-  [25, 45, 7], [35, 40, 4],
-  // Afrika
-  [22, 5, 8], [20, 25, 8], [5, 20, 9], [0, 27, 7], [-10, 25, 8], [-25, 25, 6],
-  [12, -5, 6], [5, -7, 4], [8, 40, 5], [-19, 47, 2.5],
-  // Nordamerika
-  [60, -110, 12], [65, -150, 6], [50, -100, 9], [40, -100, 8], [36, -115, 5],
-  [31, -99, 5], [45, -75, 5], [21, -100, 4], [75, -40, 6], [15, -90, 3],
-  // Südamerika
-  [0, -60, 8], [-10, -55, 7], [-20, -60, 6], [-33, -64, 5], [-47, -70, 3], [5, -70, 4],
-  // Australien / NZ
-  [-25, 135, 7], [-28, 120, 5], [-19, 144, 4], [-42, 172, 2],
-];
-
-function isLand(lat: number, lon: number): boolean {
-  for (const [clat, clon, r] of LAND) {
-    const dLat = lat - clat;
-    let dLon = lon - clon;
-    if (dLon > 180) dLon -= 360;
-    if (dLon < -180) dLon += 360;
-    // Länge mit Breitengrad-Korrektur, grob elliptisch
-    const d2 = dLat * dLat + dLon * dLon * Math.cos((clat * Math.PI) / 180) ** 2;
-    if (d2 < r * r) return true;
-  }
-  return false;
-}
+const TEX_W = 1024;
+const TEX_H = 512;
 
 // Plausible Städte für die Ketten-Punkte (dekorativ — Projekte haben noch keine Geo-Daten).
 const CITY_POINTS: [number, number][] = [
@@ -50,6 +21,26 @@ const CITY_POINTS: [number, number][] = [
   [6.5, 3.4], [-1.3, 36.8], [28.6, 77.2], [14.6, 121.0], [-33.9, 151.2],
   [55.8, 37.6], [41.0, 28.9], [19.4, -99.1], [37.6, 127.0], [50.9, 6.96],
 ];
+
+// Sonnenstand „Morgenröte": Licht kommt von rechts-vorn (Osten), leicht erhöht.
+const SUN = normalize([0.82, 0.2, 0.52]);
+
+function normalize(v: [number, number, number]): [number, number, number] {
+  const l = Math.hypot(v[0], v[1], v[2]);
+  return [v[0] / l, v[1] / l, v[2] / l];
+}
+
+async function loadTexture(src: string): Promise<Uint8ClampedArray> {
+  const img = new Image();
+  img.src = src;
+  await img.decode();
+  const c = document.createElement('canvas');
+  c.width = TEX_W;
+  c.height = TEX_H;
+  const cx = c.getContext('2d')!;
+  cx.drawImage(img, 0, 0, TEX_W, TEX_H);
+  return cx.getImageData(0, 0, TEX_W, TEX_H).data;
+}
 
 export interface GlobeProps {
   activeChains: number; // echte Anzahl laufender Ketten (Punkt-Anzahl, min 3 fürs Bild)
@@ -66,140 +57,209 @@ export function Globe({ activeChains, className }: GlobeProps) {
     if (!ctx) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const size = canvas.clientWidth;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
-    ctx.scale(dpr, dpr);
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    const cssSize = canvas.clientWidth;
+    const size = Math.round(cssSize * dpr);
+    canvas.width = size;
+    canvas.height = size;
 
     const R = size * 0.42;
     const cx = size / 2;
     const cy = size / 2;
 
-    // Punktraster der Kugel vorberechnen (lat/lon → Einheitskugel)
-    const dots: { lat: number; lon: number; land: boolean }[] = [];
-    for (let lat = -85; lat <= 85; lat += 4) {
-      const step = 4 / Math.max(0.35, Math.cos((lat * Math.PI) / 180));
-      for (let lon = -180; lon < 180; lon += step) {
-        dots.push({ lat, lon, land: isLand(lat, lon) });
+    // ── Geometrie einmal vorberechnen ────────────────────────────────
+    // Bounding-Box der Kugel; pro Pixel: Textur-Zeile, Längengrad-Basis,
+    // Tag/Nacht-Blend (weicher Terminator), Beleuchtung, Atmosphären-Rim.
+    const bb = Math.ceil(R * 2 + 4);
+    const bx0 = Math.floor(cx - R - 2);
+    const by0 = Math.floor(cy - R - 2);
+    const count = bb * bb;
+    const rowOff = new Int32Array(count); // Textur-Zeilenoffset (v * TEX_W)
+    const uBase = new Float32Array(count); // Längengrad-Basis in Texel
+    const lit = new Float32Array(count); // 0 = Nacht … 1 = Tag
+    const shade = new Float32Array(count); // Helligkeit Tagseite
+    const rim = new Float32Array(count); // Atmosphäre am Rand
+    const alpha = new Uint8ClampedArray(count); // Kanten-AA
+    for (let py = 0; py < bb; py++) {
+      for (let px = 0; px < bb; px++) {
+        const i = py * bb + px;
+        const dx = (bx0 + px - cx) / R;
+        const dy = (by0 + py - cy) / R;
+        const d2 = dx * dx + dy * dy;
+        if (d2 > 1.004) {
+          alpha[i] = 0;
+          continue;
+        }
+        const d = Math.sqrt(d2);
+        const z = Math.sqrt(Math.max(0, 1 - d2));
+        const sx = dx;
+        const sy = -dy;
+        // Kanten-Antialiasing
+        alpha[i] = d > 0.995 ? Math.max(0, Math.min(255, Math.round((1.002 - d) * R * 255 * 0.5))) : 255;
+        const lat = Math.asin(sy);
+        const lon = Math.atan2(sx, z);
+        rowOff[i] = Math.min(TEX_H - 1, Math.max(0, Math.round((0.5 - lat / Math.PI) * TEX_H))) * TEX_W;
+        uBase[i] = (lon / (2 * Math.PI) + 0.5) * TEX_W;
+        const lambert = sx * SUN[0] + sy * SUN[1] + z * SUN[2];
+        // weicher Terminator (±0.14), Nachtseite nicht ganz schwarz
+        const t = Math.max(0, Math.min(1, (lambert + 0.14) / 0.28));
+        lit[i] = t * t * (3 - 2 * t); // smoothstep
+        shade[i] = 0.25 + 0.85 * Math.max(0, lambert);
+        rim[i] = Math.pow(1 - z, 2.2);
       }
     }
+
+    const earthCanvas = document.createElement('canvas');
+    earthCanvas.width = bb;
+    earthCanvas.height = bb;
+    const earthCtx = earthCanvas.getContext('2d')!;
+    const imgData = earthCtx.createImageData(bb, bb);
+    const out = imgData.data;
+
+    // Sterne (deterministisch, dezent)
+    const stars = Array.from({ length: 110 }, (_, i) => ({
+      x: ((i * 137.508) % 360) / 360,
+      y: ((i * 76.31) % 97) / 97,
+      s: (0.4 + ((i * 29) % 10) / 12) * dpr,
+    }));
 
     const nPoints = Math.max(3, Math.min(CITY_POINTS.length, activeChains));
     const chainPts = CITY_POINTS.slice(0, nPoints);
 
-    // Sterne (fix, dezent)
-    const stars = Array.from({ length: 90 }, (_, i) => ({
-      x: ((i * 137.508) % 360) / 360, // goldener Winkel → gleichmäßig, deterministisch
-      y: ((i * 76.31) % 97) / 97,
-      s: 0.4 + ((i * 29) % 10) / 12,
-    }));
-
+    let day: Uint8ClampedArray | null = null;
+    let night: Uint8ClampedArray | null = null;
     let raf = 0;
+    let last = 0;
     const t0 = performance.now();
 
-    function project(latDeg: number, lonDeg: number, rot: number) {
+    function drawEarth(rotDeg: number) {
+      if (!day || !night) return;
+      const shift = ((rotDeg / 360) * TEX_W) % TEX_W;
+      for (let i = 0; i < count; i++) {
+        const o = i * 4;
+        const a = alpha[i];
+        if (a === 0) {
+          out[o + 3] = 0;
+          continue;
+        }
+        let u = uBase[i] + shift;
+        if (u >= TEX_W) u -= TEX_W;
+        const ti = (rowOff[i] + (u | 0)) * 4;
+        const L = lit[i];
+        const s = shade[i] * L;
+        const nGain = (1 - L) * 1.55; // Stadtlichter nur im Dunkeln
+        const rm = rim[i];
+        // Tag * Beleuchtung + Nachtlichter + blauer Atmosphären-Saum
+        out[o] = day[ti] * s + night[ti] * nGain + rm * 45;
+        out[o + 1] = day[ti + 1] * s + night[ti + 1] * nGain + rm * 70;
+        out[o + 2] = day[ti + 2] * s + night[ti + 2] * nGain + rm * 130;
+        out[o + 3] = a;
+      }
+      earthCtx.putImageData(imgData, 0, 0);
+    }
+
+    function project(latDeg: number, lonDeg: number, rotDeg: number) {
       const lat = (latDeg * Math.PI) / 180;
-      const lon = ((lonDeg + rot) * Math.PI) / 180;
+      const lon = ((lonDeg - rotDeg) * Math.PI) / 180;
       const x = Math.cos(lat) * Math.sin(lon);
       const y = Math.sin(lat);
       const z = Math.cos(lat) * Math.cos(lon);
-      return { x: cx + R * x, y: cy - R * y * 0.98, z };
+      return { x: cx + R * x, y: cy - R * y, z, sx: x, sy: y };
     }
 
     function frame(now: number) {
-      const rot = reduced ? -20 : ((now - t0) / 1000) * (360 / 90); // 90 s / Umdrehung
-      const pulse = reduced ? 1 : 0.75 + 0.25 * Math.sin((now - t0) / 600);
       if (!ctx) return;
+      // ~30 fps reichen für die langsame Rotation (Akku)
+      if (!reduced && now - last < 33) {
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+      last = now;
+      const rot = reduced ? 55 : (((now - t0) / 1000) * (360 / 120)) % 360; // 120 s/Umdrehung
+      const pulse = reduced ? 1 : 0.75 + 0.25 * Math.sin((now - t0) / 600);
 
       ctx.clearRect(0, 0, size, size);
 
       // Sterne
-      ctx.fillStyle = 'rgba(230, 235, 255, 0.5)';
       for (const st of stars) {
         const sx = st.x * size;
         const sy = st.y * size;
-        const d = Math.hypot(sx - cx, sy - cy);
-        if (d < R + 6) continue; // nicht über der Kugel
-        ctx.globalAlpha = 0.25 + 0.3 * st.s;
+        if (Math.hypot(sx - cx, sy - cy) < R + 4 * dpr) continue;
+        ctx.globalAlpha = 0.2 + 0.3 * (st.s / dpr);
+        ctx.fillStyle = 'rgb(226, 232, 255)';
         ctx.beginPath();
-        ctx.arc(sx, sy, st.s, 0, Math.PI * 2);
+        ctx.arc(sx, sy, st.s * 0.8, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
 
-      // Atmosphären-Glow + Morgenröte an der Ostkante (Hoffnung: die Sonne kommt)
-      const glow = ctx.createRadialGradient(cx, cy, R * 0.85, cx, cy, R * 1.22);
-      glow.addColorStop(0, 'rgba(90, 120, 220, 0.16)');
-      glow.addColorStop(1, 'rgba(90, 120, 220, 0)');
+      // Atmosphären-Glow außen + Morgenröte an der Sonnenkante
+      const glow = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.18);
+      glow.addColorStop(0, 'rgba(96, 140, 235, 0.22)');
+      glow.addColorStop(1, 'rgba(96, 140, 235, 0)');
       ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.arc(cx, cy, R * 1.22, 0, Math.PI * 2);
+      ctx.arc(cx, cy, R * 1.18, 0, Math.PI * 2);
       ctx.fill();
-
-      // Morgenröte: auf einen schmalen Ring um die Sphäre geclippt (kein Kanten-Artefakt)
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, cy, R * 1.09, 0, Math.PI * 2);
-      ctx.clip();
-      const dawn = ctx.createRadialGradient(cx + R * 0.9, cy - R * 0.2, 0, cx + R * 0.9, cy - R * 0.2, R * 0.95);
-      dawn.addColorStop(0, 'rgba(255, 170, 60, 0.4)');
-      dawn.addColorStop(1, 'rgba(255, 170, 60, 0)');
+      const dawn = ctx.createRadialGradient(cx + R * 0.92, cy - R * 0.22, 0, cx + R * 0.92, cy - R * 0.22, R * 0.8);
+      dawn.addColorStop(0, 'rgba(255, 176, 84, 0.3)');
+      dawn.addColorStop(1, 'rgba(255, 176, 84, 0)');
       ctx.fillStyle = dawn;
-      ctx.fillRect(0, 0, size, size);
-      ctx.restore();
-
-      // Kugel-Grundton (blaue Stunde)
-      const sphere = ctx.createRadialGradient(cx - R * 0.4, cy - R * 0.45, R * 0.1, cx, cy, R);
-      sphere.addColorStop(0, 'rgba(38, 52, 100, 0.95)');
-      sphere.addColorStop(1, 'rgba(14, 18, 38, 0.98)');
-      ctx.fillStyle = sphere;
       ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, Math.PI * 2);
+      ctx.arc(cx, cy, R * 1.18, 0, Math.PI * 2);
       ctx.fill();
 
-      // Punktraster (Ozean schwach blau, Land hell)
-      for (const d of dots) {
-        const p = project(d.lat, d.lon, rot);
-        if (p.z <= 0.02) continue; // Rückseite
-        const fade = Math.min(1, p.z * 1.4);
-        // Ostkante wärmer (Morgenröte streift das Land)
-        const eastWarm = Math.max(0, (p.x - cx) / R) * 0.5;
-        if (d.land) {
-          ctx.fillStyle = `rgba(${205 + eastWarm * 45}, ${215 - eastWarm * 25}, ${235 - eastWarm * 90}, ${0.75 * fade})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 1.5 * fade + 0.3, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          ctx.fillStyle = `rgba(120, 150, 235, ${0.16 * fade})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 0.9 * fade, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
+      // Erde
+      drawEarth(rot);
+      ctx.drawImage(earthCanvas, bx0, by0);
 
-      // Gebetsketten-Punkte (pulsierendes Gold + Glow)
+      // Gebetsketten-Punkte (Gold; auf der Nachtseite strahlen sie stärker)
       for (const [plat, plon] of chainPts) {
         const p = project(plat, plon, rot);
-        if (p.z <= 0.05) continue;
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 11 * pulse);
-        g.addColorStop(0, 'rgba(255, 200, 70, 0.9)');
-        g.addColorStop(1, 'rgba(255, 200, 70, 0)');
+        if (p.z <= 0.06) continue;
+        const lambert = p.sx * SUN[0] + p.sy * SUN[1] + p.z * SUN[2];
+        const nightBoost = lambert < 0 ? 1.45 : 1;
+        const rad = 9 * dpr * pulse * nightBoost;
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
+        g.addColorStop(0, `rgba(255, 205, 80, ${0.85 * Math.min(1, p.z * 2)})`);
+        g.addColorStop(1, 'rgba(255, 205, 80, 0)');
         ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 11 * pulse, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, rad, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = 'rgba(255, 226, 130, 1)';
+        ctx.fillStyle = 'rgba(255, 232, 150, 1)';
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 2.1, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 1.8 * dpr, 0, Math.PI * 2);
         ctx.fill();
       }
 
       if (!reduced) raf = requestAnimationFrame(frame);
     }
 
-    raf = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(raf);
+    let cancelled = false;
+    Promise.all([loadTexture('/earth/day.jpg'), loadTexture('/earth/night.jpg')])
+      .then(([d, n]) => {
+        if (cancelled) return;
+        day = d;
+        night = n;
+        raf = requestAnimationFrame(frame);
+      })
+      .catch(() => {
+        // Fallback ohne Texturen: stille blaue Kugel + Punkte
+        if (cancelled || !ctx) return;
+        const sphere = ctx.createRadialGradient(cx - R * 0.4, cy - R * 0.45, R * 0.1, cx, cy, R);
+        sphere.addColorStop(0, 'rgb(40, 56, 110)');
+        sphere.addColorStop(1, 'rgb(13, 17, 36)');
+        ctx.fillStyle = sphere;
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
   }, [activeChains]);
 
   return (

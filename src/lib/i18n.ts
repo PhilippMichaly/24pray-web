@@ -36,6 +36,7 @@ const de = {
   heroSubtitle: 'Startet eine Gebetskette, übernehmt Stunden, haltet das Licht zusammen.',
   statsChainsActive: '{n} Ketten brennen gerade',
   statsHoursHeld: '{n} Stunden gehalten',
+  earthCredit: 'Erdansicht: NASA Blue/Black Marble',
 
   // Dashboard
   yourProjects: 'Deine Gebetsketten',
@@ -190,6 +191,7 @@ const en: Record<keyof typeof de, string> = {
   heroSubtitle: 'Start a prayer chain, take hours, hold the light together.',
   statsChainsActive: '{n} chains are burning right now',
   statsHoursHeld: '{n} hours held',
+  earthCredit: 'Earth view: NASA Blue/Black Marble',
 
   yourProjects: 'Your prayer chains',
   newProject: 'New chain',

@@ -94,12 +94,7 @@ export default function HomePage() {
 
       <Sheet open={choiceOpen} onOpenChange={setChoiceOpen} title={t('prayChoiceTitle')}>
         <div className="space-y-2.5">
-          <PrayOption
-            icon={LogIn}
-            label={t('optLogin')}
-            desc={t('optLoginDesc')}
-            onClick={() => router.push('/auth/login')}
-          />
+          {/* Zielorientierte Reihenfolge: erst beten (ohne Hürde), dann starten, dann anmelden */}
           <PrayOption
             icon={HeartHandshake}
             label={t('optBrowse')}
@@ -111,6 +106,12 @@ export default function HomePage() {
             label={t('optCreate')}
             desc={t('optCreateDesc')}
             onClick={() => router.push('/projects/new')}
+          />
+          <PrayOption
+            icon={LogIn}
+            label={t('optLogin')}
+            desc={t('optLoginDesc')}
+            onClick={() => router.push('/auth/login')}
           />
         </div>
       </Sheet>

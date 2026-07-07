@@ -2,20 +2,125 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
-
 :root {
-  --bg: #FAF9F6;
-  --surface: #FFFFFF;
-  --text: #1A1814;
-  --text-muted: #6B6560;
-  --accent: #C47D2A;
-  --accent-soft: #F5E6D0;
+  /* ---- Farbe: Light „Morgenlicht auf Papier" (HSL-Triple) ---- */
+  --bg: 40 33% 97%;
+  --surface: 0 0% 100%;
+  --surface-sunken: 40 25% 94%;
+  --border: 38 18% 87%;
+  --ink: 35 20% 10%;
+  --ink-muted: 35 8% 38%;          /* L 40→38 für AA auf --bg (§3.3) */
+  --accent: 32 72% 36%;            /* L 38→36 für AA-Fill mit weißem Text (§3.3) */
+  --accent-strong: 32 74% 28%;
+  --accent-soft: 36 64% 92%;
+  --gold: 40 85% 55%;
+  --night: 250 22% 42%;
+  --positive: 150 40% 28%;
+  --danger: 12 62% 40%;
+  --focus: 32 72% 36%;
+
+  /* ---- Komponenten-Tokens (zweite Ebene, White-Label-Hebel) ---- */
+  --slot-free-bg: var(--surface);
+  --slot-booked-bg: var(--accent);
+  --slot-mine-bg: var(--accent-soft);
+  --slot-night-overlay: var(--night);
+  --chain-gap-color: var(--gold);
+
+  /* ---- Typo ---- */
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-dm-sans);
+  --text-xs: 0.75rem;   --lh-xs: 1rem;
+  --text-sm: 0.875rem;  --lh-sm: 1.25rem;
+  --text-base: 1rem;    --lh-base: 1.5rem;
+  --text-lg: 1.25rem;   --lh-lg: 1.75rem;
+  --text-xl: 1.5625rem; --lh-xl: 2rem;
+  --text-2xl: 1.953rem; --lh-2xl: 2.25rem;
+  --text-3xl: 2.441rem; --lh-3xl: 2.75rem;
+
+  /* ---- Radius ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* ---- Elevation (warm getönt) ---- */
+  --shadow-1: 0 1px 2px hsl(35 30% 10% / 0.05);
+  --shadow-2: 0 2px 8px hsl(35 30% 10% / 0.08);
+  --shadow-3: 0 8px 32px hsl(35 30% 10% / 0.14);
+
+  /* ---- Motion ---- */
+  --dur-fast: 150ms;
+  --dur-mid: 250ms;
+  --dur-slow: 400ms;
+  --ease-enter: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: ease-in;
 }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
+/* Dark „Nachtwache" — warmes Anthrazit. Nur Farb-Tokens werden überschrieben. */
+[data-theme="dark"] {
+  --bg: 30 12% 8%;
+  --surface: 30 12% 12%;
+  --surface-sunken: 30 12% 10%;
+  --border: 32 10% 22%;
+  --ink: 38 28% 92%;
+  --ink-muted: 36 10% 64%;         /* L 62→64 für AA auf dunklem --bg */
+  --accent: 36 78% 60%;
+  --accent-strong: 36 82% 68%;
+  --accent-soft: 34 40% 18%;
+  --gold: 42 90% 62%;
+  --night: 250 26% 60%;
+  --positive: 150 35% 55%;
+  --danger: 12 70% 62%;
+  --focus: 36 78% 60%;
+  --shadow-1: 0 1px 2px hsl(0 0% 0% / 0.2);
+  --shadow-2: 0 2px 8px hsl(0 0% 0% / 0.28);
+  --shadow-3: 0 8px 32px hsl(0 0% 0% / 0.4);
+}
+
+/* System-Default vor Hydration / bei JS-off. next-themes stempelt data-theme
+   synchron; dieser Block deckt nur das Millisekunden-Fenster ab (Dark-Tokens dupliziert). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: 30 12% 8%;
+    --surface: 30 12% 12%;
+    --surface-sunken: 30 12% 10%;
+    --border: 32 10% 22%;
+    --ink: 38 28% 92%;
+    --ink-muted: 36 10% 64%;
+    --accent: 36 78% 60%;
+    --accent-strong: 36 82% 68%;
+    --accent-soft: 34 40% 18%;
+    --gold: 42 90% 62%;
+    --night: 250 26% 60%;
+    --positive: 150 35% 55%;
+    --danger: 12 70% 62%;
+    --focus: 36 78% 60%;
+    --shadow-1: 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-2: 0 2px 8px hsl(0 0% 0% / 0.28);
+    --shadow-3: 0 8px 32px hsl(0 0% 0% / 0.4);
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--bg));
+    color: hsl(var(--ink));
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11";
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

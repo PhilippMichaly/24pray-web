@@ -1,0 +1,20 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "Literal[value=/(?:^|[\\s'\"`])(?:bg|text|border|ring|from|to|via|fill|stroke|shadow)-(?:blue|gray|slate|zinc|neutral|stone|red|green|emerald|sky|indigo)-[0-9]/]",
+        "message": "Roh-Paletten-Klasse verboten (Fixpunkt 1). Nur semantische Tokens: bg-surface, text-ink(-muted), border-border, bg-accent, text-danger, text-positive …"
+      },
+      {
+        "selector": "TemplateElement[value.raw=/(?:^|[\\s'\"`])(?:bg|text|border|ring|from|to|via|fill|stroke|shadow)-(?:blue|gray|slate|zinc|neutral|stone|red|green|emerald|sky|indigo)-[0-9]/]",
+        "message": "Roh-Paletten-Klasse verboten (Fixpunkt 1). Nur semantische Tokens."
+      },
+      {
+        "selector": "Literal[value=/(?:bg|text|border)-\\[var\\(--/]",
+        "message": "Arbitrary CSS-Var-Utility verboten (Fixpunkt 1). Nutze die semantische Tailwind-Utility statt bg-[var(--…)]."
+      }
+    ]
+  }
+}

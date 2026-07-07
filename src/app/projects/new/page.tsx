@@ -6,11 +6,15 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuth } from '@/hooks/use-auth';
 import type { ProjectVisibility, ProjectWithStats } from '@/types';
-
-const DEFAULT_TZ =
-  typeof Intl !== 'undefined'
-    ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Berlin'
-    : 'Europe/Berlin';
+import { AppShell } from '@/components/patterns/AppShell';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input, Textarea, Select } from '@/components/ui/Input';
+import { Label, FieldError } from '@/components/ui/Label';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { FolderHeart } from 'lucide-react';
+import { browserTz } from '@/lib/time';
+import { t } from '@/lib/i18n';
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -28,22 +32,20 @@ export default function NewProjectPage() {
     e.preventDefault();
     setError(null);
 
-    if (!title.trim()) return setError('Bitte einen Titel angeben.');
-    if (!startDate || !endDate) return setError('Bitte Start und Ende angeben.');
+    if (!title.trim()) return setError(t('errTitleRequired'));
+    if (!startDate || !endDate) return setError(t('errDatesRequired'));
     const start = new Date(startDate);
     const end = new Date(endDate);
-    if (end <= start) return setError('Das Ende muss nach dem Start liegen.');
+    if (end <= start) return setError(t('errEndAfterStart'));
 
     setSubmitting(true);
     try {
-      // datetime-local has no timezone; toISOString() yields UTC ISO with "Z"
-      // which the backend's zod .datetime() expects.
       const project = await api.post<ProjectWithStats>('/projects', {
         title: title.trim(),
         description: description.trim() || undefined,
         startDate: start.toISOString(),
         endDate: end.toISOString(),
-        timezone: DEFAULT_TZ,
+        timezone: browserTz(),
         visibility,
       });
       router.push(`/projects/${project.id}`);
@@ -53,109 +55,94 @@ export default function NewProjectPage() {
     }
   }
 
-  if (loading) return <main className="p-8">Lädt…</main>;
-  if (!user)
+  if (loading) return <AppShell>{null}</AppShell>;
+  if (!user) {
     return (
-      <main className="p-8">
-        Bitte{' '}
-        <Link className="underline" href="/auth/login">
-          einloggen
-        </Link>
-        .
-      </main>
+      <AppShell>
+        <EmptyState
+          icon={FolderHeart}
+          title={t('pleaseLogin', { login: t('login') })}
+          action={{ label: t('login'), href: '/auth/login' }}
+        />
+      </AppShell>
     );
+  }
 
   return (
-    <main className="mx-auto max-w-2xl p-8">
-      <h1 className="mb-6 text-2xl font-bold">Neues Gebetsprojekt</h1>
-      {error && <p className="mb-4 text-red-600">{error}</p>}
-
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="title" className="mb-1 block text-sm font-medium">
-            Titel
-          </label>
-          <input
-            id="title"
-            type="text"
-            required
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded border p-2"
-            placeholder="z.B. Nachtgebet"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="description" className="mb-1 block text-sm font-medium">
-            Beschreibung <span className="text-gray-500">(optional)</span>
-          </label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded border p-2"
-            rows={3}
-          />
-        </div>
-
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label htmlFor="startDate" className="mb-1 block text-sm font-medium">
-              Start
-            </label>
-            <input
-              id="startDate"
-              type="datetime-local"
+    <AppShell>
+      <h1 className="mb-6 font-display text-2xl font-semibold text-ink">{t('newProjectTitle')}</h1>
+      <Card elevation={1}>
+        <form onSubmit={onSubmit} className="space-y-5">
+          <div>
+            <Label htmlFor="title">{t('fieldTitle')}</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={t('fieldTitlePlaceholder')}
               required
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full rounded border p-2"
             />
           </div>
-          <div className="flex-1">
-            <label htmlFor="endDate" className="mb-1 block text-sm font-medium">
-              Ende
-            </label>
-            <input
-              id="endDate"
-              type="datetime-local"
-              required
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full rounded border p-2"
+
+          <div>
+            <Label htmlFor="description">
+              {t('fieldDescription')} <span className="text-ink-muted">({t('optional')})</span>
+            </Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
             />
           </div>
-        </div>
 
-        <div>
-          <label htmlFor="visibility" className="mb-1 block text-sm font-medium">
-            Sichtbarkeit
-          </label>
-          <select
-            id="visibility"
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value as ProjectVisibility)}
-            className="w-full rounded border p-2"
-          >
-            <option value="PRIVATE">Privat (nur per Einladungslink)</option>
-            <option value="PUBLIC">Öffentlich (für alle sichtbar)</option>
-          </select>
-        </div>
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <div className="flex-1">
+              <Label htmlFor="startDate">{t('fieldStart')}</Label>
+              <Input
+                id="startDate"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="endDate">{t('fieldEnd')}</Label>
+              <Input
+                id="endDate"
+                type="datetime-local"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
 
-        <div className="flex items-center gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
-          >
-            {submitting ? 'Wird erstellt…' : 'Projekt erstellen'}
-          </button>
-          <Link href="/dashboard" className="text-gray-600 underline">
-            Abbrechen
-          </Link>
-        </div>
-      </form>
-    </main>
+          <div>
+            <Label htmlFor="visibility">{t('fieldVisibility')}</Label>
+            <Select
+              id="visibility"
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value as ProjectVisibility)}
+            >
+              <option value="PRIVATE">{t('visibilityPrivate')}</option>
+              <option value="PUBLIC">{t('visibilityPublic')}</option>
+            </Select>
+          </div>
+
+          <FieldError>{error}</FieldError>
+
+          <div className="flex items-center gap-3 pt-1">
+            <Button type="submit" loading={submitting}>
+              {submitting ? t('creating') : t('createProject')}
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href="/dashboard">{t('cancel')}</Link>
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </AppShell>
   );
 }

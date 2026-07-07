@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogIn, HeartHandshake, PlusCircle, type LucideIcon } from 'lucide-react';
+import { LogIn, HeartHandshake, PlusCircle, X, MapPin, type LucideIcon } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Sheet } from '@/components/ui/Sheet';
 import { Brand } from '@/components/patterns/Brand';
 import { ThemeToggle } from '@/components/patterns/ThemeToggle';
 import { Globe, type ChainPoint } from '@/components/patterns/Globe';
+import { Button } from '@/components/ui/Button';
 import { t } from '@/lib/i18n';
 
 interface PublicStats {
@@ -47,6 +49,7 @@ export default function HomePage() {
   const router = useRouter();
   const [stats, setStats] = useState<PublicStats | null>(null);
   const [choiceOpen, setChoiceOpen] = useState(false);
+  const [focusPoint, setFocusPoint] = useState<ChainPoint | null>(null);
 
   useEffect(() => {
     const load = () =>
@@ -69,8 +72,43 @@ export default function HomePage() {
 
       {/* Nur die Erde, groß — und ein Button. */}
       <main className="z-10 flex w-full flex-1 flex-col items-center justify-center">
-        <div className="w-full max-w-[min(78vh,700px)]">
-          <Globe activeChains={stats?.activeChains ?? 5} points={stats?.points} />
+        <div className="relative w-full max-w-[min(78vh,700px)]">
+          <Globe
+            activeChains={stats?.activeChains ?? 5}
+            points={stats?.points}
+            focusPoint={focusPoint}
+            onSelectPoint={setFocusPoint}
+          />
+          {focusPoint && (
+            <div className="absolute inset-x-0 bottom-2 z-20 mx-auto w-fit max-w-[92%] rounded-lg border border-gold/30 bg-surface/95 px-4 py-3 shadow-3 backdrop-blur">
+              <div className="flex items-center gap-3">
+                <MapPin size={16} className="shrink-0 text-accent-strong" aria-hidden />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-ink">
+                    {focusPoint.title ?? t('silentChain')}
+                  </p>
+                  <p className="text-xs text-ink-muted">
+                    {focusPoint.locationName ?? t('silentChainHint')}
+                    {(focusPoint.links?.length ?? 0) > 0 && (
+                      <> · {t('nIntercessors', { n: focusPoint.links!.length })}</>
+                    )}
+                  </p>
+                </div>
+                {focusPoint.id && (
+                  <Button asChild size="sm" className="shrink-0">
+                    <Link href={`/projects/${focusPoint.id}`}>{t('toChain')}</Link>
+                  </Button>
+                )}
+                <button
+                  onClick={() => setFocusPoint(null)}
+                  aria-label={t('cancel')}
+                  className="shrink-0 rounded-sm p-1 text-ink-muted hover:text-ink"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <h1 className="-mt-2 max-w-[560px] text-center font-display text-2xl font-semibold leading-tight tracking-tight">

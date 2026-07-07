@@ -6,9 +6,9 @@ import { api } from '@/lib/api';
 import type { ProjectWithStats } from '@/types';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { toast } from '@/components/ui/toast-store';
-import { CITIES, matchCity } from '@/lib/cities';
+import { CityInput } from './CityInput';
+import type { GeoCity } from '@/lib/api';
 import { t } from '@/lib/i18n';
 
 /**
@@ -24,9 +24,8 @@ export function LocationCard({
   onUpdated: (p: ProjectWithStats) => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const [input, setInput] = useState(project.locationName ?? '');
   const [saving, setSaving] = useState(false);
-  const match = matchCity(input);
+  const [match, setMatch] = useState<GeoCity | null>(null);
 
   async function save() {
     if (!match) return;
@@ -79,24 +78,7 @@ export function LocationCard({
     <Card elevation={1}>
       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="min-w-0 flex-1">
-          <Input
-            list="loc-city-list"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={t('fieldLocationPlaceholder')}
-            autoComplete="off"
-            autoFocus
-          />
-          <datalist id="loc-city-list">
-            {CITIES.map((c) => (
-              <option key={c.name} value={c.name} />
-            ))}
-          </datalist>
-          {input.trim().length >= 2 && (
-            <p className={`mt-1 text-xs ${match ? 'text-positive' : 'text-danger'}`}>
-              {match ? t('locationMatched', { city: match.name }) : t('locationUnknown')}
-            </p>
-          )}
+          <CityInput id="loc-city" initialName={project.locationName ?? ''} onSelect={setMatch} />
         </div>
         <div className="flex shrink-0 gap-2">
           <Button size="sm" loading={saving} disabled={!match} onClick={save}>

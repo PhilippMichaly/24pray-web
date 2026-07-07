@@ -110,6 +110,18 @@ export function getProjectStats(projectId: string, invite?: string) {
   return api.get<ProjectStats>(`/projects/${projectId}/stats${inviteQ(invite)}`);
 }
 
+export interface GeoCity {
+  name: string;
+  country?: string; // Anzeige; lokal gespeicherte Orte haben keins
+  lat: number;
+  lon: number;
+}
+
+/** Orts-Suche (GeoNames, W3.6): weltweit, alle Sprachvarianten. */
+export function geocodeCity(q: string) {
+  return api.get<GeoCity[]>(`/geocode?q=${encodeURIComponent(q)}`);
+}
+
 export function getReminderPref() {
   return api.get<{ minutesBefore: number; channel: string }>('/me/reminder');
 }

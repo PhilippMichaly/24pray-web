@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label, FieldError } from '@/components/ui/Label';
 import { formatDualTz, buildIcs } from '@/lib/time';
-import { CITIES } from '@/lib/cities';
-import { setMyCityByName, getMyCity } from '@/lib/mylocation';
+import { CityInput } from '@/components/patterns/CityInput';
+import { setMyCity, getMyCity } from '@/lib/mylocation';
+import type { GeoCity } from '@/lib/api';
 import { t } from '@/lib/i18n';
 import type { SlotViewModel } from './types';
 
@@ -33,7 +34,7 @@ export interface GuestBookingFormProps {
 export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: GuestBookingFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [cityInput, setCityInput] = useState(() => getMyCity()?.name ?? '');
+  const [city, setCity] = useState<GeoCity | null>(() => getMyCity());
   const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -66,7 +67,7 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: Gu
     setLoading(true);
     try {
       // Ort ist freiwillig; merkt sich die Stadt fürs Gerät (W3.5)
-      const city = setMyCityByName(cityInput);
+      setMyCity(city);
       await onSubmit({
         ...parsed.data,
         ...(city ? { locationLat: city.lat, locationLon: city.lon } : {}),
@@ -136,20 +137,8 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: Gu
         <Label htmlFor="guestCity">
           {t('fieldLocation')} <span className="text-ink-muted">({t('optional')})</span>
         </Label>
-        <Input
-          id="guestCity"
-          list="guest-city-list"
-          value={cityInput}
-          onChange={(e) => setCityInput(e.target.value)}
-          placeholder={t('fieldLocationPlaceholder')}
-          autoComplete="off"
-        />
-        <datalist id="guest-city-list">
-          {CITIES.map((c) => (
-            <option key={c.name} value={c.name} />
-          ))}
-        </datalist>
-        <p className="mt-1 text-xs text-ink-muted">{t('beterLocationHint')}</p>
+        <CityInput id="guestCity" initialName={getMyCity()?.name ?? ''} onSelect={setCity} />
+        {!city && <p className="mt-1 text-xs text-ink-muted">{t('beterLocationHint')}</p>}
       </div>
       <Button type="submit" loading={loading} className="w-full">
         {t('takeThisHour')}

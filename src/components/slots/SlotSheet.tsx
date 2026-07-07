@@ -9,10 +9,9 @@ import { Select } from '@/components/ui/Input';
 import { toast } from '@/components/ui/toast-store';
 import { GuestBookingForm } from './GuestBookingForm';
 import { bookSlot, recurSlot, getReminderPref, putReminderPref } from '@/lib/api';
-import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
-import { CITIES } from '@/lib/cities';
-import { getMyCity, setMyCityByName } from '@/lib/mylocation';
+import { CityInput } from '@/components/patterns/CityInput';
+import { getMyCity, setMyCity } from '@/lib/mylocation';
 import { formatDualTz } from '@/lib/time';
 import { t } from '@/lib/i18n';
 import type { ProjectWithStats } from '@/types';
@@ -85,20 +84,7 @@ function MineExtras({ slot, project, onRecurred }: { slot: SlotViewModel; projec
         <Label htmlFor="myCity">
           {t('myLocation')} <span className="text-ink-muted">({t('optional')})</span>
         </Label>
-        <Input
-          id="myCity"
-          list="my-city-list"
-          defaultValue={getMyCity()?.name ?? ''}
-          onBlur={(e) => setMyCityByName(e.target.value)}
-          placeholder={t('fieldLocationPlaceholder')}
-          autoComplete="off"
-          className="py-2 text-sm"
-        />
-        <datalist id="my-city-list">
-          {CITIES.map((c) => (
-            <option key={c.name} value={c.name} />
-          ))}
-        </datalist>
+        <CityInput id="myCity" compact initialName={getMyCity()?.name ?? ''} onSelect={(c) => setMyCity(c)} />
         <p className="mt-1 text-xs text-ink-muted">{t('myLocationHint')}</p>
       </div>
       {minutes !== null && (

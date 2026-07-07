@@ -17,6 +17,16 @@ export function getMyCity(): City | null {
   }
 }
 
+/** Stadt direkt speichern (aus CityInput-Auswahl, W3.6). */
+export function setMyCity(city: City | null): void {
+  try {
+    if (city) localStorage.setItem(KEY, JSON.stringify(city));
+    else localStorage.removeItem(KEY);
+  } catch {
+    /* localStorage blockiert */
+  }
+}
+
 export function setMyCityByName(name: string): City | null {
   const city = matchCity(name);
   try {

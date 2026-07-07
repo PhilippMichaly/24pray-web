@@ -16,7 +16,8 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FolderHeart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { browserTz, formatDayHeader } from '@/lib/time';
-import { CITIES, matchCity } from '@/lib/cities';
+import { CityInput } from '@/components/patterns/CityInput';
+import type { GeoCity } from '@/lib/api';
 import { t } from '@/lib/i18n';
 
 const DURATIONS = [
@@ -36,7 +37,7 @@ export default function NewProjectPage() {
   const [startDate, setStartDate] = useState('');
   const [hours, setHours] = useState<number>(48);
   const [visibility, setVisibility] = useState<ProjectVisibility>('PRIVATE');
-  const [locationInput, setLocationInput] = useState('');
+  const [selectedCity, setSelectedCity] = useState<GeoCity | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -53,8 +54,7 @@ export default function NewProjectPage() {
     const start = new Date(startDate);
     setSubmitting(true);
     try {
-      // Standort nur mitschicken, wenn er in der Städte-Liste auflösbar ist (W3.4)
-      const city = matchCity(locationInput);
+      const city = selectedCity;
       const project = await api.post<ProjectWithStats>('/projects', {
         title: title.trim(),
         description: description.trim() || undefined,
@@ -149,30 +149,8 @@ export default function NewProjectPage() {
               <Label htmlFor="location">
                 {t('fieldLocation')} <span className="text-ink-muted">({t('optional')})</span>
               </Label>
-              <Input
-                id="location"
-                list="city-list"
-                value={locationInput}
-                onChange={(e) => setLocationInput(e.target.value)}
-                placeholder={t('fieldLocationPlaceholder')}
-                autoComplete="off"
-              />
-              <datalist id="city-list">
-                {CITIES.map((c) => (
-                  <option key={c.name} value={c.name} />
-                ))}
-              </datalist>
-              {locationInput.trim().length >= 2 ? (
-                matchCity(locationInput) ? (
-                  <p className="mt-1 text-xs text-positive">
-                    {t('locationMatched', { city: matchCity(locationInput)!.name })}
-                  </p>
-                ) : (
-                  <p className="mt-1 text-xs text-danger">{t('locationUnknown')}</p>
-                )
-              ) : (
-                <p className="mt-1 text-xs text-ink-muted">{t('fieldLocationHint')}</p>
-              )}
+              <CityInput id="location" onSelect={setSelectedCity} />
+              {!selectedCity && <p className="mt-1 text-xs text-ink-muted">{t('fieldLocationHint')}</p>}
             </div>
 
             <div>

@@ -6,6 +6,7 @@ import type { ProjectWithStats, SlotView } from '@/types';
 import { getSlotGrid, bookSlot, cancelSlot } from '@/lib/api';
 import { toast } from '@/components/ui/toast-store';
 import { buildViewModels, groupByDay, bookedCount } from './logic';
+import { myCityPayload } from '@/lib/mylocation';
 import { t } from '@/lib/i18n';
 
 interface SlotGridState {
@@ -98,7 +99,7 @@ export function useSlotGrid(
       patchSlot(key, { status: 'BOOKED', isMine: true, userName: myName });
       setPending(key, true);
       try {
-        const created = await bookSlot(project.id, { startTime: key });
+        const created = await bookSlot(project.id, { startTime: key, ...myCityPayload() });
         patchSlot(key, { slotId: created.id });
         setPending(key, false);
         // W3.1 Ketten-Glow: das neue Glied leuchtet kurz gold auf.

@@ -9,6 +9,10 @@ import { Select } from '@/components/ui/Input';
 import { toast } from '@/components/ui/toast-store';
 import { GuestBookingForm } from './GuestBookingForm';
 import { bookSlot, recurSlot, getReminderPref, putReminderPref } from '@/lib/api';
+import { Input } from '@/components/ui/Input';
+import { Label } from '@/components/ui/Label';
+import { CITIES } from '@/lib/cities';
+import { getMyCity, setMyCityByName } from '@/lib/mylocation';
 import { formatDualTz } from '@/lib/time';
 import { t } from '@/lib/i18n';
 import type { ProjectWithStats } from '@/types';
@@ -77,6 +81,26 @@ function MineExtras({ slot, project, onRecurred }: { slot: SlotViewModel; projec
           {t('everyWeek')}
         </Button>
       )}
+      <div>
+        <Label htmlFor="myCity">
+          {t('myLocation')} <span className="text-ink-muted">({t('optional')})</span>
+        </Label>
+        <Input
+          id="myCity"
+          list="my-city-list"
+          defaultValue={getMyCity()?.name ?? ''}
+          onBlur={(e) => setMyCityByName(e.target.value)}
+          placeholder={t('fieldLocationPlaceholder')}
+          autoComplete="off"
+          className="py-2 text-sm"
+        />
+        <datalist id="my-city-list">
+          {CITIES.map((c) => (
+            <option key={c.name} value={c.name} />
+          ))}
+        </datalist>
+        <p className="mt-1 text-xs text-ink-muted">{t('myLocationHint')}</p>
+      </div>
       {minutes !== null && (
         <div className="flex items-center gap-2 text-sm text-ink-muted">
           <BellRing size={15} className="shrink-0 text-accent" aria-hidden />
@@ -183,6 +207,8 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, onCancel, o
                 startTime: slot.startTime,
                 guestName: data.guestName,
                 guestEmail: data.guestEmail,
+                locationLat: data.locationLat,
+                locationLon: data.locationLon,
               });
               const guestToken = created.guestToken ?? '';
               if (guestToken) {

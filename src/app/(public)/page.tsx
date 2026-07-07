@@ -7,13 +7,13 @@ import { api } from '@/lib/api';
 import { Sheet } from '@/components/ui/Sheet';
 import { Brand } from '@/components/patterns/Brand';
 import { ThemeToggle } from '@/components/patterns/ThemeToggle';
-import { Globe } from '@/components/patterns/Globe';
+import { Globe, type ChainPoint } from '@/components/patterns/Globe';
 import { t } from '@/lib/i18n';
 
 interface PublicStats {
   activeChains: number;
   heldSlots: number;
-  points?: { lat: number; lon: number }[];
+  points?: ChainPoint[];
 }
 
 function PrayOption({
@@ -69,9 +69,13 @@ export default function HomePage() {
           <Globe activeChains={stats?.activeChains ?? 5} points={stats?.points} />
         </div>
 
+        <h1 className="-mt-2 max-w-[560px] text-center font-display text-2xl font-semibold leading-tight tracking-tight">
+          {t('heroTitle')}
+        </h1>
+
         <button
           onClick={() => setChoiceOpen(true)}
-          className="-mt-4 rounded-full bg-accent px-14 py-4 font-display text-2xl font-semibold text-accent-ink shadow-3 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-bg"
+          className="mt-6 rounded-full bg-accent px-14 py-4 font-display text-2xl font-semibold text-accent-ink shadow-3 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-bg"
         >
           {t('prayCta')}
         </button>

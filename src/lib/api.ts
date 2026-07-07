@@ -67,7 +67,13 @@ export function getSlotGrid(projectId: string, invite?: string) {
 
 export function bookSlot(
   projectId: string,
-  input: { startTime: string; guestName?: string; guestEmail?: string },
+  input: {
+    startTime: string;
+    guestName?: string;
+    guestEmail?: string;
+    locationLat?: number; // Beter-Standort (W3.5), nur Koordinaten
+    locationLon?: number;
+  },
 ) {
   return api.post<PrayerSlot>(`/projects/${projectId}/slots`, {
     ...input,

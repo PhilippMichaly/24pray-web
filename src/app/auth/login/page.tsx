@@ -14,6 +14,7 @@ import { t } from '@/lib/i18n';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [devLoginUrl, setDevLoginUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,7 +23,9 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      await api.post('/auth/magic-link', { email });
+      // Testmodus (kein SMTP): API liefert devLoginUrl → direkt einloggbar ohne Postfach.
+      const res = await api.post<{ devLoginUrl?: string }>('/auth/magic-link', { email });
+      setDevLoginUrl(res?.devLoginUrl ?? null);
       setSent(true);
     } catch {
       setError(t('loginError'));
@@ -40,6 +43,14 @@ export default function LoginPage() {
           </span>
           <h1 className="font-display text-2xl font-semibold text-ink">{t('checkEmail')}</h1>
           <p className="mt-2 text-sm text-ink-muted">{t('checkEmailBody', { email })}</p>
+          {devLoginUrl && (
+            <div className="mt-5 rounded-md border border-accent/30 bg-accent-soft/40 p-3">
+              <p className="mb-2 text-xs text-ink-muted">{t('devModeHint')}</p>
+              <Button asChild className="w-full">
+                <a href={devLoginUrl}>{t('devLoginNow')}</a>
+              </Button>
+            </div>
+          )}
         </Card>
       </CenterShell>
     );

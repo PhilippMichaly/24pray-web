@@ -26,6 +26,8 @@ const de = {
   linkInvalid: 'Link ungültig',
   linkInvalidBody: 'Dieser Link ist abgelaufen oder wurde bereits verwendet.',
   requestNewLink: 'Neuen Link anfordern',
+  devModeHint: 'Testmodus: kein E-Mail-Versand konfiguriert.',
+  devLoginNow: 'Im Testmodus einloggen →',
 
   // Landing
   exploreProjects: 'Projekte entdecken',

@@ -50,3 +50,26 @@ class ApiClient {
 }
 
 export const api = new ApiClient(API_URL);
+
+// ── Slot-Helper (Welle 2) ──────────────────────
+import type { PrayerSlot, SlotView } from '@/types';
+
+export function getSlotGrid(projectId: string) {
+  return api.get<SlotView[]>(`/projects/${projectId}/slots`);
+}
+
+export function bookSlot(
+  projectId: string,
+  input: { startTime: string; guestName?: string; guestEmail?: string },
+) {
+  return api.post<PrayerSlot>(`/projects/${projectId}/slots`, {
+    ...input,
+    notifyChannel: 'EMAIL',
+  });
+}
+
+/** Storno. Gast reicht seinen guestToken als Query mit (§6.3). */
+export function cancelSlot(slotId: string, guestToken?: string) {
+  const q = guestToken ? `?guestToken=${encodeURIComponent(guestToken)}` : '';
+  return api.delete<void>(`/slots/${slotId}${q}`);
+}

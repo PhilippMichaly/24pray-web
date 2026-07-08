@@ -52,6 +52,8 @@ const de = {
 
   // Dashboard
   yourProjects: 'Deine Gebetsketten',
+  openChains: 'Offene Gebetsketten',
+  openChainsHint: 'Zum Mitbeten brauchst du kein Konto — öffne eine Kette und übernimm eine Stunde.',
   newProject: 'Neue Kette',
   pleaseLogin: 'Bitte {login}.',
   noProjects: 'Noch keine Gebetsketten.',
@@ -234,6 +236,8 @@ const en: Record<keyof typeof de, string> = {
   optCreateDesc: 'Start a new chain and invite others.',
 
   yourProjects: 'Your prayer chains',
+  openChains: 'Open prayer chains',
+  openChainsHint: 'No account needed to join — open a chain and take an hour.',
   newProject: 'New chain',
   pleaseLogin: 'Please {login}.',
   noProjects: 'No prayer chains yet.',

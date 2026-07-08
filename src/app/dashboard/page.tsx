@@ -68,11 +68,22 @@ export default function DashboardPage() {
   return (
     <AppShell>
       <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="font-display text-2xl font-semibold text-ink">{t('yourProjects')}</h1>
-        <Button asChild icon={Plus} size="sm">
-          <Link href="/projects/new">{t('newProject')}</Link>
-        </Button>
+        <h1 className="font-display text-2xl font-semibold text-ink">
+          {user ? t('yourProjects') : t('openChains')}
+        </h1>
+        {user ? (
+          <Button asChild icon={Plus} size="sm">
+            <Link href="/projects/new">{t('newProject')}</Link>
+          </Button>
+        ) : (
+          <Button asChild size="sm" variant="secondary">
+            <Link href="/auth/login">{t('login')}</Link>
+          </Button>
+        )}
       </div>
+
+      {/* Offene (PUBLIC) Ketten sind ohne Konto sichtbar — Mitbeten braucht keinen Account (F4). */}
+      {!user && <p className="mb-4 text-sm text-ink-muted">{t('openChainsHint')}</p>}
 
       <FieldError>{error}</FieldError>
 
@@ -81,7 +92,7 @@ export default function DashboardPage() {
           <Skeleton className="h-28 w-full" />
           <Skeleton className="h-28 w-full" />
         </div>
-      ) : !user ? (
+      ) : !user && loaded.length === 0 ? (
         <EmptyState
           icon={FolderHeart}
           title={t('pleaseLogin', { login: t('login') })}

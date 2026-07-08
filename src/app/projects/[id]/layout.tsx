@@ -8,7 +8,7 @@ import type { ProjectWithStats } from '@/types';
 const SITE_NAME = '24pray';
 const DEFAULT_TITLE = '24pray — Gemeinsam beten';
 const DEFAULT_DESCRIPTION =
-  'Organisiere Gebetsketten, buche deinen Slot und bete gemeinsam mit deiner Gemeinde.';
+  'Organisiere Gebetswachen, buche deinen Slot und bete gemeinsam mit deiner Gemeinde.';
 const FETCH_TIMEOUT_MS = 3000;
 const DESCRIPTION_MAX_LEN = 160;
 
@@ -44,7 +44,7 @@ export async function generateMetadata({
     return { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION };
   }
 
-  const title = `${project.title} — Gebetskette auf 24pray`;
+  const title = `${project.title} — Gebetswache auf 24pray`;
   const description = project.description
     ? truncate(project.description)
     : `${project.bookedSlots} von ${project.totalSlots} Stunden gehalten — bete mit auf 24pray.`;

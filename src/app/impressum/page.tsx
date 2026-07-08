@@ -44,8 +44,8 @@ export default function ImpressumPage() {
         <section>
           <h2 className="mb-1 font-semibold">Haftung für Inhalte</h2>
           <p>
-            24pray ist eine nichtkommerzielle Plattform zur Organisation von Gebetsketten.
-            Für von Nutzerinnen und Nutzern eingestellte Inhalte (z.&nbsp;B. Kettentitel,
+            24pray ist eine nichtkommerzielle Plattform zur Organisation von Gebetswachen.
+            Für von Nutzerinnen und Nutzern eingestellte Inhalte (z.&nbsp;B. Wachentitel,
             Gebetsanliegen) sind die jeweiligen Verfasser verantwortlich. Rechtswidrige
             Inhalte entfernen wir nach Kenntnisnahme unverzüglich — bitte per E-Mail an die
             oben genannte Adresse melden.

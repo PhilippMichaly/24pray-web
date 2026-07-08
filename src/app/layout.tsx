@@ -19,7 +19,7 @@ const dmSans = DM_Sans({
 
 const DEFAULT_TITLE = '24pray — Gemeinsam beten';
 const DEFAULT_DESCRIPTION =
-  'Organisiere Gebetsketten, buche deinen Slot und bete gemeinsam mit deiner Gemeinde.';
+  'Organisiere Gebetswachen, buche deinen Slot und bete gemeinsam mit deiner Gemeinde.';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://24pray.org'),
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: DEFAULT_TITLE,
-    description: 'Organisiere Gebetsketten und buche deinen Gebets-Slot.',
+    description: 'Organisiere Gebetswachen und buche deinen Gebets-Slot.',
     url: 'https://24pray.org',
     siteName: '24pray',
     locale: 'de_DE',

@@ -38,7 +38,7 @@ describe('generateMetadata — Projektseite (OpenGraph pro Kette)', () => {
     const { generateMetadata } = await import('./layout');
     const meta = await generateMetadata({ params: { id: 'p-pub' } });
 
-    expect(meta.title).toBe('Nachtgebet für die Stadt — Gebetskette auf 24pray');
+    expect(meta.title).toBe('Nachtgebet für die Stadt — Gebetswache auf 24pray');
     expect(typeof meta.description).toBe('string');
     expect((meta.description as string).length).toBeLessThanOrEqual(160);
     expect((meta.description as string).endsWith('…')).toBe(true);

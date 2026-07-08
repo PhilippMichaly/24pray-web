@@ -56,7 +56,7 @@ export default function DatenschutzPage() {
           erforderlich, weitere Cookies gibt es nicht.
         </p>
 
-        <H2>5. Gebetsketten, Buchungen und Anliegen — besondere Daten (Art. 9 DSGVO)</H2>
+        <H2>5. Gebetswachen, Buchungen und Anliegen — besondere Daten (Art. 9 DSGVO)</H2>
         <p>
           Wer eine Gebetsstunde übernimmt oder ein Anliegen teilt, gibt damit zu erkennen, sich
           für Gebet zu interessieren — daraus kann auf eine religiöse Überzeugung geschlossen
@@ -74,9 +74,9 @@ export default function DatenschutzPage() {
 
         <H2>6. Sichtbarkeit von Namen</H2>
         <p>
-          In einer Gebetskette ist der eingetragene Name für andere Betrachter der Kette sichtbar —
-          bei öffentlichen Ketten für alle, bei privaten nur für Personen mit Einladungslink.
-          Organisatorinnen und Organisatoren können beim Anlegen einer Kette die Maskierung
+          In einer Gebetswache ist der eingetragene Name für andere Betrachter der Wache sichtbar —
+          bei öffentlichen Wachen für alle, bei privaten nur für Personen mit Einladungslink.
+          Organisatorinnen und Organisatoren können beim Anlegen einer Gebetswache die Maskierung
           aktivieren ({'„Namen für Außenstehende maskieren“'}); dann sehen nicht angemeldete Besucher
           nur eine Kurzform (z.&nbsp;B. {'„Ruth K.“'}). Auf der Weltkugel der Startseite erscheinen
           niemals Namen, sondern nur anonyme Koordinaten-Punkte.
@@ -100,7 +100,7 @@ export default function DatenschutzPage() {
 
         <H2>9. Speicherdauer</H2>
         <p>
-          Konten und Kettendaten speichern wir, bis du sie löschst oder ihre Löschung verlangst.
+          Konten und Wachendaten speichern wir, bis du sie löschst oder ihre Löschung verlangst.
           Anmelde-Tokens verfallen nach 15&nbsp;Minuten, Sessions nach 30&nbsp;Tagen. Tägliche
           technische Sicherungskopien werden nach 14&nbsp;Tagen überschrieben.
         </p>

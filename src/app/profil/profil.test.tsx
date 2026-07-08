@@ -46,7 +46,7 @@ describe('Profil-Seite — wb-Name ändern + wb-Konto löschen', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Konto löschen/i }));
     await waitFor(() => expect(screen.getByText(/rückgängig gemacht werden|cannot be undone/i)).toBeTruthy());
-    expect(screen.getByText(/eigenen Ketten|own chains/i)).toBeTruthy();
+    expect(screen.getByText(/eigenen Gebetswachen|own prayer watches/i)).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /endgültig löschen|permanently delete/i }));
 

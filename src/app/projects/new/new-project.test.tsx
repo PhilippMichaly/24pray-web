@@ -39,7 +39,7 @@ describe('Neue Kette anlegen — wb-Owner-Benachrichtigung (Punkt 10)', () => {
     expect(checkbox.checked).toBe(true);
 
     fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T00:00' } });
-    fireEvent.click(screen.getByRole('button', { name: /Kette erstellen/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Wache erstellen/i }));
 
     await waitFor(() => expect(post).toHaveBeenCalled());
     const [, payload] = post.mock.calls[0];
@@ -55,7 +55,7 @@ describe('Neue Kette anlegen — wb-Owner-Benachrichtigung (Punkt 10)', () => {
     expect(checkbox.checked).toBe(false);
 
     fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T00:00' } });
-    fireEvent.click(screen.getByRole('button', { name: /Kette erstellen/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Wache erstellen/i }));
 
     await waitFor(() => expect(post).toHaveBeenCalled());
     const [, payload] = post.mock.calls[0];

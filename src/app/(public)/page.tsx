@@ -135,6 +135,7 @@ export default function HomePage() {
       </main>
 
       <footer className="z-10 pb-4 pt-4 text-center text-xs text-ink-muted opacity-70">
+        <p className="mb-1 text-xs text-ink-muted">{t('lightOfWorld')}</p>
         24pray · {t('earthCredit')}
         <span className="mx-2">·</span>
         <Link href="/impressum" className="underline underline-offset-2 hover:text-ink">{t('legalImprint')}</Link>

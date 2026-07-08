@@ -38,6 +38,6 @@ describe('Dashboard ohne Account (F4) — offene Ketten sofort sichtbar', () => 
     render(<DashboardPage />);
     await waitFor(() => expect(screen.getByText('Offene Testkette')).toBeTruthy());
     expect(screen.queryByText(/melde dich an/i)).toBeNull();
-    expect(screen.getByText('Offene Gebetsketten')).toBeTruthy();
+    expect(screen.getByText('Offene Gebetswachen')).toBeTruthy();
   });
 });

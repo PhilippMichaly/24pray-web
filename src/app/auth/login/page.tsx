@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MailCheck } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -121,6 +122,15 @@ export default function LoginPage() {
             <Button type="submit" loading={loading} disabled={!email} className="mt-4 w-full">
               {loading ? t('sending') : t('sendMagicLink')}
             </Button>
+
+            {/* Art.-9-Einwilligung (besondere Kategorien: religiöse Überzeugung) */}
+            <p className="mt-3 text-xs leading-relaxed text-ink-muted">
+              {t('consentLogin')}{' '}
+              <Link href="/datenschutz" className="underline underline-offset-2 hover:text-ink">
+                {t('privacyPolicy')}
+              </Link>
+              .
+            </p>
           </form>
         </Card>
       </div>

@@ -132,6 +132,10 @@ export default function HomePage() {
 
       <footer className="z-10 pb-4 pt-4 text-center text-xs text-ink-muted opacity-70">
         24pray · {t('earthCredit')}
+        <span className="mx-2">·</span>
+        <Link href="/impressum" className="underline underline-offset-2 hover:text-ink">{t('legalImprint')}</Link>
+        <span className="mx-2">·</span>
+        <Link href="/datenschutz" className="underline underline-offset-2 hover:text-ink">{t('legalPrivacy')}</Link>
       </footer>
 
       <Sheet open={choiceOpen} onOpenChange={setChoiceOpen} title={t('prayChoiceTitle')}>

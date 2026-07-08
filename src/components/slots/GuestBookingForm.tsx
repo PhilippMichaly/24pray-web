@@ -140,6 +140,14 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: Gu
         <CityInput id="guestCity" initialName={getMyCity()?.name ?? ''} onSelect={setCity} />
         {!city && <p className="mt-1 text-xs text-ink-muted">{t('beterLocationHint')}</p>}
       </div>
+      {/* Art.-9-Einwilligung + Namens-Sichtbarkeit (Gast-Buchung) */}
+      <p className="text-xs leading-relaxed text-ink-muted">
+        {t('consentGuest')}{' '}
+        <a href="/datenschutz" target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-ink">
+          {t('privacyPolicy')}
+        </a>
+        .
+      </p>
       <Button type="submit" loading={loading} className="w-full">
         {t('takeThisHour')}
       </Button>

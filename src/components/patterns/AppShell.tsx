@@ -63,6 +63,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-border">
         <div className="mx-auto max-w-3xl px-4 py-6 text-center text-xs text-ink-muted">
           24pray · {t('tagline')}
+          <span className="mx-2">·</span>
+          <Link href="/impressum" className="underline underline-offset-2 hover:text-ink">{t('legalImprint')}</Link>
+          <span className="mx-2">·</span>
+          <Link href="/datenschutz" className="underline underline-offset-2 hover:text-ink">{t('legalPrivacy')}</Link>
         </div>
       </footer>
     </div>

@@ -53,6 +53,11 @@ const de = {
   // Dashboard
   yourProjects: 'Deine Gebetsketten',
   openChains: 'Offene Gebetsketten',
+  legalImprint: 'Impressum',
+  legalPrivacy: 'Datenschutz',
+  consentLogin: 'Mit der Anmeldung willigst du ein, dass 24pray deine Angaben (E-Mail, Name, Buchungen) zur Organisation von Gebetsketten verarbeitet — einschließlich des Umstands, dass daraus deine religiöse Überzeugung erkennbar sein kann (Art. 9 DSGVO). Details in der',
+  consentGuest: 'Mit dem Übernehmen willigst du ein, dass 24pray deine Angaben zur Organisation dieser Gebetskette verarbeitet (Art. 9 DSGVO); dein Name ist für Betrachter der Kette sichtbar. Details in der',
+  privacyPolicy: 'Datenschutzerklärung',
   codeLabel: 'Code aus der E-Mail',
   codeHint: 'Statt den Link zu klicken, kannst du den 6-stelligen Code aus der E-Mail hier eingeben — praktisch auf einem anderen Gerät.',
   codeSubmit: 'Mit Code anmelden',
@@ -242,6 +247,11 @@ const en: Record<keyof typeof de, string> = {
 
   yourProjects: 'Your prayer chains',
   openChains: 'Open prayer chains',
+  legalImprint: 'Legal notice',
+  legalPrivacy: 'Privacy',
+  consentLogin: 'By signing in you consent to 24pray processing your details (email, name, bookings) to organise prayer chains — including that this may reveal your religious conviction (Art. 9 GDPR). Details in the',
+  consentGuest: 'By taking this hour you consent to 24pray processing your details to organise this prayer chain (Art. 9 GDPR); your name is visible to viewers of the chain. Details in the',
+  privacyPolicy: 'privacy policy',
   codeLabel: 'Code from the email',
   codeHint: 'Instead of clicking the link, enter the 6-digit code from the email here — handy on another device.',
   codeSubmit: 'Sign in with code',

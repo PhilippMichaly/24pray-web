@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { deriveSlotState, computeLargestGap, buildViewModels, cancelAbility } from './logic';
+import {
+  deriveSlotState,
+  computeLargestGap,
+  buildViewModels,
+  cancelAbility,
+  isGapStart,
+  dayCollapseState,
+  leadingPastCount,
+} from './logic';
 import type { SlotView } from '@/types';
 import type { DerivationContext } from './types';
 
@@ -119,5 +127,89 @@ describe('cancelAbility — wer darf einen fremden/Gast-Slot stornieren (F2)', (
     expect(cancelAbility({ slotId: 'id-1', state: 'PAST' }, { isOrganizer: true, hasGuestToken: true })).toBe(null);
     expect(cancelAbility({ slotId: 'id-1', state: 'MINE' }, { isOrganizer: true, hasGuestToken: true })).toBe(null);
     expect(cancelAbility({ slotId: 'id-1', state: 'NOW_MINE' }, { isOrganizer: true, hasGuestToken: true })).toBe(null);
+  });
+});
+
+describe('isGapStart — Lücken-Kopfzeile erscheint genau einmal (P1)', () => {
+  it('ist true für genau den allerersten Slot der größten Lücke', () => {
+    const slots = [
+      slot(6, { status: 'BOOKED' }),
+      slot(7), // free
+      slot(8, { status: 'BOOKED' }),
+      slot(9), // free ← Lückenstart
+      slot(10), // free
+      slot(11), // free ← größte Lücke 09–12
+      slot(12, { status: 'BOOKED' }),
+    ];
+    const { models, gap } = buildViewModels(slots, {
+      now: NOW,
+      projectTz: TZ,
+      pendingKeys: new Set(),
+      conflictKey: null,
+    });
+    const flags = models.map((m) => isGapStart(m, gap.startTime));
+    expect(flags.filter(Boolean)).toHaveLength(1);
+    expect(models[flags.indexOf(true)].startTime).toBe('2026-07-06T09:00:00.000Z');
+  });
+
+  it('ist false, wenn es keine Lücke gibt (startTime null)', () => {
+    const m = { isLargestGap: true, startTime: '2026-07-06T09:00:00.000Z' } as never;
+    expect(isGapStart(m, null)).toBe(false);
+  });
+
+  it('ist false für alle anderen Slots der Lücke (nicht der Start)', () => {
+    const slots = [slot(9), slot(10), slot(11)];
+    const { models, gap } = buildViewModels(slots, {
+      now: NOW,
+      projectTz: TZ,
+      pendingKeys: new Set(),
+      conflictKey: null,
+    });
+    expect(isGapStart(models[1], gap.startTime)).toBe(false);
+    expect(isGapStart(models[2], gap.startTime)).toBe(false);
+  });
+});
+
+describe('dayCollapseState — Kollaps-Zustand eines Tages (P2)', () => {
+  it('all-past, wenn jeder Slot PAST ist', () => {
+    const slots = [slot(1), slot(2), slot(3)];
+    const { models } = buildViewModels(slots, { now: NOW, projectTz: TZ, pendingKeys: new Set(), conflictKey: null });
+    expect(dayCollapseState(models)).toBe('all-past');
+  });
+
+  it('future-free, wenn alle Slots zukünftig UND frei sind', () => {
+    const slots = [slot(10), slot(11), slot(12)];
+    const { models } = buildViewModels(slots, { now: NOW, projectTz: TZ, pendingKeys: new Set(), conflictKey: null });
+    expect(dayCollapseState(models)).toBe('future-free');
+  });
+
+  it('normal, wenn Vergangenheit/laufende Stunde/Buchung mit Zukunft gemischt ist', () => {
+    const slots = [slot(3), slot(5), slot(10, { status: 'BOOKED' })];
+    const { models } = buildViewModels(slots, { now: NOW, projectTz: TZ, pendingKeys: new Set(), conflictKey: null });
+    expect(dayCollapseState(models)).toBe('normal');
+  });
+
+  it('normal für einen leeren Tag (keine Slots)', () => {
+    expect(dayCollapseState([])).toBe('normal');
+  });
+});
+
+describe('leadingPastCount — führende vergangene Slots zu einer Ghost-Zeile falten (P2)', () => {
+  it('zählt nur die führenden PAST-Slots, stoppt beim ersten Nicht-PAST', () => {
+    const slots = [slot(1), slot(2), slot(3), slot(5), slot(10)]; // 1–3 PAST, 5 NOW, 10 FREE
+    const { models } = buildViewModels(slots, { now: NOW, projectTz: TZ, pendingKeys: new Set(), conflictKey: null });
+    expect(leadingPastCount(models)).toBe(3);
+  });
+
+  it('0, wenn der erste Slot bereits nicht PAST ist', () => {
+    const slots = [slot(10), slot(1)];
+    const { models } = buildViewModels(slots, { now: NOW, projectTz: TZ, pendingKeys: new Set(), conflictKey: null });
+    expect(leadingPastCount(models)).toBe(0);
+  });
+
+  it('= Gesamtlänge, wenn der ganze Tag vorüber ist', () => {
+    const slots = [slot(1), slot(2)];
+    const { models } = buildViewModels(slots, { now: NOW, projectTz: TZ, pendingKeys: new Set(), conflictKey: null });
+    expect(leadingPastCount(models)).toBe(2);
   });
 });

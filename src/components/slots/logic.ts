@@ -147,3 +147,36 @@ export function groupByDay(
 export function bookedCount(models: SlotViewModel[]): number {
   return models.filter((m) => m.status === 'BOOKED').length;
 }
+
+/**
+ * Ist dieser Slot der allererste Slot der größten Lücke? Damit erscheint die
+ * „Größte Lücke"-Kopfzeile genau EINMAL statt bei jedem einzelnen Gap-Slot (P1).
+ */
+export function isGapStart(model: Pick<SlotViewModel, 'isLargestGap' | 'startTime'>, gapStartTime: string | null): boolean {
+  return gapStartTime != null && model.isLargestGap && model.startTime === gapStartTime;
+}
+
+export type DayCollapseState = 'all-past' | 'future-free' | 'normal';
+
+/**
+ * Kollaps-Zustand eines Tages (P2):
+ * - all-past: komplett vorüber → als einzelne Ghost-Zeile statt Sektion.
+ * - future-free: komplett zukünftig UND frei → einladend eingeklappte Sektion.
+ * - normal: alles andere (Buchung, laufende Stunde, Vergangenheit+Zukunft gemischt) → expandiert.
+ */
+export function dayCollapseState(models: SlotViewModel[]): DayCollapseState {
+  if (models.length === 0) return 'normal';
+  if (models.every((m) => m.state === 'PAST')) return 'all-past';
+  if (models.every((m) => m.state === 'FREE' || m.state === 'FREE_LARGEST_GAP')) return 'future-free';
+  return 'normal';
+}
+
+/** Anzahl der FÜHRENDEN PAST-Slots eines (zeitlich sortierten) Tages — für die Ghost-Fold-Zeile (P2). */
+export function leadingPastCount(models: SlotViewModel[]): number {
+  let n = 0;
+  for (const m of models) {
+    if (m.state !== 'PAST') break;
+    n++;
+  }
+  return n;
+}

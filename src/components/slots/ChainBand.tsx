@@ -14,14 +14,15 @@ export interface ChainBandProps {
 }
 
 // Farbe je Zustand (Heatmap). KEINE Buchung aus dem Band (Fixpunkt 4).
+// Gebuchte/eigene Zellen bekommen einen warmen Glow (Lichtband-Signatur, P4); freie bleiben matt.
 function cellClass(state: SlotCellState): string {
   switch (state) {
     case 'MINE':
     case 'NOW_MINE':
-      return 'bg-accent';
+      return 'bg-accent shadow-[0_0_6px_1px_hsl(var(--gold)/0.45)]';
     case 'BOOKED':
     case 'NOW_BOOKED':
-      return 'bg-accent/55';
+      return 'bg-accent/55 shadow-[0_0_6px_1px_hsl(var(--gold)/0.45)]';
     case 'PENDING':
       return 'bg-accent/30 animate-pulse';
     case 'CONFLICT':

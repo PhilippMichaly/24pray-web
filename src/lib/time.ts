@@ -39,6 +39,11 @@ export function formatDayHeader(dateISO: string, projectTz: string): string {
   }).format(new Date(dateISO));
 }
 
+/** „Montag" / "Monday" — nur der Wochentag, für kollabierte Tages-Header (P2). */
+export function formatWeekday(dateISO: string, projectTz: string): string {
+  return new Intl.DateTimeFormat(intlLocale(), { timeZone: projectTz, weekday: 'long' }).format(new Date(dateISO));
+}
+
 /** ISO-Datum (YYYY-MM-DD) in Projekt-Zeitzone — Gruppierungsschlüssel je Tag. */
 export function dayKey(dateISO: string, projectTz: string): string {
   const parts = new Intl.DateTimeFormat('en-CA', {

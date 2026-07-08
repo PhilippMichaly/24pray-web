@@ -17,7 +17,14 @@ export function ChainProgress({ booked, total, largestGap, onGapClick }: ChainPr
   return (
     <div>
       <p className="font-display text-xl font-semibold text-ink tnum">
-        {complete ? t('chainClosed') : t('slotsBookedOf', { booked, total })}
+        {complete ? (
+          t('chainClosed')
+        ) : (
+          <>
+            <span className="font-semibold text-accent-strong">{booked}</span>{' '}
+            {t('slotsBookedOfRest', { total })}
+          </>
+        )}
       </p>
       <Progress
         className="mt-3"

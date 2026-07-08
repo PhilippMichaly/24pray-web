@@ -8,7 +8,10 @@ import { Spinner } from './Spinner';
 export const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-colors ' +
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 ' +
-    'focus-visible:ring-offset-bg disabled:pointer-events-none disabled:opacity-50 ' +
+    'focus-visible:ring-offset-bg disabled:pointer-events-none disabled:shadow-none ' +
+    // Disabled: neutrale Fläche statt reiner Opazität — bei bg-accent+accent-ink verwässert 50%-Opazität
+    // den Kontrast auf ~2:1 (AA verfehlt); disabled:bg/text überschreiben die Variante dank :disabled-Spezifität.
+    'disabled:bg-surface-sunken disabled:text-ink-muted ' +
     'transition-[background-color,color] duration-fast ease-enter',
   {
     variants: {

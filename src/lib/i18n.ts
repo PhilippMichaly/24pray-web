@@ -83,6 +83,8 @@ const de = {
   noProjects: 'Noch keine Gebetswachen.',
   noProjectsHint: 'Starte deine erste Gebetswache und lade deine Gemeinde ein.',
   slotsBookedOf: '{booked} von {total} Stunden gehalten',
+  slotsBookedOfRest: 'von {total} Stunden gehalten',
+  untilDate: 'bis {date}',
 
   // Projekt-Detail
   organizerLabel: 'Organisiert von {name}',
@@ -135,10 +137,14 @@ const de = {
   timesInTz: 'Zeiten in {tz}',
 
   // Slot-Modul (Welle 2)
-  closesLargestGap: 'Schließt die größte Lücke',
   chainBandLabel: 'Überblick der Gebetswache',
   chainClosed: 'Die Wache ist geschlossen.',
   largestGap: 'Größte Lücke: {gap}',
+  gapRangeHeader: 'Größte Lücke: {n} Stunden am Stück',
+  pastFoldLabel: '{n} Stunden vorüber',
+  dayFutureFreeHeader: '{weekday} — noch ganz frei · {n} Stunden zu vergeben',
+  largestGapSuffix: 'größte Lücke',
+  dayHeldCount: '{held} von {total}',
   oclock: 'Uhr',
   atYou: 'bei dir',
   nightWatch: 'Nachtwache',
@@ -304,6 +310,8 @@ const en: Record<keyof typeof de, string> = {
   noProjects: 'No prayer watches yet.',
   noProjectsHint: 'Start your first prayer watch and invite your community.',
   slotsBookedOf: '{booked} of {total} hours held',
+  slotsBookedOfRest: 'of {total} hours held',
+  untilDate: 'until {date}',
 
   organizerLabel: 'Organized by {name}',
   take: 'Take it',
@@ -350,10 +358,14 @@ const en: Record<keyof typeof de, string> = {
 
   timesInTz: 'Times in {tz}',
 
-  closesLargestGap: 'Closes the largest gap',
   chainBandLabel: 'Prayer watch overview',
   chainClosed: 'The watch is complete.',
   largestGap: 'Largest gap: {gap}',
+  gapRangeHeader: 'Largest gap: {n} hours in a row',
+  pastFoldLabel: '{n} hours past',
+  dayFutureFreeHeader: '{weekday} — still wide open · {n} hours to take',
+  largestGapSuffix: 'largest gap',
+  dayHeldCount: '{held} of {total}',
   oclock: '',
   atYou: 'your time',
   nightWatch: 'Night watch',

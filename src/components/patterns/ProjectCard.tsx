@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge, type BadgeProps } from '@/components/ui/Badge';
 import type { ProjectStatus, ProjectWithStats } from '@/types';
 import type { SlotViewModel } from '@/components/slots/types';
+import { formatDayHeader } from '@/lib/time';
 import { t } from '@/lib/i18n';
 
 const statusMeta: Record<ProjectStatus, { variant: BadgeProps['variant']; key: string }> = {
@@ -30,9 +31,14 @@ export interface ProjectCardProps {
 // Mini-ChainBand: kompakter, nicht interaktiver Streifen (aggregiert, wrap).
 export function ProjectCard({ project, models }: ProjectCardProps) {
   const meta = statusMeta[project.status as ProjectStatus] ?? statusMeta.DRAFT;
+  const isActive = project.status === 'ACTIVE';
   // Bei sehr vielen Slots ausdünnen, damit der Streifen kompakt bleibt.
   const step = Math.max(1, Math.ceil(models.length / 96));
   const cells = models.filter((_, i) => i % step === 0);
+  const showBand = project.bookedSlots > 0 && cells.length > 0;
+
+  const untilLabel = t('untilDate', { date: formatDayHeader(project.endDate, project.timezone) });
+  const metaLine = project.locationName ? `${project.locationName} · ${untilLabel}` : untilLabel;
 
   return (
     <Link
@@ -42,12 +48,17 @@ export function ProjectCard({ project, models }: ProjectCardProps) {
       <Card elevation={1} className="transition-shadow hover:shadow-2">
         <div className="flex items-start justify-between gap-3">
           <h2 className="font-display text-lg font-semibold text-ink">{project.title}</h2>
-          <Badge variant={meta.variant}>{t(meta.key as never)}</Badge>
+          {/* Abweichung vom Standard (ACTIVE) ist die Information — nicht jede Karte braucht ein Label. */}
+          {!isActive && <Badge variant={meta.variant}>{t(meta.key as never)}</Badge>}
         </div>
+        {project.description && (
+          <p className="mt-1 line-clamp-2 text-sm text-ink-muted">{project.description}</p>
+        )}
         <p className="mt-1 text-sm text-ink-muted tnum">
           {t('slotsBookedOf', { booked: project.bookedSlots, total: project.totalSlots })}
         </p>
-        {cells.length > 0 && (
+        <p className="mt-0.5 text-xs text-ink-muted">{metaLine}</p>
+        {showBand && (
           <div className="mt-3 flex flex-wrap gap-[2px]" aria-hidden>
             {cells.map((m) => (
               <span key={m.key} className={cn('h-2 w-2 rounded-[2px]', cellColor(m))} />

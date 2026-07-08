@@ -36,7 +36,7 @@ export function SlotRow({ slot, projectTz, onBook, onOpen }: SlotRowProps) {
       className={cn(
         'relative flex min-h-[52px] items-center gap-3 rounded-md border px-4 py-2.5 transition-colors',
         free && 'border-dashed bg-surface',
-        gap && 'bg-gold/10',
+        gap && 'bg-gold/5',
         booked && 'border-solid bg-surface-sunken',
         mine && 'border-solid bg-accent-soft ring-1 ring-accent/40',
         past && 'opacity-40',
@@ -71,7 +71,6 @@ export function SlotRow({ slot, projectTz, onBook, onOpen }: SlotRowProps) {
             <span className="text-ink-muted">{t('free')}</span>
           )}
         </span>
-        {gap && <span className="text-xs text-gold">{t('closesLargestGap')}</span>}
       </span>
 
       {/* Rechts */}

@@ -95,7 +95,11 @@ function ProjectPageInner() {
   if (loadError) {
     return (
       <AppShell>
-        <EmptyState icon={CalendarClock} title={loadError} />
+        <EmptyState
+          icon={CalendarClock}
+          title={loadError}
+          action={{ label: t('exploreProjects'), href: '/dashboard' }}
+        />
       </AppShell>
     );
   }
@@ -186,7 +190,14 @@ function ProjectPageInner() {
                   <div className="mb-6 overflow-x-auto">
                     <ChainBand days={grid.days} projectTz={grid.tz} onCellActivate={scrollToSlot} interactiveTooltip />
                   </div>
-                  <SlotList days={grid.days} projectTz={grid.tz} onBook={onBook} onOpenSheet={onOpenSheet} />
+                  <SlotList
+                    days={grid.days}
+                    projectTz={grid.tz}
+                    onBook={onBook}
+                    onOpenSheet={onOpenSheet}
+                    gapStartTime={grid.gap.startTime}
+                    gapCount={grid.gap.keys.size}
+                  />
                 </>
               )}
             </TabPanel>

@@ -26,8 +26,10 @@ export function Progress({ value, max, segmented, className, ...aria }: Progress
           <span
             key={i}
             className={cn(
-              'h-2 flex-1 rounded-[2px] transition-colors',
-              i < value ? (complete ? 'bg-gold' : 'bg-accent') : 'bg-surface-sunken',
+              'h-2.5 flex-1 rounded-[3px] transition-colors',
+              i < value
+                ? cn(complete ? 'bg-gold' : 'bg-accent', 'shadow-[0_0_6px_1px_hsl(var(--gold)/0.45)]')
+                : 'bg-surface-sunken', // frei bleibt matt — kein Glow
             )}
           />
         ))}

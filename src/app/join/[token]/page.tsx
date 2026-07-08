@@ -34,7 +34,11 @@ export default function JoinPage() {
   if (error) {
     return (
       <CenterShell>
-        <EmptyState icon={MailX} title={t('invitationInvalid')} />
+        <EmptyState
+          icon={MailX}
+          title={t('invitationInvalid')}
+          action={{ label: t('exploreProjects'), href: '/dashboard' }}
+        />
       </CenterShell>
     );
   }

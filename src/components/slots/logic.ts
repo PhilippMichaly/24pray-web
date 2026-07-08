@@ -111,6 +111,22 @@ export function buildViewModels(
   return { models, gap };
 }
 
+/**
+ * Wer darf einen fremden gebuchten Slot stornieren (SlotSheet info-Modus)?
+ * Gast über seinen localStorage-Token, Organisator über seine Rolle (API erlaubt beides, §6.3).
+ * Eigene Slots (MINE/NOW_MINE) laufen über den mine-Modus, nicht hierüber.
+ */
+export function cancelAbility(
+  slot: Pick<SlotViewModel, 'slotId' | 'state'>,
+  opts: { isOrganizer: boolean; hasGuestToken: boolean },
+): 'guest' | 'organizer' | null {
+  if (!slot.slotId) return null;
+  if (slot.state !== 'BOOKED' && slot.state !== 'NOW_BOOKED') return null;
+  if (opts.hasGuestToken) return 'guest';
+  if (opts.isOrganizer) return 'organizer';
+  return null;
+}
+
 /** Nach Projekt-Kalendertag gruppieren (für DaySection). */
 export function groupByDay(
   models: SlotViewModel[],

@@ -77,12 +77,12 @@ export function useSlotGrid(
   const days = useMemo(() => groupByDay(models, tz), [models, tz]);
   const booked = bookedCount(models);
 
-  /** Storno (eingeloggt eigener Slot, oder via Undo). */
+  /** Storno (eingeloggt eigener Slot, via Undo, Gast mit Token oder Organisator — F2). */
   const cancelBooked = useCallback(
-    async (slotId: string, key: string) => {
+    async (slotId: string, key: string, guestToken?: string) => {
       patchSlot(key, { status: 'FREE', isMine: false, userName: null, slotId: null });
       try {
-        await cancelSlot(slotId);
+        await cancelSlot(slotId, guestToken);
       } catch (e) {
         setError((e as Error).message);
         await reload();

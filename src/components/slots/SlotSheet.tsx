@@ -8,6 +8,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Select } from '@/components/ui/Input';
 import { toast } from '@/components/ui/toast-store';
 import { GuestBookingForm } from './GuestBookingForm';
+import { cancelAbility } from './logic';
 import { bookSlot, recurSlot, getReminderPref, putReminderPref } from '@/lib/api';
 import { Label } from '@/components/ui/Label';
 import { CityInput } from '@/components/patterns/CityInput';
@@ -25,9 +26,56 @@ export interface SlotSheetProps {
   slot: SlotViewModel | null;
   project: ProjectWithStats;
   mode: SlotSheetMode;
-  onCancel?: () => Promise<void> | void; // Storno (mode='mine')
+  isOrganizer?: boolean; // Organisator darf fremde/Gast-Buchungen entfernen (F2)
+  onCancel?: (guestToken?: string) => Promise<void> | void; // Storno (mine, Gast via Token, Organisator)
   onGuestBooked?: (slotId: string, guestToken: string) => void;
   onRecurred?: () => void; // Grid neu laden nach „Jede Woche" (W3)
+}
+
+/** Storno mit Rückfrage — genutzt im mine-Modus und (Gast/Organisator) im info-Modus. */
+function CancelBlock({
+  label,
+  confirmText,
+  onConfirm,
+  onDone,
+}: {
+  label: string;
+  confirmText: string;
+  onConfirm: () => Promise<void> | void;
+  onDone: () => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  return (
+    <div className="pt-2">
+      {confirming ? (
+        <div className="space-y-3">
+          <p className="text-sm text-ink-muted">{confirmText}</p>
+          <div className="flex gap-2">
+            <Button
+              variant="danger-fill"
+              loading={cancelling}
+              onClick={async () => {
+                setCancelling(true);
+                await onConfirm();
+                setCancelling(false);
+                onDone();
+              }}
+            >
+              {label}
+            </Button>
+            <Button variant="ghost" onClick={() => setConfirming(false)}>
+              {t('cancel')}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button variant="danger" onClick={() => setConfirming(true)}>
+          {label}
+        </Button>
+      )}
+    </div>
+  );
 }
 
 /** W3: Recurring + Reminder — Andockpunkte im mine-Modus. */
@@ -117,12 +165,23 @@ function MineExtras({ slot, project, onRecurred }: { slot: SlotViewModel; projec
 
 const guestTokenKey = (slotId: string) => `24pray:guest:${slotId}`;
 
-export function SlotSheet({ open, onOpenChange, slot, project, mode, onCancel, onGuestBooked, onRecurred }: SlotSheetProps) {
-  const [confirming, setConfirming] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
-
+export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer, onCancel, onGuestBooked, onRecurred }: SlotSheetProps) {
   if (!slot) return null;
   const times = formatDualTz(slot.startTime, slot.endTime, project.timezone);
+
+  // Gast-Storno: Token liegt seit der Buchung im localStorage (F2).
+  let storedGuestToken: string | null = null;
+  if (slot.slotId && typeof window !== 'undefined') {
+    try {
+      storedGuestToken = localStorage.getItem(guestTokenKey(slot.slotId));
+    } catch {
+      /* localStorage kann blockiert sein */
+    }
+  }
+  const ability =
+    mode === 'info'
+      ? cancelAbility(slot, { isOrganizer: !!isOrganizer, hasGuestToken: !!storedGuestToken })
+      : null;
 
   const TimeBlock = (
     <div className="flex items-center gap-2 text-sm tnum text-ink">
@@ -153,34 +212,32 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, onCancel, o
         {mode === 'mine' && <MineExtras slot={slot} project={project} onRecurred={onRecurred} />}
 
         {mode === 'mine' && (
-          <div className="pt-2">
-            {confirming ? (
-              <div className="space-y-3">
-                <p className="text-sm text-ink-muted">{t('releaseConfirm')}</p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="danger-fill"
-                    loading={cancelling}
-                    onClick={async () => {
-                      setCancelling(true);
-                      await onCancel?.();
-                      setCancelling(false);
-                      onOpenChange(false);
-                    }}
-                  >
-                    {t('releaseHour')}
-                  </Button>
-                  <Button variant="ghost" onClick={() => setConfirming(false)}>
-                    {t('cancel')}
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <Button variant="danger" onClick={() => setConfirming(true)}>
-                {t('releaseHour')}
-              </Button>
-            )}
-          </div>
+          <CancelBlock
+            label={t('releaseHour')}
+            confirmText={t('releaseConfirm')}
+            onConfirm={async () => {
+              await onCancel?.();
+            }}
+            onDone={() => onOpenChange(false)}
+          />
+        )}
+
+        {ability && (
+          <CancelBlock
+            label={ability === 'guest' ? t('releaseHour') : t('removeBooking')}
+            confirmText={ability === 'guest' ? t('releaseConfirm') : t('removeBookingConfirm')}
+            onConfirm={async () => {
+              await onCancel?.(ability === 'guest' ? storedGuestToken ?? undefined : undefined);
+              if (ability === 'guest' && slot.slotId) {
+                try {
+                  localStorage.removeItem(guestTokenKey(slot.slotId));
+                } catch {
+                  /* localStorage kann blockiert sein */
+                }
+              }
+            }}
+            onDone={() => onOpenChange(false)}
+          />
         )}
 
         {mode === 'guest-book' && (

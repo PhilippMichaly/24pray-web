@@ -182,8 +182,9 @@ function ProjectPageInner() {
             slot={sheet.slot}
             project={project}
             mode={sheet.mode}
-            onCancel={async () => {
-              if (sheet.slot?.slotId) await grid.cancelBooked(sheet.slot.slotId, sheet.slot.key);
+            isOrganizer={!!currentUserId && project.organizerId === currentUserId}
+            onCancel={async (guestToken) => {
+              if (sheet.slot?.slotId) await grid.cancelBooked(sheet.slot.slotId, sheet.slot.key, guestToken);
             }}
             onGuestBooked={() => {
               // Sheet bleibt offen (Erfolgs-State + .ics im Formular); Grid im Hintergrund aktualisieren.

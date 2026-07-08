@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { deriveSlotState, computeLargestGap, buildViewModels } from './logic';
+import { deriveSlotState, computeLargestGap, buildViewModels, cancelAbility } from './logic';
 import type { SlotView } from '@/types';
 import type { DerivationContext } from './types';
 
@@ -95,5 +95,29 @@ describe('buildViewModels', () => {
     expect(models[1].isNight).toBe(false); // 10h
     // 10+11 sind der größte Lauf → FREE_LARGEST_GAP
     expect(models[1].state).toBe('FREE_LARGEST_GAP');
+  });
+});
+
+describe('cancelAbility — wer darf einen fremden/Gast-Slot stornieren (F2)', () => {
+  const booked = { slotId: 'id-1', state: 'BOOKED' as const };
+
+  it('Gast mit gespeichertem Token darf seinen gebuchten Slot stornieren', () => {
+    expect(cancelAbility(booked, { isOrganizer: false, hasGuestToken: true })).toBe('guest');
+  });
+
+  it('Organisator darf fremde/Gast-Buchungen stornieren (auch die laufende Stunde)', () => {
+    expect(cancelAbility(booked, { isOrganizer: true, hasGuestToken: false })).toBe('organizer');
+    expect(cancelAbility({ slotId: 'id-1', state: 'NOW_BOOKED' }, { isOrganizer: true, hasGuestToken: false })).toBe('organizer');
+  });
+
+  it('sonst niemand', () => {
+    expect(cancelAbility(booked, { isOrganizer: false, hasGuestToken: false })).toBe(null);
+  });
+
+  it('nicht für freie, vergangene oder eigene Slots (eigene laufen über den mine-Modus)', () => {
+    expect(cancelAbility({ slotId: null, state: 'FREE' }, { isOrganizer: true, hasGuestToken: true })).toBe(null);
+    expect(cancelAbility({ slotId: 'id-1', state: 'PAST' }, { isOrganizer: true, hasGuestToken: true })).toBe(null);
+    expect(cancelAbility({ slotId: 'id-1', state: 'MINE' }, { isOrganizer: true, hasGuestToken: true })).toBe(null);
+    expect(cancelAbility({ slotId: 'id-1', state: 'NOW_MINE' }, { isOrganizer: true, hasGuestToken: true })).toBe(null);
   });
 });

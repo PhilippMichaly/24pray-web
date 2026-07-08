@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/Toast';
+import { LocaleProvider } from '@/lib/locale-context';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -11,8 +12,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
-      <Toaster />
+      <LocaleProvider>
+        {children}
+        <Toaster />
+      </LocaleProvider>
     </ThemeProvider>
   );
 }

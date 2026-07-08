@@ -27,9 +27,11 @@ export function formatSlotRange(
   return `${pad2(hourInTz(startISO, projectTz))}–${pad2(hourInTz(endISO, projectTz))}`;
 }
 
-/** „Montag, 6. Juli" — Tages-Header in Projekt-Zeitzone (de). */
+import { intlLocale } from './i18n';
+
+/** „Montag, 6. Juli" / "Monday, 6 July" — Tages-Header in Projekt-Zeitzone. */
 export function formatDayHeader(dateISO: string, projectTz: string): string {
-  return new Intl.DateTimeFormat('de-DE', {
+  return new Intl.DateTimeFormat(intlLocale(), {
     timeZone: projectTz,
     weekday: 'long',
     day: 'numeric',

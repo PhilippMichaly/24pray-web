@@ -387,8 +387,40 @@ type Locale = 'de' | 'en';
 
 const catalogs: Record<Locale, Partial<Record<TranslationKey, string>>> = { de, en };
 
-// v1: fester Default `de`. Welle 3 macht das umschaltbar (Context/Cookie).
-const currentLocale: Locale = 'de';
+// Umschaltbar (2026-07-08): Server rendert de, der LocaleProvider wendet nach dem
+// Mount die Browser-Sprache bzw. die gespeicherte Wahl an (kein Geo-IP — bewusst).
+let currentLocale: Locale = 'de';
+
+export type { Locale };
+export function getLocale(): Locale {
+  return currentLocale;
+}
+export function setLocale(l: Locale): void {
+  currentLocale = l;
+}
+/** BCP-47 für Intl.DateTimeFormat & Co. */
+export function intlLocale(): string {
+  return currentLocale === 'de' ? 'de-DE' : 'en-GB';
+}
+const LOCALE_KEY = '24pray:locale';
+/** Manuelle Wahl (localStorage) schlägt Browser-Sprache; Nicht-Deutsch → Englisch. */
+export function detectLocale(): Locale {
+  try {
+    const saved = localStorage.getItem(LOCALE_KEY);
+    if (saved === 'de' || saved === 'en') return saved;
+  } catch {
+    /* localStorage kann blockiert sein */
+  }
+  const lang = typeof navigator !== 'undefined' ? navigator.language : 'de';
+  return lang.toLowerCase().startsWith('de') ? 'de' : 'en';
+}
+export function persistLocale(l: Locale): void {
+  try {
+    localStorage.setItem(LOCALE_KEY, l);
+  } catch {
+    /* s.o. */
+  }
+}
 
 export function t(key: TranslationKey, params?: Record<string, string | number>): string {
   const raw = catalogs[currentLocale][key] ?? de[key];

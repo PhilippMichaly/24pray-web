@@ -1,4 +1,5 @@
 import { isNightHour, dayKey, formatSlotRange } from '@/lib/time';
+import { intlLocale } from '@/lib/i18n';
 import type { SlotView } from '@/types';
 import type { DerivationContext, RawSlot, SlotCellState, SlotViewModel } from './types';
 
@@ -70,7 +71,7 @@ export function computeLargestGap(
   for (let i = bestStart; i < bestStart + bestLen; i++) keys.add(slots[i].startTime);
   const first = slots[bestStart];
   const last = slots[bestStart + bestLen - 1];
-  const weekday = new Intl.DateTimeFormat('de-DE', { timeZone: projectTz, weekday: 'short' }).format(
+  const weekday = new Intl.DateTimeFormat(intlLocale(), { timeZone: projectTz, weekday: 'short' }).format(
     new Date(first.startTime),
   );
   // Innerhalb eines Projekt-Tages: „Mi 03–06 Uhr". Über Tage hinweg: „ab Mi 14 Uhr"

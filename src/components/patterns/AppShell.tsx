@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 import { Brand } from './Brand';
 import { ThemeToggle } from './ThemeToggle';
+import { LocaleToggle } from './LocaleToggle';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/use-auth';
@@ -53,7 +54,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/" className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
             <Brand size="sm" />
           </Link>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
+            <LocaleToggle />
             <ThemeToggle />
             <UserMenu />
           </div>

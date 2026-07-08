@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { Sheet } from '@/components/ui/Sheet';
 import { Brand } from '@/components/patterns/Brand';
 import { ThemeToggle } from '@/components/patterns/ThemeToggle';
+import { LocaleToggle } from '@/components/patterns/LocaleToggle';
 import { Globe, type ChainPoint } from '@/components/patterns/Globe';
 import { Button } from '@/components/ui/Button';
 import { t } from '@/lib/i18n';
@@ -67,7 +68,10 @@ export default function HomePage() {
     <div data-theme="dark" className="relative flex min-h-screen flex-col items-center overflow-hidden bg-bg px-4 text-ink">
       <header className="z-10 flex w-full max-w-5xl items-center justify-between py-4">
         <Brand size="sm" />
-        <ThemeToggle />
+        <div className="flex items-center gap-1.5">
+          <LocaleToggle />
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* Nur die Erde, groß — und ein Button. */}

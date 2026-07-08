@@ -32,7 +32,7 @@ describe('Rechtliches (Impressum/Datenschutz, DSGVO-Hinweise)', () => {
 
   it('Login zeigt den Einwilligungshinweis mit Link zur Datenschutzerklärung', () => {
     render(<LoginPage />);
-    expect(screen.getByText(/willigst du ein/i)).toBeTruthy();
+    expect(screen.getByText(/stimmst du der/i)).toBeTruthy();
     const link = screen.getByRole('link', { name: /Datenschutzerklärung/i });
     expect(link.getAttribute('href')).toBe('/datenschutz');
   });

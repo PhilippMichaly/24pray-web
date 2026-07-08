@@ -72,7 +72,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleCodeSubmit} className="mt-6 border-t border-border pt-5 text-left">
+          <form onSubmit={handleCodeSubmit} className="mt-6 border-t border-border pt-5 text-start">
             <Label htmlFor="code">{t('codeLabel')}</Label>
             <Input
               id="code"

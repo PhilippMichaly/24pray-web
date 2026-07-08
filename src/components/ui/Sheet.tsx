@@ -44,7 +44,7 @@ export function Sheet({ open, onOpenChange, title, children, side }: SheetProps)
             )}
             <Dialog.Close
               aria-label="Schließen"
-              className="-mr-1 -mt-1 rounded-sm p-1 text-ink-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+              className="-me-1 -mt-1 rounded-sm p-1 text-ink-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               <X size={20} />
             </Dialog.Close>

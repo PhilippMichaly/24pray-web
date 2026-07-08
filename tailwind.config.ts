@@ -42,8 +42,33 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ['var(--font-display)', 'Playfair Display', 'serif'],
-        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        // Fraunces/DM Sans (variable, next/font/google) haben keine hebräischen/arabischen
+        // Glyphen — Browser fallen pro Zeichen automatisch auf den nächsten Font in der Kette;
+        // hochwertige, verbreitete System-Fonts statt Tofu (kein externer Font-Download,
+        // Datenschutz-Zusage). Reihenfolge deckt Windows (Segoe UI/Tahoma), macOS (Geeza
+        // Pro/Arial Hebrew) und Linux/Android (Noto Sans *) ab.
+        display: [
+          'var(--font-display)',
+          '"Noto Sans Hebrew"',
+          '"Noto Naskh Arabic"',
+          '"Geeza Pro"',
+          '"Arial Hebrew"',
+          'Tahoma',
+          '"Segoe UI"',
+          'Playfair Display',
+          'serif',
+        ],
+        sans: [
+          'var(--font-sans)',
+          '"Noto Sans Hebrew"',
+          '"Noto Sans Arabic"',
+          '"Arial Hebrew"',
+          '"Geeza Pro"',
+          'Tahoma',
+          '"Segoe UI"',
+          'system-ui',
+          'sans-serif',
+        ],
       },
       fontSize: {
         xs: ['var(--text-xs)', 'var(--lh-xs)'],

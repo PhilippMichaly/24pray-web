@@ -1,5 +1,5 @@
 import { isNightHour, dayKey, formatSlotRange, formatShortWeekdayDate, hourInTz } from '@/lib/time';
-import { intlLocale } from '@/lib/i18n';
+import { intlLocale, t } from '@/lib/i18n';
 import type { SlotView } from '@/types';
 import type { DerivationContext, RawSlot, SlotCellState, SlotViewModel } from './types';
 
@@ -91,12 +91,14 @@ export function computeLargestGap(
     new Date(first.startTime),
   );
   // Innerhalb eines Projekt-Tages: „Mi 03–06 Uhr". Über Tage hinweg: „ab Mi 14 Uhr"
-  // (ein tagesübergreifender „14–13"-Bereich wäre missverständlich).
+  // (ein tagesübergreifender „14–13"-Bereich wäre missverständlich). „Uhr"/„ab" waren früher
+  // hart auf Deutsch verdrahtet (Bug, unabhängig von der aktiven Locale) — jetzt über t().
   const sameDay = dayKey(first.startTime, projectTz) === dayKey(last.startTime, projectTz);
   const startHH = formatSlotRange(first.startTime, first.endTime, projectTz).split('–')[0];
+  const oclock = t('oclock');
   const label = sameDay
-    ? `${weekday} ${formatSlotRange(first.startTime, last.endTime, projectTz)} Uhr`
-    : `ab ${weekday} ${startHH} Uhr`;
+    ? `${weekday} ${formatSlotRange(first.startTime, last.endTime, projectTz)}${oclock ? ` ${oclock}` : ''}`
+    : `${t('gapFromPrefix')} ${weekday} ${startHH}${oclock ? ` ${oclock}` : ''}`;
   return { keys, label, startTime: first.startTime };
 }
 

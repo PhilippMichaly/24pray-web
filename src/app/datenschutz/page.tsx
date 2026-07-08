@@ -11,7 +11,9 @@ function H2({ children }: { children: React.ReactNode }) {
 export default function DatenschutzPage() {
   return (
     <AppShell>
-      <article className="space-y-3 text-sm leading-relaxed text-ink">
+      {/* Bleibt bewusst Deutsch (Rechtsseite) — dir="ltr" fest, unabhängig von der App-Locale
+          (sonst würde z. B. he/ar via <html dir="rtl"> die Listen-Marker/Ausrichtung kippen). */}
+      <article dir="ltr" className="space-y-3 text-start text-sm leading-relaxed text-ink">
         <h1 className="font-display text-2xl font-semibold">Datenschutzerklärung</h1>
         <p className="text-ink-muted">Stand: Juli 2026</p>
 

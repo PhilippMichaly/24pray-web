@@ -7,7 +7,8 @@ export const metadata: Metadata = { title: 'Impressum — 24pray' };
 export default function ImpressumPage() {
   return (
     <AppShell>
-      <article className="prose-legal space-y-5 text-sm leading-relaxed text-ink">
+      {/* Bleibt bewusst Deutsch (Rechtsseite) — dir="ltr" fest, unabhängig von der App-Locale. */}
+      <article dir="ltr" className="prose-legal space-y-5 text-start text-sm leading-relaxed text-ink">
         <h1 className="font-display text-2xl font-semibold">Impressum</h1>
 
         {ANBIETER_UNVOLLSTAENDIG && (

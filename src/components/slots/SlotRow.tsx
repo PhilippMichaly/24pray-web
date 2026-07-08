@@ -44,7 +44,7 @@ export function SlotRow({ slot, projectTz, onBook, onOpen, dayMode }: SlotRowPro
         past && 'opacity-40',
         pending && 'opacity-60',
         conflict && 'animate-shake border-danger',
-        now && 'border-l-[3px] border-l-gold',
+        now && 'border-s-[3px] border-s-gold',
         clickable && 'cursor-pointer hover:shadow-1',
       )}
       onClick={clickable ? onOpen : undefined}
@@ -53,7 +53,12 @@ export function SlotRow({ slot, projectTz, onBook, onOpen, dayMode }: SlotRowPro
       <span className={cn('flex shrink-0 items-center gap-1 text-sm tnum text-ink', dayMode ? 'w-20' : 'w-16')}>
         {!dayMode && slot.isNight && <Moon size={13} className="text-night" aria-hidden />}
         {now && <Flame size={13} className="animate-breathe text-gold" aria-hidden />}
-        {dayMode ? formatShortWeekdayDate(slot.startTime, projectTz) : formatSlotRange(slot.startTime, slot.endTime, projectTz)}
+        {dayMode ? (
+          formatShortWeekdayDate(slot.startTime, projectTz)
+        ) : (
+          // Roher Stunden-Bereich ("07–08") bleibt in RTL-Locales visuell LTR-isoliert.
+          <span dir="ltr">{formatSlotRange(slot.startTime, slot.endTime, projectTz)}</span>
+        )}
       </span>
 
       {/* Mitte */}

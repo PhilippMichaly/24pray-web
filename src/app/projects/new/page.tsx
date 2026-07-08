@@ -119,7 +119,7 @@ export default function NewProjectPage() {
     <AppShell>
       <div className="mb-6 flex items-center gap-2">
         <h1 className="font-display text-2xl font-semibold text-ink">{t('newProjectTitle')}</h1>
-        <span className="ml-auto text-sm tnum text-ink-muted">{step}/2</span>
+        <span className="ms-auto text-sm tnum text-ink-muted">{step}/2</span>
       </div>
 
       <Card elevation={1}>
@@ -172,7 +172,7 @@ export default function NewProjectPage() {
                       type="button"
                       onClick={() => selectUnit(value)}
                       className={cn(
-                        'flex items-start gap-2 rounded-md border px-3 py-3 text-left transition-colors',
+                        'flex items-start gap-2 rounded-md border px-3 py-3 text-start transition-colors',
                         active ? 'border-accent bg-accent-soft' : 'bg-surface hover:bg-surface-sunken',
                       )}
                     >
@@ -181,7 +181,7 @@ export default function NewProjectPage() {
                         <span className="block text-sm text-ink">{t(labelKey)}</span>
                         <span className="block text-xs text-ink-muted">{t(descKey)}</span>
                       </span>
-                      {active && <Check size={16} className="ml-auto shrink-0 text-accent-strong" aria-hidden />}
+                      {active && <Check size={16} className="ms-auto shrink-0 text-accent-strong" aria-hidden />}
                     </button>
                   );
                 })}
@@ -229,7 +229,7 @@ export default function NewProjectPage() {
                       type="button"
                       onClick={() => setVisibility(v)}
                       className={cn(
-                        'flex items-start gap-2 rounded-md border px-3 py-3 text-left transition-colors',
+                        'flex items-start gap-2 rounded-md border px-3 py-3 text-start transition-colors',
                         active ? 'border-accent bg-accent-soft' : 'bg-surface hover:bg-surface-sunken',
                       )}
                     >
@@ -237,7 +237,7 @@ export default function NewProjectPage() {
                       <span className="text-sm text-ink">
                         {v === 'PRIVATE' ? t('visibilityPrivate') : t('visibilityPublic')}
                       </span>
-                      {active && <Check size={16} className="ml-auto text-accent-strong" aria-hidden />}
+                      {active && <Check size={16} className="ms-auto text-accent-strong" aria-hidden />}
                     </button>
                   );
                 })}
@@ -313,7 +313,7 @@ export default function NewProjectPage() {
               <Button type="button" variant="ghost" onClick={() => setStep(1)}>
                 {t('stepBack')}
               </Button>
-              <Button type="submit" loading={submitting} className="ml-auto">
+              <Button type="submit" loading={submitting} className="ms-auto">
                 {submitting ? t('creating') : t('createProject')}
               </Button>
             </div>

@@ -90,7 +90,7 @@ export function RequestsFeed({ projectId, projectTz, isLoggedIn, isOrganizer, in
               <div className="flex items-center gap-2">
                 <Avatar name={r.authorName} size="sm" />
                 <span className="text-sm font-medium text-ink">{r.authorName ?? '—'}</span>
-                <span className="ml-auto text-xs text-ink-muted">
+                <span className="ms-auto text-xs text-ink-muted">
                   {formatDayHeader(r.createdAt, projectTz)}
                 </span>
               </div>

@@ -96,11 +96,11 @@ export function CityInput({ id, initialName, placeholder, onSelect, compact }: C
                   e.preventDefault(); // vor onBlur greifen
                   choose(c);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ink hover:bg-accent-soft/50"
+                className="flex w-full items-center gap-2 px-3 py-2 text-start text-sm text-ink hover:bg-accent-soft/50"
               >
                 <MapPin size={13} className="shrink-0 text-accent-strong" aria-hidden />
                 <span className="truncate">{c.name}</span>
-                {c.country && <span className="ml-auto shrink-0 text-xs text-ink-muted">{c.country}</span>}
+                {c.country && <span className="ms-auto shrink-0 text-xs text-ink-muted">{c.country}</span>}
               </button>
             </li>
           ))}

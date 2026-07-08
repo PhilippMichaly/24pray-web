@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, Fragment, useContext, useEffect, useState } from 'react';
-import { detectLocale, getLocale, persistLocale, setLocale, type Locale } from './i18n';
+import { detectLocale, getLocale, isRtl, persistLocale, setLocale, type Locale } from './i18n';
 
 interface LocaleCtx {
   locale: Locale;
@@ -22,6 +22,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     setLocale(detected);
     setState(detected);
     document.documentElement.lang = detected;
+    document.documentElement.dir = isRtl(detected) ? 'rtl' : 'ltr';
   }, []);
 
   const switchLocale = (l: Locale) => {
@@ -29,6 +30,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     setLocale(l);
     setState(l);
     document.documentElement.lang = l;
+    document.documentElement.dir = isRtl(l) ? 'rtl' : 'ltr';
   };
 
   return (

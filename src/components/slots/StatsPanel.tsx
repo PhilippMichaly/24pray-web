@@ -72,7 +72,7 @@ export function StatsPanel({ projectId, invite, models, tz, dayMode = false }: S
           <tbody>
             {stats.perPerson.map((p, i) => (
               <tr key={`${p.name}-${i}`}>
-                <td className="py-1.5 pr-3 align-middle">
+                <td className="py-1.5 pe-3 align-middle">
                   <div className="flex items-center gap-3">
                     <Avatar name={p.name} size="sm" />
                     <span className="max-w-[9rem] truncate text-sm text-ink">{p.name ?? '—'}</span>
@@ -85,11 +85,14 @@ export function StatsPanel({ projectId, invite, models, tz, dayMode = false }: S
                         className="h-3 bg-accent"
                         style={{
                           width: `${Math.max(4, (p.hours / max) * 100)}%`,
-                          borderRadius: '0 4px 4px 0',
+                          // Logische Eck-Radien statt physischer (0 4px 4px 0): die Leiste rundet
+                          // immer die "inline-end"-Kante ab — rechts in LTR, links in RTL.
+                          borderStartEndRadius: 4,
+                          borderEndEndRadius: 4,
                         }}
                       />
                     </div>
-                    <span className="w-10 shrink-0 text-right text-sm tnum text-ink-muted">
+                    <span className="w-10 shrink-0 text-end text-sm tnum text-ink-muted">
                       {dayMode
                         ? displayUnits(p.hours, true) === 1
                           ? t('statsDaySingular')

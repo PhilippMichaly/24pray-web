@@ -11,6 +11,10 @@ export interface HourCoverageChartProps {
 
 const pad2 = (n: number) => n.toString().padStart(2, '0');
 const isNightIndex = (h: number) => h >= 22 || h < 6;
+// Bidi-Isolierung (LRI…PDI, U+2066/U+2069): der rohe Stunden-Bereich ("07–08") bleibt
+// visuell LTR-geordnet, auch wenn er in einen RTL-Satz (he/ar) interpoliert wird — ohne
+// die umgebende Übersetzung selbst in eine falsche Gesamtrichtung zu zwingen.
+const ltrIsolate = (s: string) => `⁦${s}⁩`;
 
 /** Farb-Slot (0..4) für einen Wert relativ zum Tagesmaximum. */
 function rampIndex(value: number, max: number): number {
@@ -29,7 +33,7 @@ export function HourCoverageChart({ hours }: HourCoverageChartProps) {
         {hours.map((count, h) => {
           const idx = rampIndex(count, max);
           const heightPct = max > 0 ? Math.max(count > 0 ? 6 : 0, (count / max) * 100) : 0;
-          const range = `${pad2(h)}–${pad2((h + 1) % 24)}`;
+          const range = ltrIsolate(`${pad2(h)}–${pad2((h + 1) % 24)}`);
           return (
             <Tooltip
               key={h}

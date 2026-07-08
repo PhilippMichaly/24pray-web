@@ -29,9 +29,27 @@ describe('Locale-Erkennung + Umschaltung', () => {
     langMock('de-AT');
     expect(detectLocale()).toBe('de');
     langMock('fr-FR');
-    expect(detectLocale()).toBe('en'); // Fallback für Nicht-Deutsch: Englisch
+    expect(detectLocale()).toBe('en'); // Fallback für unbekannte Sprachen: Englisch
     localStorage.setItem('24pray:locale', 'de');
     expect(detectLocale()).toBe('de'); // manuelle Wahl schlägt Browser-Sprache
+  });
+
+  it('detectLocale: es/he/ar-Browsersprachen werden erkannt', () => {
+    langMock('es-MX');
+    expect(detectLocale()).toBe('es');
+    langMock('he-IL');
+    expect(detectLocale()).toBe('he');
+    langMock('ar-EG');
+    expect(detectLocale()).toBe('ar');
+  });
+
+  it('t() liefert für es/he/ar den jeweiligen Katalog (Katalog-Vollständigkeit via Typ erzwungen)', () => {
+    setLocale('es');
+    expect(t('cancel')).toBe('Cancelar');
+    setLocale('he');
+    expect(t('cancel')).toBe('ביטול');
+    setLocale('ar');
+    expect(t('cancel')).toBe('إلغاء');
   });
 
   it('LocaleProvider wendet die erkannte Sprache nach Mount an und Umschalten persistiert', async () => {
@@ -67,5 +85,36 @@ describe('Locale-Erkennung + Umschaltung', () => {
     expect(screen.getByTestId('pure').textContent).toBe('Abbrechen'); // Nicht-Consumer muss mitziehen
     expect(localStorage.getItem('24pray:locale')).toBe('de');
     expect(document.documentElement.lang).toBe('de');
+  });
+
+  it('RTL: Provider setzt dir="rtl" bei he/ar und zurück auf "ltr" bei de/en/es', async () => {
+    function Probe() {
+      const { locale, switchLocale } = useLocale();
+      return (
+        <div>
+          <span data-testid="loc">{locale}</span>
+          <button onClick={() => switchLocale('he')}>he</button>
+          <button onClick={() => switchLocale('ar')}>ar</button>
+          <button onClick={() => switchLocale('de')}>de</button>
+        </div>
+      );
+    }
+    langMock('de-DE');
+    render(
+      <LocaleProvider>
+        <Probe />
+      </LocaleProvider>,
+    );
+    await waitFor(() => expect(screen.getByTestId('loc').textContent).toBe('de'));
+    expect(document.documentElement.dir).toBe('ltr');
+
+    fireEvent.click(screen.getByRole('button', { name: 'he' }));
+    await waitFor(() => expect(document.documentElement.dir).toBe('rtl'));
+
+    fireEvent.click(screen.getByRole('button', { name: 'ar' }));
+    await waitFor(() => expect(document.documentElement.dir).toBe('rtl'));
+
+    fireEvent.click(screen.getByRole('button', { name: 'de' }));
+    await waitFor(() => expect(document.documentElement.dir).toBe('ltr'));
   });
 });

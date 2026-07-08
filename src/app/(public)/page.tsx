@@ -33,7 +33,7 @@ function PrayOption({
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-4 rounded-md border bg-surface px-4 py-4 text-left transition-colors hover:border-accent hover:bg-accent-soft/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+      className="flex w-full items-center gap-4 rounded-md border bg-surface px-4 py-4 text-start transition-colors hover:border-accent hover:bg-accent-soft/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
     >
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
         <Icon size={22} aria-hidden />

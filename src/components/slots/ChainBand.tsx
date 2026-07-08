@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils';
 import { formatSlotRange, formatShortWeekdayDate } from '@/lib/time';
 import { Tooltip } from '@/components/ui/Tooltip';
-import { t } from '@/lib/i18n';
+import { t, intlLocale } from '@/lib/i18n';
 import type { SlotCellState, SlotViewModel } from './types';
 
 export interface ChainBandProps {
@@ -39,8 +39,9 @@ function cellClass(state: SlotCellState): string {
   }
 }
 
+// War früher hart auf 'de-DE' verdrahtet (Bug, unabhängig von der aktiven Locale) — jetzt lokalisiert.
 const shortWeekday = (iso: string, tz: string) =>
-  new Intl.DateTimeFormat('de-DE', { timeZone: tz, weekday: 'short' }).format(new Date(iso));
+  new Intl.DateTimeFormat(intlLocale(), { timeZone: tz, weekday: 'short' }).format(new Date(iso));
 
 export function ChainBand({ days, projectTz, onCellActivate, interactiveTooltip, dayMode }: ChainBandProps) {
   return (
@@ -50,7 +51,7 @@ export function ChainBand({ days, projectTz, onCellActivate, interactiveTooltip,
         const rowLabel = dayMode ? `W${rowIndex + 1}` : shortWeekday(row.slots[0].startTime, projectTz);
         return (
           <div key={row.key} className="flex items-center gap-2">
-            <span className="w-8 shrink-0 text-right text-xs tnum text-ink-muted">{rowLabel}</span>
+            <span className="w-8 shrink-0 text-end text-xs tnum text-ink-muted">{rowLabel}</span>
             <div className={cn('grid flex-1 gap-[2px]', dayMode ? 'grid-cols-7' : 'grid-cols-24')}>
               {row.slots.map((slot) => {
                 const now = slot.state.startsWith('NOW_');
@@ -80,7 +81,9 @@ export function ChainBand({ days, projectTz, onCellActivate, interactiveTooltip,
                     key={slot.key}
                     content={
                       <span className="tnum">
-                        {label}
+                        {/* Roher Stunden-Bereich ("07–08") bleibt in RTL-Locales visuell LTR-isoliert
+                            (dayMode-Label ist bereits über Intl(locale) lokalisiert formatiert). */}
+                        <span dir={dayMode ? undefined : 'ltr'}>{label}</span>
                         {slot.userName ? ` · ${slot.isMine ? t('you') : slot.userName}` : ` · ${t('free')}`}
                       </span>
                     }

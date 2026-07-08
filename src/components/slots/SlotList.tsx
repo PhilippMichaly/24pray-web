@@ -34,7 +34,7 @@ function PastFoldRow({ count, dayMode }: { count: number; dayMode: boolean }) {
 /** Dezente Kopfzeile am Beginn der größten Lücke — erscheint genau einmal (P1). */
 function GapRangeHeader({ count, dayMode }: { count: number; dayMode: boolean }) {
   return (
-    <li className="flex items-center gap-2 border-l-2 border-gold py-1 pl-3 text-xs font-medium text-ink-muted">
+    <li className="flex items-center gap-2 border-s-2 border-gold py-1 ps-3 text-xs font-medium text-ink-muted">
       <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold" aria-hidden />
       {tUnit(dayMode, 'gapRangeHeader', 'gapRangeHeaderDays', { n: count })}
     </li>

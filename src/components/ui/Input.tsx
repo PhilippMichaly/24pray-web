@@ -47,7 +47,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     <select
       ref={ref}
       aria-invalid={invalid || undefined}
-      className={cn(base, 'appearance-none pr-10', invalid && 'border-danger', className)}
+      className={cn(base, 'appearance-none pe-10', invalid && 'border-danger', className)}
       {...props}
     >
       {children}

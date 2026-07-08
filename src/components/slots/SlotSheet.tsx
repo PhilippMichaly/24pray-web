@@ -194,8 +194,13 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
     <div className="flex items-center gap-2 text-sm tnum text-ink">
       {slot.isNight && <Moon size={14} className="text-night" aria-hidden />}
       <span>
-        {times.project} {t('oclock')}
-        {times.differs && <span className="text-ink-muted"> · {t('atYou')} {times.local}</span>}
+        <span dir="ltr">{times.project}</span> {t('oclock')}
+        {times.differs && (
+          <span className="text-ink-muted">
+            {' '}
+            · {t('atYou')} <span dir="ltr">{times.local}</span>
+          </span>
+        )}
       </span>
     </div>
   );

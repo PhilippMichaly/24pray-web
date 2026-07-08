@@ -34,7 +34,7 @@ export function NextSlotCard({ slot, projectTimezone, now = Date.now(), dayMode 
             ) : (
               <>
                 {formatDayHeader(slot.startTime, projectTimezone)},{' '}
-                {formatSlotRange(slot.startTime, slot.endTime, projectTimezone)} {t('oclock')}
+                <span dir="ltr">{formatSlotRange(slot.startTime, slot.endTime, projectTimezone)}</span> {t('oclock')}
               </>
             )}
           </p>

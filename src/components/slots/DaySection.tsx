@@ -21,7 +21,7 @@ export function DaySection({ dateLabel, dayProgress, defaultCollapsed, headerOve
       <button
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="sticky top-16 z-10 -mx-4 flex w-[calc(100%+2rem)] items-center gap-2 bg-bg/85 px-4 py-2 text-left backdrop-blur focus-visible:outline-none"
+        className="sticky top-16 z-10 -mx-4 flex w-[calc(100%+2rem)] items-center gap-2 bg-bg/85 px-4 py-2 text-start backdrop-blur focus-visible:outline-none"
       >
         <ChevronDown
           size={16}
@@ -37,7 +37,7 @@ export function DaySection({ dateLabel, dayProgress, defaultCollapsed, headerOve
                 mehrwortigen Labels mit Kleinschreibung mittendrin (z. B. „Woche vom 14. Juli",
                 Tages-Modus-Wochenüberschrift) fälschlich „Woche Vom …" erzeugen. */}
             <span className="text-sm font-medium text-ink">{dateLabel}</span>
-            <span className="ml-auto text-xs tnum text-ink-muted">
+            <span className="ms-auto text-xs tnum text-ink-muted">
               {t('dayHeldCount', { held: dayProgress.booked, total: dayProgress.total })}
             </span>
           </>

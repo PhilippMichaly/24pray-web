@@ -133,7 +133,8 @@
   body {
     background-color: hsl(var(--bg));
     color: hsl(var(--ink));
-    font-family: var(--font-sans), system-ui, sans-serif;
+    font-family: var(--font-sans), "Noto Sans Hebrew", "Noto Sans Arabic", "Arial Hebrew", "Geeza Pro", Tahoma,
+      "Segoe UI", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     font-feature-settings: "cv11";
   }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { MailCheck } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
@@ -12,11 +13,29 @@ import { Brand } from '@/components/patterns/Brand';
 import { t } from '@/lib/i18n';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [devLoginUrl, setDevLoginUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [code, setCode] = useState('');
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeError, setCodeError] = useState('');
+
+  // Alternative zum Link: 6-stelliger Code aus der Mail (praktisch auf einem anderen Gerät).
+  const handleCodeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCodeLoading(true);
+    setCodeError('');
+    try {
+      await api.post('/auth/verify-code', { email, code });
+      router.push('/dashboard');
+    } catch (err) {
+      setCodeError((err as Error).message);
+      setCodeLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +70,27 @@ export default function LoginPage() {
               </Button>
             </div>
           )}
+
+          <form onSubmit={handleCodeSubmit} className="mt-6 border-t border-border pt-5 text-left">
+            <Label htmlFor="code">{t('codeLabel')}</Label>
+            <Input
+              id="code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="\d{6}"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="000000"
+              invalid={!!codeError}
+              className="tnum tracking-[0.3em]"
+            />
+            <p className="mt-1 text-xs text-ink-muted">{t('codeHint')}</p>
+            <FieldError>{codeError}</FieldError>
+            <Button type="submit" variant="secondary" loading={codeLoading} disabled={code.length !== 6} className="mt-3 w-full">
+              {t('codeSubmit')}
+            </Button>
+          </form>
         </Card>
       </CenterShell>
     );

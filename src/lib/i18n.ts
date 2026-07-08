@@ -53,6 +53,9 @@ const de = {
   // Dashboard
   yourProjects: 'Deine Gebetsketten',
   openChains: 'Offene Gebetsketten',
+  codeLabel: 'Code aus der E-Mail',
+  codeHint: 'Statt den Link zu klicken, kannst du den 6-stelligen Code aus der E-Mail hier eingeben — praktisch auf einem anderen Gerät.',
+  codeSubmit: 'Mit Code anmelden',
   maskNamesLabel: 'Namen für Außenstehende maskieren',
   maskNamesHint: 'Standard: Namen sind sichtbar — das schafft Verbindung. Aktivieren, wenn Betende anonym bleiben sollen („Ruth K.").',
   openChainsHint: 'Zum Mitbeten brauchst du kein Konto — öffne eine Kette und übernimm eine Stunde.',
@@ -239,6 +242,9 @@ const en: Record<keyof typeof de, string> = {
 
   yourProjects: 'Your prayer chains',
   openChains: 'Open prayer chains',
+  codeLabel: 'Code from the email',
+  codeHint: 'Instead of clicking the link, enter the 6-digit code from the email here — handy on another device.',
+  codeSubmit: 'Sign in with code',
   maskNamesLabel: 'Mask names for outside viewers',
   maskNamesHint: 'Default: names are visible — it builds connection. Enable if intercessors should stay anonymous (“Ruth K.”).',
   openChainsHint: 'No account needed to join — open a chain and take an hour.',

@@ -5,7 +5,7 @@ import { create } from 'zustand';
 import type { ProjectWithStats, SlotView } from '@/types';
 import { getSlotGrid, bookSlot, cancelSlot } from '@/lib/api';
 import { toast } from '@/components/ui/toast-store';
-import { buildViewModels, groupByDay, bookedCount } from './logic';
+import { buildViewModels, groupByDay, groupByWeek, bookedCount, isDayMode } from './logic';
 import { myCityPayload } from '@/lib/mylocation';
 import { t } from '@/lib/i18n';
 
@@ -70,11 +70,16 @@ export function useSlotGrid(
   }, [reload]);
 
   const tz = project?.timezone ?? 'UTC';
+  const dayMode = isDayMode(project?.slotDurationMinutes ?? 60);
   const { models, gap } = useMemo(
-    () => buildViewModels(slots, { now, projectTz: tz, pendingKeys, conflictKey }),
-    [slots, now, tz, pendingKeys, conflictKey],
+    () => buildViewModels(slots, { now, projectTz: tz, pendingKeys, conflictKey, dayMode }),
+    [slots, now, tz, pendingKeys, conflictKey, dayMode],
   );
-  const days = useMemo(() => groupByDay(models, tz), [models, tz]);
+  // Tages-Modus: Wochen- statt Tages-Gruppen (die Zeile IST bereits der Tag, siehe SlotList).
+  const days = useMemo(
+    () => (dayMode ? groupByWeek(models) : groupByDay(models, tz)),
+    [dayMode, models, tz],
+  );
   const booked = bookedCount(models);
 
   /** Storno (eingeloggt eigener Slot, via Undo, Gast mit Token oder Organisator — F2). */
@@ -148,6 +153,7 @@ export function useSlotGrid(
     error,
     now,
     tz,
+    dayMode,
     currentUserId,
     reload,
     bookOptimistic,

@@ -80,3 +80,42 @@ describe('SlotSheet info-Modus — Storno für Gast und Organisator (F2)', () =>
     expect(screen.queryByRole('button', { name: 'Buchung entfernen' })).toBeNull();
   });
 });
+
+describe('SlotSheet Tages-Modus (dayMode, P3) — Titel/Zeitanzeige/Storno-Texte sagen Tag statt Stunde', () => {
+  const dayProject = { ...project, slotDurationMinutes: 1440 } as ProjectWithStats;
+  const daySlot: SlotViewModel = {
+    ...bookedSlot,
+    startTime: '2099-01-01T14:00:00.000Z',
+    endTime: '2099-01-02T14:00:00.000Z',
+  };
+
+  beforeEach(() => {
+    cleanup();
+    localStorage.clear();
+  });
+
+  it('info-Modus: Titel "Dieser Tag", Zeitanzeige zeigt ein Datum, kein "Uhr"-Suffix', () => {
+    renderSheet({ project: dayProject, slot: daySlot });
+    expect(screen.getByText('Dieser Tag')).toBeTruthy();
+    expect(screen.queryByText(/Uhr/)).toBeNull();
+    expect(screen.queryByText(/\d{2}–\d{2}/)).toBeNull();
+  });
+
+  it('mine-Modus: Titel "Dein Tag", Storno-Button sagt "Tag freigeben"', () => {
+    renderSheet({ project: dayProject, slot: { ...daySlot, isMine: true, state: 'MINE' }, mode: 'mine' });
+    expect(screen.getByText('Dein Tag')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Tag freigeben' })).toBeTruthy();
+  });
+
+  it('info-Modus Organisator: "Buchung entfernen" -> Bestätigung sagt "Tag wird wieder frei"', async () => {
+    const onCancel = vi.fn().mockResolvedValue(undefined);
+    renderSheet({ project: dayProject, slot: daySlot, isOrganizer: true, onCancel });
+    fireEvent.click(screen.getByRole('button', { name: 'Buchung entfernen' }));
+    expect(screen.getByText(/Der Tag wird wieder frei/)).toBeTruthy();
+  });
+
+  it('guest-book-Modus: Titel sagt "Tag übernehmen"', () => {
+    renderSheet({ project: dayProject, slot: { ...daySlot, status: 'FREE', slotId: null }, mode: 'guest-book' });
+    expect(screen.getByText('Tag übernehmen')).toBeTruthy();
+  });
+});

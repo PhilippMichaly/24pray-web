@@ -74,8 +74,8 @@ export default function DatenschutzPage() {
 
         <H2>6. Sichtbarkeit von Namen</H2>
         <p>
-          In einer Gebetswache ist der eingetragene Name für andere Betrachter der Wache sichtbar —
-          bei öffentlichen Wachen für alle, bei privaten nur für Personen mit Einladungslink.
+          In einer Gebetswache ist der eingetragene Name für andere Betrachter der Gebetswache sichtbar —
+          bei öffentlichen Gebetswachen für alle, bei privaten nur für Personen mit Einladungslink.
           Organisatorinnen und Organisatoren können beim Anlegen einer Gebetswache die Maskierung
           aktivieren ({'„Namen für Außenstehende maskieren“'}); dann sehen nicht angemeldete Besucher
           nur eine Kurzform (z.&nbsp;B. {'„Ruth K.“'}). Auf der Weltkugel der Startseite erscheinen

@@ -21,7 +21,7 @@ describe('ProjectDangerZone — wk-Wache löschen (Ersteller-Lebenszyklus)', () 
     render(<ProjectDangerZone projectId="p1" />);
 
     expect(screen.getByText(/informiert.*rückgängig|notified.*undone/i)).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: /Wache löschen|Delete watch/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache löschen|Delete prayer watch/i }));
 
     await waitFor(() => expect(screen.getByText(/Bist du sicher|Are you sure/i)).toBeTruthy());
 
@@ -33,7 +33,7 @@ describe('ProjectDangerZone — wk-Wache löschen (Ersteller-Lebenszyklus)', () 
 
   it('Abbrechen im Bestätigungs-Schritt löscht nicht', () => {
     render(<ProjectDangerZone projectId="p1" />);
-    fireEvent.click(screen.getByRole('button', { name: /Wache löschen|Delete watch/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache löschen|Delete prayer watch/i }));
     fireEvent.click(screen.getByRole('button', { name: /Abbrechen|Cancel/i }));
     expect(deleteProject).not.toHaveBeenCalled();
   });

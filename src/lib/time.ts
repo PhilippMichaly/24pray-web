@@ -56,6 +56,23 @@ export function dayKey(dateISO: string, projectTz: string): string {
   return `${get('year')}-${get('month')}-${get('day')}`;
 }
 
+/** „14. Juli" — Datum ohne Wochentag, für Tages-Modus-Wochenüberschriften. */
+export function formatDateShort(dateISO: string, projectTz: string): string {
+  return new Intl.DateTimeFormat(intlLocale(), { timeZone: projectTz, day: 'numeric', month: 'long' }).format(
+    new Date(dateISO),
+  );
+}
+
+/** „Mo 14.7." — Kurzform Wochentag+Datum, für Tages-Modus-Zeilen/-Zellen (Tages-Wachen). */
+export function formatShortWeekdayDate(dateISO: string, projectTz: string): string {
+  return new Intl.DateTimeFormat(intlLocale(), {
+    timeZone: projectTz,
+    weekday: 'short',
+    day: 'numeric',
+    month: 'numeric',
+  }).format(new Date(dateISO));
+}
+
 /** Nachtstunde? 22:00–05:59 (inklusive) in Projekt-Zeitzone. */
 export function isNightHour(startISO: string, projectTz: string): boolean {
   const h = hourInTz(startISO, projectTz);
@@ -95,9 +112,19 @@ export function buildIcs(slot: {
   startTime: string;
   endTime: string;
   title: string;
+  // Tages-Wache (slotDurationMinutes=1440): Ganztagestermin statt Uhrzeit-Termin.
+  allDay?: boolean;
+  projectTz?: string; // für die Ganztages-Datumsgrenze — Default UTC
 }): string {
   const uid = `${icsStamp(slot.startTime)}-${Math.abs(hashStr(slot.title))}@24pray`;
   const esc = (s: string) => s.replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
+  const tz = slot.projectTz ?? 'UTC';
+  const dtstart = slot.allDay
+    ? `DTSTART;VALUE=DATE:${dayKey(slot.startTime, tz).replace(/-/g, '')}`
+    : `DTSTART:${icsStamp(slot.startTime)}`;
+  const dtend = slot.allDay
+    ? `DTEND;VALUE=DATE:${dayKey(slot.endTime, tz).replace(/-/g, '')}`
+    : `DTEND:${icsStamp(slot.endTime)}`;
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -105,8 +132,8 @@ export function buildIcs(slot: {
     'BEGIN:VEVENT',
     `UID:${uid}`,
     `DTSTAMP:${icsStamp(slot.startTime)}`,
-    `DTSTART:${icsStamp(slot.startTime)}`,
-    `DTEND:${icsStamp(slot.endTime)}`,
+    dtstart,
+    dtend,
     `SUMMARY:${esc(slot.title)}`,
     'END:VEVENT',
     'END:VCALENDAR',

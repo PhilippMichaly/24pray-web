@@ -14,7 +14,8 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
 import { CenterShell } from '@/components/patterns/CenterShell';
 import { Brand } from '@/components/patterns/Brand';
-import { t } from '@/lib/i18n';
+import { t, tUnit } from '@/lib/i18n';
+import { isDayMode } from '@/components/slots/logic';
 
 export default function JoinPage() {
   const { token } = useParams<{ token: string }>();
@@ -61,7 +62,10 @@ export default function JoinPage() {
 
             <div className="mx-auto mt-5 max-w-[300px]">
               <p className="mb-2 text-sm text-ink-muted tnum">
-                {t('slotsBookedOf', { booked: project.bookedSlots, total: project.totalSlots })}
+                {tUnit(isDayMode(project.slotDurationMinutes), 'slotsBookedOf', 'heldOfDays', {
+                  booked: project.bookedSlots,
+                  total: project.totalSlots,
+                })}
               </p>
               <Progress value={project.bookedSlots} max={project.totalSlots} />
             </div>

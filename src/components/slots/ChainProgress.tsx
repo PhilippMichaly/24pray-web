@@ -2,16 +2,18 @@
 
 import { ArrowRight } from 'lucide-react';
 import { Progress } from '@/components/ui/Progress';
-import { t } from '@/lib/i18n';
+import { t, tUnit } from '@/lib/i18n';
 
 export interface ChainProgressProps {
   booked: number;
   total: number;
   largestGap?: { label: string; startTime: string } | null;
   onGapClick?: (startTime: string) => void;
+  /** Tages-Wache (slotDurationMinutes=1440): Texte sagen Tage statt Stunden. */
+  dayMode?: boolean;
 }
 
-export function ChainProgress({ booked, total, largestGap, onGapClick }: ChainProgressProps) {
+export function ChainProgress({ booked, total, largestGap, onGapClick, dayMode }: ChainProgressProps) {
   const complete = total > 0 && booked >= total;
 
   return (
@@ -22,7 +24,7 @@ export function ChainProgress({ booked, total, largestGap, onGapClick }: ChainPr
         ) : (
           <>
             <span className="font-semibold text-accent-strong">{booked}</span>{' '}
-            {t('slotsBookedOfRest', { total })}
+            {tUnit(!!dayMode, 'slotsBookedOfRest', 'slotsBookedOfRestDays', { total })}
           </>
         )}
       </p>
@@ -31,7 +33,7 @@ export function ChainProgress({ booked, total, largestGap, onGapClick }: ChainPr
         segmented
         value={booked}
         max={total}
-        aria-label={t('slotsBookedOf', { booked, total })}
+        aria-label={tUnit(!!dayMode, 'slotsBookedOf', 'heldOfDays', { booked, total })}
       />
       {!complete && largestGap && (
         <button

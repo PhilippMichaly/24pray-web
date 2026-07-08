@@ -7,11 +7,11 @@ import { CalendarPlus, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label, FieldError } from '@/components/ui/Label';
-import { formatDualTz, buildIcs } from '@/lib/time';
+import { formatDualTz, buildIcs, formatDayHeader } from '@/lib/time';
 import { CityInput } from '@/components/patterns/CityInput';
 import { setMyCity, getMyCity } from '@/lib/mylocation';
 import type { GeoCity } from '@/lib/api';
-import { t } from '@/lib/i18n';
+import { t, tUnit } from '@/lib/i18n';
 import type { SlotViewModel } from './types';
 
 const GuestSchema = z.object({
@@ -23,6 +23,8 @@ export interface GuestBookingFormProps {
   slot: SlotViewModel;
   projectTitle: string;
   projectTz: string;
+  /** Tages-Wache (slotDurationMinutes=1440): Ganztages-ICS + Tages-Texte statt Stunden. */
+  dayMode?: boolean;
   onSubmit: (data: {
     guestName: string;
     guestEmail: string;
@@ -31,7 +33,7 @@ export interface GuestBookingFormProps {
   }) => Promise<{ guestToken: string }>;
 }
 
-export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: GuestBookingFormProps) {
+export function GuestBookingForm({ slot, projectTitle, projectTz, dayMode, onSubmit }: GuestBookingFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [city, setCity] = useState<GeoCity | null>(() => getMyCity());
@@ -42,7 +44,13 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: Gu
   const times = formatDualTz(slot.startTime, slot.endTime, projectTz);
 
   function downloadIcs() {
-    const ics = buildIcs({ startTime: slot.startTime, endTime: slot.endTime, title: projectTitle });
+    const ics = buildIcs({
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+      title: projectTitle,
+      allDay: dayMode,
+      projectTz,
+    });
     const blob = new Blob([ics], { type: 'text/calendar' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -88,8 +96,14 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: Gu
         </span>
         <p className="font-display text-lg font-semibold text-ink">{t('guestBookedTitle')}</p>
         <p className="mt-1 text-sm text-ink-muted tnum">
-          {times.project} {t('oclock')}
-          {times.differs && ` · ${t('atYou')} ${times.local}`}
+          {dayMode ? (
+            formatDayHeader(slot.startTime, projectTz)
+          ) : (
+            <>
+              {times.project} {t('oclock')}
+              {times.differs && ` · ${t('atYou')} ${times.local}`}
+            </>
+          )}
         </p>
         <Button variant="secondary" icon={CalendarPlus} className="mt-4 w-full" onClick={downloadIcs}>
           {t('addToCalendar')}
@@ -107,8 +121,14 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: Gu
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="rounded-md bg-surface-sunken px-3 py-2 text-sm tnum text-ink">
-        {times.project} {t('oclock')}
-        {times.differs && <span className="text-ink-muted"> · {t('atYou')} {times.local}</span>}
+        {dayMode ? (
+          formatDayHeader(slot.startTime, projectTz)
+        ) : (
+          <>
+            {times.project} {t('oclock')}
+            {times.differs && <span className="text-ink-muted"> · {t('atYou')} {times.local}</span>}
+          </>
+        )}
       </div>
       <div>
         <Label htmlFor="guestName">{t('name')}</Label>
@@ -149,7 +169,7 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, onSubmit }: Gu
         .
       </p>
       <Button type="submit" loading={loading} className="w-full">
-        {t('takeThisHour')}
+        {tUnit(!!dayMode, 'takeThisHour', 'takeThisDay')}
       </Button>
     </form>
   );

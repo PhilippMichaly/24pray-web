@@ -8,9 +8,12 @@ import {
   dayCollapseState,
   leadingPastCount,
   coverageByHour,
+  isDayMode,
+  groupByWeek,
+  displayUnits,
 } from './logic';
 import type { SlotView } from '@/types';
-import type { DerivationContext } from './types';
+import type { DerivationContext, SlotViewModel } from './types';
 
 const TZ = 'UTC';
 // Fester „now": 2026-07-06T05:30Z → laufende Stunde = 05:00–06:00
@@ -257,5 +260,88 @@ describe('coverageByHour — Tagesstunden-Abdeckung für die „Wache über den 
     // Slot in der Vergangenheit — status bleibt BOOKED unabhängig vom abgeleiteten PAST-State.
     const models = [m('2020-01-01T09:00:00.000Z', 'BOOKED')];
     expect(coverageByHour(models, 'UTC')[9]).toBe(1);
+  });
+});
+
+describe('isDayMode — Tages-Wache vs. Stunden-Wache (slotDurationMinutes)', () => {
+  it('true nur für 1440 (ganzer Tag)', () => {
+    expect(isDayMode(1440)).toBe(true);
+  });
+  it('false für Stunden-Slots (60) und jeden anderen Wert', () => {
+    expect(isDayMode(60)).toBe(false);
+    expect(isDayMode(30)).toBe(false);
+  });
+});
+
+describe('groupByWeek — Wochen-Chunking für Tages-Modus-Zwischenüberschriften', () => {
+  function daySlot(dayOffset: number): SlotViewModel {
+    const start = new Date(Date.UTC(2026, 6, 1 + dayOffset)).toISOString();
+    const end = new Date(Date.UTC(2026, 6, 2 + dayOffset)).toISOString();
+    return {
+      key: start,
+      slotId: null,
+      startTime: start,
+      endTime: end,
+      isMine: false,
+      userName: null,
+      status: 'FREE',
+      isNight: false,
+      isLargestGap: false,
+      state: 'FREE',
+    };
+  }
+
+  it('chunkt in Blöcke von 7 Tagen, key = erster Slot des Blocks', () => {
+    const models = Array.from({ length: 10 }, (_, i) => daySlot(i));
+    const weeks = groupByWeek(models);
+    expect(weeks).toHaveLength(2);
+    expect(weeks[0].slots).toHaveLength(7);
+    expect(weeks[1].slots).toHaveLength(3);
+    expect(weeks[0].key).toBe(models[0].startTime);
+    expect(weeks[1].key).toBe(models[7].startTime);
+  });
+
+  it('ein einzelner Block bei <=7 Tagen', () => {
+    const models = Array.from({ length: 5 }, (_, i) => daySlot(i));
+    expect(groupByWeek(models)).toHaveLength(1);
+  });
+
+  it('leer bei leerer Liste', () => {
+    expect(groupByWeek([])).toHaveLength(0);
+  });
+});
+
+describe('displayUnits — Personen-Tabelle Stunden vs. Tage', () => {
+  it('gibt Stunden unverändert zurück, wenn nicht im Tages-Modus', () => {
+    expect(displayUnits(48, false)).toBe(48);
+  });
+  it('rechnet Stunden in Tage um (÷24), im Tages-Modus', () => {
+    expect(displayUnits(48, true)).toBe(2);
+    expect(displayUnits(36, true)).toBe(1.5);
+  });
+});
+
+describe('computeLargestGap — Tages-Modus-Label (Datum statt Uhrzeit)', () => {
+  function daySlot(dayOffset: number, over: Partial<SlotView> = {}): SlotView {
+    const start = new Date(Date.UTC(2026, 6, 1 + dayOffset)).toISOString();
+    const end = new Date(Date.UTC(2026, 6, 2 + dayOffset)).toISOString();
+    return { slotId: null, startTime: start, endTime: end, status: 'FREE', isMine: false, userName: null, ...over };
+  }
+
+  it('baut ein Datums-Label (kein Stunden-Bereich) für einen Ein-Tages-Lauf', () => {
+    const now = Date.parse('2026-06-25T00:00:00.000Z'); // vor der ganzen Wache
+    const slots = [daySlot(0, { status: 'BOOKED' }), daySlot(1), daySlot(2, { status: 'BOOKED' })];
+    const gap = computeLargestGap(slots, now, 'UTC', true);
+    expect(gap.keys.size).toBe(1);
+    expect(gap.label).not.toMatch(/\d{2}–\d{2}/); // kein Stunden-Bereich
+    expect(gap.label).toMatch(/\d/); // enthält ein Datum
+  });
+
+  it('baut ein Datums-Bereichs-Label für einen Mehr-Tages-Lauf', () => {
+    const now = Date.parse('2026-06-25T00:00:00.000Z');
+    const slots = [daySlot(0, { status: 'BOOKED' }), daySlot(1), daySlot(2), daySlot(3, { status: 'BOOKED' })];
+    const gap = computeLargestGap(slots, now, 'UTC', true);
+    expect(gap.keys.size).toBe(2);
+    expect(gap.label).toContain('–');
   });
 });

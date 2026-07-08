@@ -7,7 +7,8 @@ import { Badge, type BadgeProps } from '@/components/ui/Badge';
 import type { ProjectStatus, ProjectWithStats } from '@/types';
 import type { SlotViewModel } from '@/components/slots/types';
 import { formatDayHeader } from '@/lib/time';
-import { t } from '@/lib/i18n';
+import { t, tUnit } from '@/lib/i18n';
+import { isDayMode } from '@/components/slots/logic';
 
 const statusMeta: Record<ProjectStatus, { variant: BadgeProps['variant']; key: string }> = {
   DRAFT: { variant: 'neutral', key: 'status_DRAFT' },
@@ -55,7 +56,10 @@ export function ProjectCard({ project, models }: ProjectCardProps) {
           <p className="mt-1 line-clamp-2 text-sm text-ink-muted">{project.description}</p>
         )}
         <p className="mt-1 text-sm text-ink-muted tnum">
-          {t('slotsBookedOf', { booked: project.bookedSlots, total: project.totalSlots })}
+          {tUnit(isDayMode(project.slotDurationMinutes), 'slotsBookedOf', 'heldOfDays', {
+            booked: project.bookedSlots,
+            total: project.totalSlots,
+          })}
         </p>
         <p className="mt-0.5 text-xs text-ink-muted">{metaLine}</p>
         {showBand && (

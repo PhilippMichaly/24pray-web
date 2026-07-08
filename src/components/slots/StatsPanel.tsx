@@ -7,20 +7,22 @@ import type { ProjectStats } from '@/types';
 import { Avatar } from '@/components/ui/Avatar';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { t } from '@/lib/i18n';
+import { t, tUnit } from '@/lib/i18n';
 import { HourCoverageChart } from './HourCoverageChart';
-import { coverageByHour } from './logic';
+import { coverageByHour, displayUnits } from './logic';
 import type { SlotViewModel } from './types';
 
 export interface StatsPanelProps {
   projectId: string;
   invite?: string;
-  /** Für die „Wache über den Tag"-Ableitung (Stunden-Abdeckung, dataviz-Skill). */
+  /** Für die „Gebetswache über den Tag"-Ableitung (Stunden-Abdeckung, dataviz-Skill). */
   models: SlotViewModel[];
   tz: string;
+  /** Tages-Wache (slotDurationMinutes=1440): Tage statt Stunden anzeigen, kein Stunden-Chart. */
+  dayMode?: boolean;
 }
 
-export function StatsPanel({ projectId, invite, models, tz }: StatsPanelProps) {
+export function StatsPanel({ projectId, invite, models, tz, dayMode = false }: StatsPanelProps) {
   const [stats, setStats] = useState<ProjectStats | null>(null);
   const [error, setError] = useState(false);
 
@@ -33,21 +35,29 @@ export function StatsPanel({ projectId, invite, models, tz }: StatsPanelProps) {
   if (error) return <EmptyState icon={BarChart3} title={t('statsError')} />;
   if (!stats) return <Skeleton className="h-48 w-full" />;
   if (stats.perPerson.length === 0) {
-    return <EmptyState icon={BarChart3} title={t('noStatsTitle')} description={t('noStatsHint')} />;
+    return (
+      <EmptyState
+        icon={BarChart3}
+        title={t('noStatsTitle')}
+        description={tUnit(dayMode, 'noStatsHint', 'noStatsHintDay')}
+      />
+    );
   }
 
   const max = Math.max(...stats.perPerson.map((p) => p.hours));
   const hourly = coverageByHour(models, tz);
+  const heroValue = displayUnits(stats.completedHours, dayMode);
 
   return (
     <div className="space-y-8">
       {/* Hero-Zahl — die eine Kennzahl, die diese Ansicht anführt. */}
       <div>
-        <p className="font-display text-4xl font-semibold text-accent-strong tnum">{stats.completedHours}</p>
-        <p className="mt-1 text-sm text-ink-muted">{t('statsHeroLabel')}</p>
+        <p className="font-display text-4xl font-semibold text-accent-strong tnum">{heroValue}</p>
+        <p className="mt-1 text-sm text-ink-muted">{tUnit(dayMode, 'statsHeroLabel', 'statsHeroLabelDay')}</p>
       </div>
 
-      <HourCoverageChart hours={hourly} />
+      {/* Tagesstunden-Chart ist im Tages-Modus sinnlos (jeder Slot ist bereits ein ganzer Tag) — YAGNI, ausgeblendet. */}
+      {!dayMode && <HourCoverageChart hours={hourly} />}
 
       <section aria-label={t('statsWhoTitle')}>
         <h3 className="text-sm font-semibold text-ink">{t('statsWhoTitle')}</h3>
@@ -56,7 +66,7 @@ export function StatsPanel({ projectId, invite, models, tz }: StatsPanelProps) {
           <thead className="sr-only">
             <tr>
               <th scope="col">{t('statsWhoColPerson')}</th>
-              <th scope="col">{t('statsWhoColHours')}</th>
+              <th scope="col">{tUnit(dayMode, 'statsWhoColHours', 'statsWhoColDays')}</th>
             </tr>
           </thead>
           <tbody>
@@ -80,7 +90,11 @@ export function StatsPanel({ projectId, invite, models, tz }: StatsPanelProps) {
                       />
                     </div>
                     <span className="w-10 shrink-0 text-right text-sm tnum text-ink-muted">
-                      {t('statsHours', { hours: p.hours })}
+                      {dayMode
+                        ? displayUnits(p.hours, true) === 1
+                          ? t('statsDaySingular')
+                          : t('statsDays', { days: displayUnits(p.hours, true) })
+                        : t('statsHours', { hours: p.hours })}
                     </span>
                   </div>
                 </td>

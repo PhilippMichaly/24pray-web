@@ -1,7 +1,12 @@
-import { isNightHour, dayKey, formatSlotRange, hourInTz } from '@/lib/time';
+import { isNightHour, dayKey, formatSlotRange, formatShortWeekdayDate, hourInTz } from '@/lib/time';
 import { intlLocale } from '@/lib/i18n';
 import type { SlotView } from '@/types';
 import type { DerivationContext, RawSlot, SlotCellState, SlotViewModel } from './types';
+
+/** Tages-Wache statt Stunden-Wache? Einzige gültige Alternative zu 60 ist 1440 (§ Advisor-Design). */
+export function isDayMode(slotDurationMinutes: number): boolean {
+  return slotDurationMinutes === 1440;
+}
 
 /** Zustands-Matrix (Spec §3.2). Reine Ableitung — testbar ohne React. */
 export function deriveSlotState(slot: RawSlot, ctx: DerivationContext): SlotCellState {
@@ -36,6 +41,7 @@ export function computeLargestGap(
   slots: SlotView[],
   now: number,
   projectTz: string,
+  dayMode = false,
 ): { keys: Set<string>; label: string | null; startTime: string | null } {
   let bestStart = -1;
   let bestLen = 0;
@@ -71,6 +77,16 @@ export function computeLargestGap(
   for (let i = bestStart; i < bestStart + bestLen; i++) keys.add(slots[i].startTime);
   const first = slots[bestStart];
   const last = slots[bestStart + bestLen - 1];
+
+  if (dayMode) {
+    // Tages-Modus: Datum statt Uhrzeit-Bereich — „Mo 14.7." (ein Tag) bzw. „Mo 14.7. – Mi 16.7." (mehrere).
+    const label =
+      bestLen === 1
+        ? formatShortWeekdayDate(first.startTime, projectTz)
+        : `${formatShortWeekdayDate(first.startTime, projectTz)} – ${formatShortWeekdayDate(last.startTime, projectTz)}`;
+    return { keys, label, startTime: first.startTime };
+  }
+
   const weekday = new Intl.DateTimeFormat(intlLocale(), { timeZone: projectTz, weekday: 'short' }).format(
     new Date(first.startTime),
   );
@@ -87,9 +103,9 @@ export function computeLargestGap(
 /** SlotView[] → SlotViewModel[] inkl. Zustand, Nacht-Flag, Lücken-Flag. */
 export function buildViewModels(
   slots: SlotView[],
-  opts: { now: number; projectTz: string; pendingKeys: Set<string>; conflictKey: string | null },
+  opts: { now: number; projectTz: string; pendingKeys: Set<string>; conflictKey: string | null; dayMode?: boolean },
 ): { models: SlotViewModel[]; gap: ReturnType<typeof computeLargestGap> } {
-  const gap = computeLargestGap(slots, opts.now, opts.projectTz);
+  const gap = computeLargestGap(slots, opts.now, opts.projectTz, opts.dayMode ?? false);
   const ctx: DerivationContext = {
     now: opts.now,
     projectTz: opts.projectTz,
@@ -198,4 +214,23 @@ export function leadingPastCount(models: SlotViewModel[]): number {
     n++;
   }
   return n;
+}
+
+/**
+ * Tages-Modus: Wochen-Chunking (7 Tages-Slots je Block) — Grundlage für die
+ * „Woche vom …"-Zwischenüberschriften + die Wochen-Kollaps-Logik (dayCollapseState
+ * ist generisch über eine Slot-Liste, also direkt auf einen Wochen-Chunk anwendbar).
+ */
+export function groupByWeek(models: SlotViewModel[]): { key: string; slots: SlotViewModel[] }[] {
+  const weeks: { key: string; slots: SlotViewModel[] }[] = [];
+  for (let i = 0; i < models.length; i += 7) {
+    const chunk = models.slice(i, i + 7);
+    weeks.push({ key: chunk[0].startTime, slots: chunk });
+  }
+  return weeks;
+}
+
+/** Anzeige-Menge für die Personen-Statistik-Tabelle: Stunden unverändert, im Tages-Modus in Tage (÷24). */
+export function displayUnits(hours: number, dayMode: boolean): number {
+  return dayMode ? hours / 24 : hours;
 }

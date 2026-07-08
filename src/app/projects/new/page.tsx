@@ -3,7 +3,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Globe, Lock, Check } from 'lucide-react';
+import { Globe, Lock, Check, Clock, CalendarDays } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/hooks/use-auth';
 import type { ProjectVisibility, ProjectWithStats } from '@/types';
@@ -20,11 +20,22 @@ import { CityInput } from '@/components/patterns/CityInput';
 import type { GeoCity } from '@/lib/api';
 import { t } from '@/lib/i18n';
 
-const DURATIONS = [
+type SplitUnit = 'hour' | 'day';
+
+const HOUR_DURATIONS = [
   { hours: 24, key: 'duration24' },
   { hours: 48, key: 'duration48' },
   { hours: 72, key: 'duration72' },
   { hours: 168, key: 'durationWeek' },
+] as const;
+
+// Tages-Wachen laufen typischerweise über Wochen — Presets in ganzen Wochen + 40 Tage
+// (Wert bleibt intern weiter „hours", da endDate = startDate + hours*3600_000 unverändert gilt).
+const DAY_DURATIONS = [
+  { hours: 168, key: 'durationWeek' },
+  { hours: 336, key: 'duration2Weeks' },
+  { hours: 672, key: 'duration4Weeks' },
+  { hours: 960, key: 'duration40Days' },
 ] as const;
 
 export default function NewProjectPage() {
@@ -35,6 +46,7 @@ export default function NewProjectPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
+  const [unit, setUnit] = useState<SplitUnit>('hour'); // Wählbare Aufteilung: Stunden oder ganze Tage
   const [hours, setHours] = useState<number>(48);
   const [visibility, setVisibility] = useState<ProjectVisibility>('PRIVATE');
   const [maskNames, setMaskNames] = useState(false); // Opt-in (§E5-Revision): Default Klartext
@@ -45,10 +57,18 @@ export default function NewProjectPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const tz = browserTz();
+  const durations = unit === 'day' ? DAY_DURATIONS : HOUR_DURATIONS;
+  const slotDurationMinutes = unit === 'day' ? 1440 : 60;
   const endIso = useMemo(() => {
     if (!startDate) return null;
     return new Date(new Date(startDate).getTime() + hours * 3600_000).toISOString();
   }, [startDate, hours]);
+
+  function selectUnit(next: SplitUnit) {
+    setUnit(next);
+    // Presets wechseln komplett (24h/48h/... vs. 1/2/4 Wochen/40 Tage) — erstes Preset der neuen Liste greifen.
+    setHours((next === 'day' ? DAY_DURATIONS : HOUR_DURATIONS)[0].hours);
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -64,6 +84,7 @@ export default function NewProjectPage() {
         startDate: start.toISOString(),
         endDate: new Date(start.getTime() + hours * 3600_000).toISOString(),
         timezone: tz,
+        slotDurationMinutes,
         visibility,
         maskNames,
         notifyOnBooking,
@@ -130,12 +151,47 @@ export default function NewProjectPage() {
             <div>
               <Label htmlFor="startDate">{t('fieldStart')}</Label>
               <Input id="startDate" type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+              {unit === 'day' && (
+                <p className="mt-1 text-xs text-ink-muted">
+                  {t('dayRunsHint', { start: startDate ? startDate.slice(11, 16) : '00:00' })}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <span className="mb-1.5 block text-sm font-medium text-ink-muted">{t('splitLabel')}</span>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {([
+                  ['hour', Clock, 'splitHours', 'splitHoursDesc'],
+                  ['day', CalendarDays, 'splitDays', 'splitDaysDesc'],
+                ] as const).map(([value, Icon, labelKey, descKey]) => {
+                  const active = unit === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => selectUnit(value)}
+                      className={cn(
+                        'flex items-start gap-2 rounded-md border px-3 py-3 text-left transition-colors',
+                        active ? 'border-accent bg-accent-soft' : 'bg-surface hover:bg-surface-sunken',
+                      )}
+                    >
+                      <Icon size={18} className={active ? 'text-accent-strong' : 'text-ink-muted'} aria-hidden />
+                      <span className="min-w-0">
+                        <span className="block text-sm text-ink">{t(labelKey)}</span>
+                        <span className="block text-xs text-ink-muted">{t(descKey)}</span>
+                      </span>
+                      {active && <Check size={16} className="ml-auto shrink-0 text-accent-strong" aria-hidden />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
               <Label htmlFor="dur">{t('durationLabel')}</Label>
               <div id="dur" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {DURATIONS.map((d) => (
+                {durations.map((d) => (
                   <button
                     key={d.hours}
                     type="button"
@@ -239,10 +295,15 @@ export default function NewProjectPage() {
 
             {startDate && endIso && (
               <div className="rounded-md bg-surface-sunken px-3 py-2 text-sm text-ink-muted tnum">
-                {t('summaryLine', {
-                  hours,
-                  start: formatDayHeader(new Date(startDate).toISOString(), tz),
-                })}
+                {unit === 'day'
+                  ? t('summaryLineDays', {
+                      days: hours / 24,
+                      start: formatDayHeader(new Date(startDate).toISOString(), tz),
+                    })
+                  : t('summaryLine', {
+                      hours,
+                      start: formatDayHeader(new Date(startDate).toISOString(), tz),
+                    })}
               </div>
             )}
 

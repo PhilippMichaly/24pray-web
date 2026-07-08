@@ -32,7 +32,11 @@ export function DaySection({ dateLabel, dayProgress, defaultCollapsed, headerOve
           <span className="text-sm font-medium text-ink">{headerOverride}</span>
         ) : (
           <>
-            <span className="text-sm font-medium capitalize text-ink">{dateLabel}</span>
+            {/* Kein CSS-„capitalize" hier: Intl liefert Wochentag/Monat in beiden Locales bereits
+                korrekt großgeschrieben zurück — ein blanket text-transform capitalize würde bei
+                mehrwortigen Labels mit Kleinschreibung mittendrin (z. B. „Woche vom 14. Juli",
+                Tages-Modus-Wochenüberschrift) fälschlich „Woche Vom …" erzeugen. */}
+            <span className="text-sm font-medium text-ink">{dateLabel}</span>
             <span className="ml-auto text-xs tnum text-ink-muted">
               {t('dayHeldCount', { held: dayProgress.booked, total: dayProgress.total })}
             </span>

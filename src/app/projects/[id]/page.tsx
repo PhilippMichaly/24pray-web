@@ -144,6 +144,7 @@ function ProjectPageInner() {
               total={grid.total}
               largestGap={grid.gap.label ? { label: grid.gap.label, startTime: grid.gap.startTime! } : null}
               onGapClick={scrollToSlot}
+              dayMode={grid.dayMode}
             />
             <div className="mt-3">
               <TimezoneHint projectTimezone={project.timezone} />
@@ -161,6 +162,7 @@ function ProjectPageInner() {
                 }}
                 projectTimezone={project.timezone}
                 now={grid.now}
+                dayMode={grid.dayMode}
               />
             </div>
           )}
@@ -191,7 +193,13 @@ function ProjectPageInner() {
               ) : (
                 <>
                   <div className="mb-6 overflow-x-auto">
-                    <ChainBand days={grid.days} projectTz={grid.tz} onCellActivate={scrollToSlot} interactiveTooltip />
+                    <ChainBand
+                      days={grid.days}
+                      projectTz={grid.tz}
+                      onCellActivate={scrollToSlot}
+                      interactiveTooltip
+                      dayMode={grid.dayMode}
+                    />
                   </div>
                   <SlotList
                     days={grid.days}
@@ -200,6 +208,7 @@ function ProjectPageInner() {
                     onOpenSheet={onOpenSheet}
                     gapStartTime={grid.gap.startTime}
                     gapCount={grid.gap.keys.size}
+                    dayMode={grid.dayMode}
                   />
                 </>
               )}
@@ -214,7 +223,7 @@ function ProjectPageInner() {
               />
             </TabPanel>
             <TabPanel value="stats" className="pt-5">
-              <StatsPanel projectId={project.id} invite={invite} models={grid.models} tz={grid.tz} />
+              <StatsPanel projectId={project.id} invite={invite} models={grid.models} tz={grid.tz} dayMode={grid.dayMode} />
             </TabPanel>
           </Tabs>
 

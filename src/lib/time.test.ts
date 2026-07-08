@@ -6,6 +6,8 @@ import {
   formatDualTz,
   buildIcs,
   dayKey,
+  formatDateShort,
+  formatShortWeekdayDate,
 } from './time';
 
 // 2026-07-06T02:00:00Z … in Europe/Berlin (UTC+2 im Sommer) = 04:00–05:00 lokal
@@ -64,5 +66,34 @@ describe('buildIcs', () => {
     expect(ics).toContain('DTEND:20260706T030000Z');
     expect(ics).toContain('SUMMARY:Gebetsstunde');
     expect(ics).toContain('END:VCALENDAR');
+  });
+
+  it('Tages-Modus (allDay): DTSTART/DTEND als VALUE=DATE in Projekt-TZ, kein Uhrzeit-Stempel', () => {
+    const ics = buildIcs({
+      startTime: '2026-07-14T12:00:00.000Z', // 14:00 Berlin
+      endTime: '2026-07-15T12:00:00.000Z', // 14:00 Berlin, Folgetag
+      title: 'Gebetstag',
+      allDay: true,
+      projectTz: 'Europe/Berlin',
+    });
+    expect(ics).toContain('DTSTART;VALUE=DATE:20260714');
+    expect(ics).toContain('DTEND;VALUE=DATE:20260715');
+    expect(ics).not.toMatch(/DTSTART:\d/);
+  });
+});
+
+describe('formatDateShort', () => {
+  it('Datum ohne Wochentag in Projekt-TZ', () => {
+    expect(formatDateShort(startUtc, 'Europe/Berlin')).toBe('6. Juli');
+  });
+});
+
+describe('formatShortWeekdayDate', () => {
+  it('Kurzform Wochentag + numerisches Datum in Projekt-TZ', () => {
+    const label = formatShortWeekdayDate(startUtc, 'Europe/Berlin');
+    expect(label).toMatch(/^Mo/);
+    expect(label).toContain('6');
+    expect(label).toContain('7');
+    expect(label).not.toMatch(/\d{2}–\d{2}/); // kein Stunden-Bereich
   });
 });

@@ -45,9 +45,10 @@ export async function generateMetadata({
   }
 
   const title = `${project.title} — Gebetswache auf 24pray`;
+  const unitWord = project.slotDurationMinutes === 1440 ? 'Tagen' : 'Stunden';
   const description = project.description
     ? truncate(project.description)
-    : `${project.bookedSlots} von ${project.totalSlots} Stunden gehalten — bete mit auf 24pray.`;
+    : `${project.bookedSlots} von ${project.totalSlots} ${unitWord} gehalten — bete mit auf 24pray.`;
 
   // Next.js merged generateMetadata NICHT tief pro Feld — ein hier gesetztes `openGraph`/`twitter`
   // ersetzt das Root-Layout-Objekt komplett. og:image (statisch) daher hier erneut mitgeben,

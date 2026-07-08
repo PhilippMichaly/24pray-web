@@ -13,8 +13,9 @@ import { bookSlot, recurSlot, getReminderPref, putReminderPref } from '@/lib/api
 import { Label } from '@/components/ui/Label';
 import { CityInput } from '@/components/patterns/CityInput';
 import { getMyCity, setMyCity } from '@/lib/mylocation';
-import { formatDualTz } from '@/lib/time';
-import { t } from '@/lib/i18n';
+import { formatDualTz, formatDayHeader } from '@/lib/time';
+import { t, tUnit } from '@/lib/i18n';
+import { isDayMode } from './logic';
 import type { ProjectWithStats } from '@/types';
 import type { SlotViewModel } from './types';
 
@@ -167,6 +168,7 @@ const guestTokenKey = (slotId: string) => `24pray:guest:${slotId}`;
 
 export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer, onCancel, onGuestBooked, onRecurred }: SlotSheetProps) {
   if (!slot) return null;
+  const dayMode = isDayMode(project.slotDurationMinutes);
   const times = formatDualTz(slot.startTime, slot.endTime, project.timezone);
 
   // Gast-Storno: Token liegt seit der Buchung im localStorage (F2).
@@ -183,7 +185,12 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
       ? cancelAbility(slot, { isOrganizer: !!isOrganizer, hasGuestToken: !!storedGuestToken })
       : null;
 
-  const TimeBlock = (
+  // Tages-Modus: Datum statt Uhrzeit-Bereich, kein „Uhr"-Suffix, kein Mond-Flag (P3).
+  const TimeBlock = dayMode ? (
+    <div className="text-sm tnum text-ink">
+      <span>{formatDayHeader(slot.startTime, project.timezone)}</span>
+    </div>
+  ) : (
     <div className="flex items-center gap-2 text-sm tnum text-ink">
       {slot.isNight && <Moon size={14} className="text-night" aria-hidden />}
       <span>
@@ -194,13 +201,17 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
   );
 
   const title =
-    mode === 'guest-book' ? t('takeHourTitle') : mode === 'mine' ? t('yourHourTitle') : t('hourTitle');
+    mode === 'guest-book'
+      ? tUnit(dayMode, 'takeHourTitle', 'takeDay')
+      : mode === 'mine'
+        ? tUnit(dayMode, 'yourHourTitle', 'yourDayTitle')
+        : tUnit(dayMode, 'hourTitle', 'dayTitle');
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange} title={title}>
       <div className="space-y-4">
         {TimeBlock}
-        {slot.isNight && <p className="text-xs text-night">{t('nightWatch')}</p>}
+        {!dayMode && slot.isNight && <p className="text-xs text-night">{t('nightWatch')}</p>}
 
         {mode === 'info' && slot.userName && (
           <div className="flex items-center gap-3 rounded-md bg-surface-sunken px-3 py-2.5">
@@ -213,8 +224,8 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
 
         {mode === 'mine' && (
           <CancelBlock
-            label={t('releaseHour')}
-            confirmText={t('releaseConfirm')}
+            label={tUnit(dayMode, 'releaseHour', 'releaseDay')}
+            confirmText={tUnit(dayMode, 'releaseConfirm', 'releaseConfirmDay')}
             onConfirm={async () => {
               await onCancel?.();
             }}
@@ -224,8 +235,12 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
 
         {ability && (
           <CancelBlock
-            label={ability === 'guest' ? t('releaseHour') : t('removeBooking')}
-            confirmText={ability === 'guest' ? t('releaseConfirm') : t('removeBookingConfirm')}
+            label={ability === 'guest' ? tUnit(dayMode, 'releaseHour', 'releaseDay') : t('removeBooking')}
+            confirmText={
+              ability === 'guest'
+                ? tUnit(dayMode, 'releaseConfirm', 'releaseConfirmDay')
+                : tUnit(dayMode, 'removeBookingConfirm', 'removeBookingConfirmDay')
+            }
             onConfirm={async () => {
               await onCancel?.(ability === 'guest' ? storedGuestToken ?? undefined : undefined);
               if (ability === 'guest' && slot.slotId) {
@@ -245,6 +260,7 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
             slot={slot}
             projectTitle={project.title}
             projectTz={project.timezone}
+            dayMode={dayMode}
             onSubmit={async (data) => {
               const created = await bookSlot(project.id, {
                 startTime: slot.startTime,

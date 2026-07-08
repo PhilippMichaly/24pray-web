@@ -103,3 +103,83 @@ describe('SlotList — Lücken-Header + Tages-Kollaps (P1/P2)', () => {
     expect(screen.getByText(/noch ganz frei · 2 Stunden zu vergeben · größte Lücke/)).toBeTruthy();
   });
 });
+
+describe('SlotList — Tages-Modus (dayMode, P3): Wochen-Zwischenüberschriften + Tages-Zeilen', () => {
+  afterEach(() => cleanup());
+
+  function daySlot(dayOffset: number, state: SlotViewModel['state']): SlotViewModel {
+    const start = new Date(Date.UTC(2026, 6, 1 + dayOffset, 14, 0, 0)).toISOString();
+    const end = new Date(Date.UTC(2026, 6, 2 + dayOffset, 14, 0, 0)).toISOString();
+    return {
+      key: start,
+      slotId: state === 'BOOKED' ? `id-${dayOffset}` : null,
+      startTime: start,
+      endTime: end,
+      isMine: false,
+      userName: null,
+      status: state === 'BOOKED' ? 'BOOKED' : 'FREE',
+      isNight: false,
+      isLargestGap: state === 'FREE_LARGEST_GAP',
+      state,
+    };
+  }
+
+  // Woche 1: 3 führende PAST-Tage, dann 4 gemischte (Buchung + freie inkl. größte Lücke).
+  const week1 = [
+    daySlot(0, 'PAST'),
+    daySlot(1, 'PAST'),
+    daySlot(2, 'PAST'),
+    daySlot(3, 'BOOKED'),
+    daySlot(4, 'FREE_LARGEST_GAP'),
+    daySlot(5, 'FREE_LARGEST_GAP'),
+    daySlot(6, 'BOOKED'),
+  ];
+  // Woche 2: komplett zukünftig + frei.
+  const week2 = [daySlot(7, 'FREE'), daySlot(8, 'FREE'), daySlot(9, 'FREE')];
+
+  const weeks = [
+    { key: week1[0].startTime, slots: week1 },
+    { key: week2[0].startTime, slots: week2 },
+  ];
+
+  it('zeigt Wochen-Kopfzeilen ("Woche vom …"), wenn die Wache >7 Tage läuft', () => {
+    render(<SlotList days={weeks} projectTz="UTC" onBook={() => {}} onOpenSheet={() => {}} dayMode />);
+    expect(screen.getAllByText(/^Woche vom/).length).toBeGreaterThan(0);
+  });
+
+  it('faltet führende vergangene Tage zu "{n} Tage vorüber" statt Stunden-Text', () => {
+    render(<SlotList days={weeks} projectTz="UTC" onBook={() => {}} onOpenSheet={() => {}} dayMode />);
+    expect(screen.getByText('3 Tage vorüber')).toBeTruthy();
+  });
+
+  it('komplett freie Woche kollabiert mit "Tage zu vergeben" statt "Stunden zu vergeben"', () => {
+    render(<SlotList days={weeks} projectTz="UTC" onBook={() => {}} onOpenSheet={() => {}} dayMode />);
+    expect(screen.getByText(/noch ganz frei · 3 Tage zu vergeben/)).toBeTruthy();
+  });
+
+  it('Gap-Header zeigt "Tage am Stück" statt "Stunden am Stück"', () => {
+    render(
+      <SlotList
+        days={weeks}
+        projectTz="UTC"
+        onBook={() => {}}
+        onOpenSheet={() => {}}
+        dayMode
+        gapStartTime={week1[4].startTime}
+        gapCount={2}
+      />,
+    );
+    expect(screen.getByText(/Größte Lücke: 2 Tage am Stück/)).toBeTruthy();
+  });
+
+  it('Tages-Zeilen zeigen keinen Stunden-Bereich (kein "HH–HH")', () => {
+    render(<SlotList days={weeks} projectTz="UTC" onBook={() => {}} onOpenSheet={() => {}} dayMode />);
+    expect(screen.queryByText(/\d{2}–\d{2}/)).toBeNull();
+  });
+
+  it('ohne Wochen-Header (≤7 Tage gesamt): flache Liste, keine "Woche vom"-Zeile', () => {
+    const single = [{ key: week2[0].startTime, slots: week2 }];
+    render(<SlotList days={single} projectTz="UTC" onBook={() => {}} onOpenSheet={() => {}} dayMode />);
+    expect(screen.queryByText(/^Woche vom/)).toBeNull();
+  });
+});

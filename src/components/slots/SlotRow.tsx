@@ -2,11 +2,11 @@
 
 import { Moon, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatSlotRange } from '@/lib/time';
+import { formatSlotRange, formatShortWeekdayDate } from '@/lib/time';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
-import { t } from '@/lib/i18n';
+import { t, tUnit } from '@/lib/i18n';
 import type { SlotViewModel } from './types';
 
 export interface SlotRowProps {
@@ -14,11 +14,13 @@ export interface SlotRowProps {
   projectTz: string;
   onBook: () => void;
   onOpen: () => void;
+  /** Tages-Wache (slotDurationMinutes=1440): Zeile = ein Tag statt einer Stunde. */
+  dayMode?: boolean;
 }
 
 const isNowState = (s: string) => s.startsWith('NOW_');
 
-export function SlotRow({ slot, projectTz, onBook, onOpen }: SlotRowProps) {
+export function SlotRow({ slot, projectTz, onBook, onOpen, dayMode }: SlotRowProps) {
   const { state } = slot;
   const past = state === 'PAST';
   const mine = state === 'MINE' || state === 'NOW_MINE';
@@ -47,11 +49,11 @@ export function SlotRow({ slot, projectTz, onBook, onOpen }: SlotRowProps) {
       )}
       onClick={clickable ? onOpen : undefined}
     >
-      {/* Zeit */}
-      <span className="flex w-16 shrink-0 items-center gap-1 text-sm tnum text-ink">
-        {slot.isNight && <Moon size={13} className="text-night" aria-hidden />}
+      {/* Zeit — Tages-Modus: kurzes Datum statt Stunden-Bereich, kein Mond-Flag (P3) */}
+      <span className={cn('flex shrink-0 items-center gap-1 text-sm tnum text-ink', dayMode ? 'w-20' : 'w-16')}>
+        {!dayMode && slot.isNight && <Moon size={13} className="text-night" aria-hidden />}
         {now && <Flame size={13} className="animate-breathe text-gold" aria-hidden />}
-        {formatSlotRange(slot.startTime, slot.endTime, projectTz)}
+        {dayMode ? formatShortWeekdayDate(slot.startTime, projectTz) : formatSlotRange(slot.startTime, slot.endTime, projectTz)}
       </span>
 
       {/* Mitte */}
@@ -84,7 +86,7 @@ export function SlotRow({ slot, projectTz, onBook, onOpen }: SlotRowProps) {
             onBook();
           }}
         >
-          {t('take')}
+          {tUnit(!!dayMode, 'take', 'takeDay')}
         </Button>
       )}
       {pending && <Spinner size={16} className="shrink-0 text-accent" />}

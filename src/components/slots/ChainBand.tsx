@@ -1,16 +1,19 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { formatSlotRange } from '@/lib/time';
+import { formatSlotRange, formatShortWeekdayDate } from '@/lib/time';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { t } from '@/lib/i18n';
 import type { SlotCellState, SlotViewModel } from './types';
 
 export interface ChainBandProps {
+  /** Tages-Modus: WOCHEN-Gruppen (7 Tages-Slots je Zeile) statt Kalendertagen. */
   days: { key: string; slots: SlotViewModel[] }[];
   projectTz: string;
   onCellActivate: (slotStartTime: string) => void;
   interactiveTooltip?: boolean; // ≥lg (E4), read-only
+  /** Tages-Wache (slotDurationMinutes=1440): 1 Zelle = 1 Tag, 1 Zeile = 1 Woche. */
+  dayMode?: boolean;
 }
 
 // Farbe je Zustand (Heatmap). KEINE Buchung aus dem Band (Fixpunkt 4).
@@ -39,28 +42,30 @@ function cellClass(state: SlotCellState): string {
 const shortWeekday = (iso: string, tz: string) =>
   new Intl.DateTimeFormat('de-DE', { timeZone: tz, weekday: 'short' }).format(new Date(iso));
 
-export function ChainBand({ days, projectTz, onCellActivate, interactiveTooltip }: ChainBandProps) {
+export function ChainBand({ days, projectTz, onCellActivate, interactiveTooltip, dayMode }: ChainBandProps) {
   return (
     <div className="space-y-1.5" aria-label={t('chainBandLabel')}>
-      {days.map((day) => {
-        const anyNight = day.slots.some((s) => s.isNight);
+      {days.map((row, rowIndex) => {
+        const anyNight = !dayMode && row.slots.some((s) => s.isNight);
+        const rowLabel = dayMode ? `W${rowIndex + 1}` : shortWeekday(row.slots[0].startTime, projectTz);
         return (
-          <div key={day.key} className="flex items-center gap-2">
-            <span className="w-8 shrink-0 text-right text-xs tnum text-ink-muted">
-              {shortWeekday(day.slots[0].startTime, projectTz)}
-            </span>
-            <div className={cn('grid flex-1 gap-[2px]', 'grid-cols-24')}>
-              {day.slots.map((slot) => {
+          <div key={row.key} className="flex items-center gap-2">
+            <span className="w-8 shrink-0 text-right text-xs tnum text-ink-muted">{rowLabel}</span>
+            <div className={cn('grid flex-1 gap-[2px]', dayMode ? 'grid-cols-7' : 'grid-cols-24')}>
+              {row.slots.map((slot) => {
                 const now = slot.state.startsWith('NOW_');
+                const label = dayMode
+                  ? formatShortWeekdayDate(slot.startTime, projectTz)
+                  : formatSlotRange(slot.startTime, slot.endTime, projectTz);
                 const cell = (
                   <button
                     key={slot.key}
                     onClick={() => onCellActivate(slot.startTime)}
-                    aria-label={formatSlotRange(slot.startTime, slot.endTime, projectTz)}
+                    aria-label={label}
                     className={cn(
                       'relative h-3 rounded-[3px] transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-focus',
                       cellClass(slot.state),
-                      slot.isNight && 'ring-1 ring-inset ring-night/20',
+                      !dayMode && slot.isNight && 'ring-1 ring-inset ring-night/20',
                     )}
                   >
                     {now && (
@@ -75,7 +80,7 @@ export function ChainBand({ days, projectTz, onCellActivate, interactiveTooltip 
                     key={slot.key}
                     content={
                       <span className="tnum">
-                        {formatSlotRange(slot.startTime, slot.endTime, projectTz)}
+                        {label}
                         {slot.userName ? ` · ${slot.isMine ? t('you') : slot.userName}` : ` · ${t('free')}`}
                       </span>
                     }

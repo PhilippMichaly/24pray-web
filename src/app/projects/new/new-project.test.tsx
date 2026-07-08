@@ -39,7 +39,7 @@ describe('Neue Kette anlegen — wb-Owner-Benachrichtigung (Punkt 10)', () => {
     expect(checkbox.checked).toBe(true);
 
     fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T00:00' } });
-    fireEvent.click(screen.getByRole('button', { name: /Wache erstellen/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
 
     await waitFor(() => expect(post).toHaveBeenCalled());
     const [, payload] = post.mock.calls[0];
@@ -55,10 +55,40 @@ describe('Neue Kette anlegen — wb-Owner-Benachrichtigung (Punkt 10)', () => {
     expect(checkbox.checked).toBe(false);
 
     fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T00:00' } });
-    fireEvent.click(screen.getByRole('button', { name: /Wache erstellen/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
 
     await waitFor(() => expect(post).toHaveBeenCalled());
     const [, payload] = post.mock.calls[0];
     expect((payload as { notifyOnBooking: boolean }).notifyOnBooking).toBe(false);
+  });
+
+  it('Default ist Stunden-Aufteilung -> slotDurationMinutes:60 im Payload', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    await goToStep2();
+    fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T00:00' } });
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    const [, payload] = post.mock.calls[0];
+    expect((payload as { slotDurationMinutes: number }).slotDurationMinutes).toBe(60);
+  });
+
+  it('Wahl "Tage": slotDurationMinutes:1440, Presets wechseln auf Wochen/40-Tage, Hinweistext erscheint', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    await goToStep2();
+
+    fireEvent.click(screen.getByRole('button', { name: /Tage/i }));
+    // Alte Stunden-Presets sind weg, neue Tages-Presets erscheinen.
+    expect(screen.queryByRole('button', { name: '24 Stunden' })).toBeNull();
+    expect(screen.getByRole('button', { name: '2 Wochen' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '4 Wochen' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '40 Tage' })).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T14:00' } });
+    expect(screen.getByText(/Jeder Tag läuft von 14:00 bis 14:00 des Folgetags/)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    const [, payload] = post.mock.calls[0];
+    expect((payload as { slotDurationMinutes: number }).slotDurationMinutes).toBe(1440);
   });
 });

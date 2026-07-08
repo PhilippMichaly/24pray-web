@@ -59,6 +59,17 @@ describe('generateMetadata — Projektseite (OpenGraph pro Kette)', () => {
 
     expect(meta.description).toContain('3');
     expect(meta.description).toContain('24');
+    expect(meta.description).toContain('Stunden');
+  });
+
+  it('Tages-Wache ohne Beschreibung: Fallback sagt "Tagen" statt "Stunden"', async () => {
+    const dayProject = { ...publicProjectNoDescription, id: 'p-pub-day', slotDurationMinutes: 1440 };
+    fetchMock.mockResolvedValue(new Response(JSON.stringify(dayProject), { status: 200 }));
+    const { generateMetadata } = await import('./layout');
+    const meta = await generateMetadata({ params: { id: 'p-pub-day' } });
+
+    expect(meta.description).toContain('Tagen');
+    expect(meta.description).not.toContain('Stunden');
   });
 
   it('403 (PRIVATE ohne Zugriff): generische Site-Defaults, kein Daten-Leak', async () => {

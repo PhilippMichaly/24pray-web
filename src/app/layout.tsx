@@ -17,10 +17,14 @@ const dmSans = DM_Sans({
   display: 'swap',
 });
 
+const DEFAULT_TITLE = '24pray — Gemeinsam beten';
+const DEFAULT_DESCRIPTION =
+  'Organisiere Gebetsketten, buche deinen Slot und bete gemeinsam mit deiner Gemeinde.';
+
 export const metadata: Metadata = {
-  title: '24pray — Gemeinsam beten',
-  description:
-    'Organisiere Gebetsketten, buche deinen Slot und bete gemeinsam mit deiner Gemeinde.',
+  metadataBase: new URL('https://24pray.org'),
+  title: DEFAULT_TITLE,
+  description: DEFAULT_DESCRIPTION,
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
@@ -30,12 +34,19 @@ export const metadata: Metadata = {
     apple: '/icons/icon-192.png',
   },
   openGraph: {
-    title: '24pray — Gemeinsam beten',
+    title: DEFAULT_TITLE,
     description: 'Organisiere Gebetsketten und buche deinen Gebets-Slot.',
     url: 'https://24pray.org',
     siteName: '24pray',
     locale: 'de_DE',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: '24pray — Gemeinsam beten' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: ['/og-image.png'],
   },
 };
 

@@ -11,6 +11,7 @@ import { TimezoneHint } from '@/components/patterns/TimezoneHint';
 import { InviteCard } from '@/components/patterns/InviteCard';
 import { LocationCard } from '@/components/patterns/LocationCard';
 import { GroupLinksBar } from '@/components/patterns/GroupLinksBar';
+import { ShareButton } from '@/components/patterns/ShareButton';
 import { GroupLinksCard } from '@/components/patterns/GroupLinksCard';
 import { ConcernCard } from '@/components/patterns/ConcernCard';
 import { NextSlotCard } from '@/components/patterns/NextSlotCard';
@@ -113,8 +114,13 @@ function ProjectPageInner() {
           <header className="mb-5">
             <h1 className="font-display text-2xl font-semibold text-ink">{project.title}</h1>
             <p className="mt-1 text-sm text-ink-muted">{t('organizerLabel', { name: project.organizerName })}</p>
-            <div className="mt-3">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
               <GroupLinksBar project={project} />
+              <ShareButton
+                project={project}
+                isOrganizer={!!currentUserId && project.organizerId === currentUserId}
+                inviteUrl={inviteUrl}
+              />
             </div>
           </header>
 

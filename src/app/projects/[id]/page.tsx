@@ -14,6 +14,8 @@ import { GroupLinksBar } from '@/components/patterns/GroupLinksBar';
 import { ShareButton } from '@/components/patterns/ShareButton';
 import { GroupLinksCard } from '@/components/patterns/GroupLinksCard';
 import { ConcernCard } from '@/components/patterns/ConcernCard';
+import { ScheduleCard } from '@/components/patterns/ScheduleCard';
+import { ProjectDangerZone } from '@/components/patterns/ProjectDangerZone';
 import { NextSlotCard } from '@/components/patterns/NextSlotCard';
 import { Tabs, TabPanel } from '@/components/ui/Tabs';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -167,6 +169,7 @@ function ProjectPageInner() {
             <div className="mb-6 space-y-3">
               <LocationCard project={project} onUpdated={setProject} />
               <ConcernCard project={project} onUpdated={setProject} />
+              <ScheduleCard project={project} onUpdated={setProject} />
               <GroupLinksCard project={project} onUpdated={setProject} />
               <InviteCard inviteUrl={inviteUrl} />
             </div>
@@ -231,6 +234,12 @@ function ProjectPageInner() {
             }}
             onRecurred={() => void grid.reload()}
           />
+
+          {inviteUrl && (
+            <div className="mt-8">
+              <ProjectDangerZone projectId={project.id} />
+            </div>
+          )}
         </>
       )}
     </AppShell>

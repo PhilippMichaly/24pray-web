@@ -230,6 +230,23 @@ const de = {
   profileDeleteConfirmText: 'Bist du sicher? Das kann nicht rückgängig gemacht werden.',
   profileDeleteConfirmButton: 'Konto endgültig löschen',
 
+  // Ersteller-Lebenszyklus: Wache verschieben (Zeitplan-Karte)
+  scheduleCardTitle: 'Zeitplan',
+  scheduleCardCurrentStart: 'Aktueller Start: {date}',
+  scheduleCardCta: 'Verschieben',
+  scheduleNewStartLabel: 'Neuer Start',
+  scheduleWarning: 'Alle gebuchten Stunden verschieben sich entsprechend; Gebuchte werden per E-Mail informiert.',
+  scheduleConfirmButton: 'Verschieben & informieren',
+  scheduleSaved: 'Zeitplan verschoben — Gebuchte wurden per E-Mail informiert.',
+
+  // Ersteller-Lebenszyklus: Wache löschen (Danger-Zone auf der Projektseite)
+  projectDangerZone: 'Gefahrenzone',
+  projectDeleteCta: 'Wache löschen',
+  projectDeleteWarning: 'Alle Stunden dieser Wache entfallen, Gebuchte werden per E-Mail informiert. Das kann nicht rückgängig gemacht werden.',
+  projectDeleteConfirmText: 'Bist du sicher? Das kann nicht rückgängig gemacht werden.',
+  projectDeleteConfirmButton: 'Wache endgültig löschen',
+  projectDeleted: 'Wache gelöscht.',
+
   // Status-Enums (Projekt)
   status_DRAFT: 'Entwurf',
   status_ACTIVE: 'Aktiv',
@@ -452,6 +469,21 @@ const en: Record<keyof typeof de, string> = {
   profileDeleteWarning: 'Your own prayer watches will be deleted entirely, and future hours in them become free again. Your bookings in other watches: future ones are released, hours already held stay anonymous in the statistics.',
   profileDeleteConfirmText: 'Are you sure? This cannot be undone.',
   profileDeleteConfirmButton: 'Permanently delete account',
+
+  scheduleCardTitle: 'Schedule',
+  scheduleCardCurrentStart: 'Current start: {date}',
+  scheduleCardCta: 'Shift',
+  scheduleNewStartLabel: 'New start',
+  scheduleWarning: 'All booked hours will move accordingly; those who booked will be notified by email.',
+  scheduleConfirmButton: 'Shift & notify',
+  scheduleSaved: 'Schedule shifted — those who booked were notified by email.',
+
+  projectDangerZone: 'Danger zone',
+  projectDeleteCta: 'Delete watch',
+  projectDeleteWarning: 'All hours in this watch will be cancelled, those who booked will be notified by email. This cannot be undone.',
+  projectDeleteConfirmText: 'Are you sure? This cannot be undone.',
+  projectDeleteConfirmButton: 'Permanently delete watch',
+  projectDeleted: 'Watch deleted.',
 
   status_DRAFT: 'Draft',
   status_ACTIVE: 'Active',

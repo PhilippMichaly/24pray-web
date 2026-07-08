@@ -56,7 +56,7 @@ class ApiClient {
 export const api = new ApiClient(API_URL);
 
 // ── Slot-Helper (Welle 2/3) ────────────────────
-import type { PrayerSlot, SlotView, PrayerRequestView, ProjectStats, User } from '@/types';
+import type { PrayerSlot, SlotView, PrayerRequestView, ProjectStats, ProjectWithStats, User } from '@/types';
 
 /** Query-Suffix für den Invite-Token (PRIVATE-Ketten per Einladungslink, W3). */
 const inviteQ = (invite?: string) => (invite ? `?invite=${encodeURIComponent(invite)}` : '');
@@ -132,6 +132,18 @@ export function updateMe(name: string) {
 /** Konto endgültig löschen (Cascade siehe API). */
 export function deleteMe() {
   return api.delete<void>('/me');
+}
+
+// ── Ersteller-Lebenszyklus (Wache verschieben / löschen) ────
+
+/** Startzeit verschieben — alle gebuchten Stunden wandern per Delta mit (Server verschickt Mails). */
+export function shiftProject(projectId: string, newStartDate: string) {
+  return api.post<ProjectWithStats>(`/projects/${projectId}/shift`, { newStartDate });
+}
+
+/** Wache endgültig löschen (Cascade + Abschieds-Mail siehe API). */
+export function deleteProject(projectId: string) {
+  return api.delete<void>(`/projects/${projectId}`);
 }
 
 export function getReminderPref() {

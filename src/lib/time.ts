@@ -2,7 +2,7 @@
 // VERBOT von rohem toLocaleString()/toLocale…() im App-Code — alles läuft hierüber.
 
 /** Stunde (0–23) eines ISO-Zeitpunkts in einer Ziel-Zeitzone. */
-function hourInTz(iso: string, tz: string): number {
+export function hourInTz(iso: string, tz: string): number {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: tz,
     hour: '2-digit',

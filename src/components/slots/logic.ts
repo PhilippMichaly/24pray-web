@@ -1,4 +1,4 @@
-import { isNightHour, dayKey, formatSlotRange } from '@/lib/time';
+import { isNightHour, dayKey, formatSlotRange, hourInTz } from '@/lib/time';
 import { intlLocale } from '@/lib/i18n';
 import type { SlotView } from '@/types';
 import type { DerivationContext, RawSlot, SlotCellState, SlotViewModel } from './types';
@@ -154,6 +154,25 @@ export function bookedCount(models: SlotViewModel[]): number {
  */
 export function isGapStart(model: Pick<SlotViewModel, 'isLargestGap' | 'startTime'>, gapStartTime: string | null): boolean {
   return gapStartTime != null && model.isLargestGap && model.startTime === gapStartTime;
+}
+
+/**
+ * „Wache über den Tag" (Statistik-Tab, W3-Dataviz): Anzahl gehaltener Slots
+ * (BOOKED — schließt vergangene/„completed" wie zukünftig reservierte gleichermaßen ein,
+ * da `status` unabhängig vom abgeleiteten PAST-State bleibt) je Tagesstunde (0–23) in
+ * Projekt-Zeitzone, aufsummiert über alle Kalendertage. Reine Ableitung für einen
+ * sequentiellen Farb-Ramp (heller→dunkler nach Wert), siehe StatsPanel.
+ */
+export function coverageByHour(
+  models: Pick<SlotViewModel, 'startTime' | 'status'>[],
+  projectTz: string,
+): number[] {
+  const buckets = new Array(24).fill(0);
+  for (const m of models) {
+    if (m.status !== 'BOOKED') continue;
+    buckets[hourInTz(m.startTime, projectTz)]++;
+  }
+  return buckets;
 }
 
 export type DayCollapseState = 'all-past' | 'future-free' | 'normal';

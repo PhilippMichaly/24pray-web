@@ -30,6 +30,14 @@
   --slot-night-overlay: var(--night);
   --chain-gap-color: var(--gold);
 
+  /* ---- Statistik: sequentieller Ramp „Wache über den Tag" (dataviz-Skill,
+     hell→dunkel nach Wert, validiert via scripts/validate_palette.js --ordinal) ---- */
+  --stats-ramp-0: #f7a63b;
+  --stats-ramp-1: #eb890a;
+  --stats-ramp-2: #b06707;
+  --stats-ramp-3: #764505;
+  --stats-ramp-4: #452803;
+
   /* ---- Typo ---- */
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-dm-sans);
@@ -81,6 +89,11 @@
   --shadow-1: 0 1px 2px hsl(230 40% 2% / 0.3);
   --shadow-2: 0 2px 8px hsl(230 40% 2% / 0.38);
   --shadow-3: 0 8px 32px hsl(230 40% 2% / 0.5);
+  --stats-ramp-0: #844d06;
+  --stats-ramp-1: #c97508;
+  --stats-ramp-2: #f69a23;
+  --stats-ramp-3: #f8b762;
+  --stats-ramp-4: #fbd29d;
 }
 
 /* System-Default vor Hydration / bei JS-off. next-themes stempelt data-theme
@@ -102,6 +115,11 @@
     --positive: 152 55% 55%;
     --danger: 5 80% 64%;
     --focus: 30 100% 60%;
+    --stats-ramp-0: #844d06;
+    --stats-ramp-1: #c97508;
+    --stats-ramp-2: #f69a23;
+    --stats-ramp-3: #f8b762;
+    --stats-ramp-4: #fbd29d;
     --shadow-1: 0 1px 2px hsl(230 40% 2% / 0.3);
     --shadow-2: 0 2px 8px hsl(230 40% 2% / 0.38);
     --shadow-3: 0 8px 32px hsl(230 40% 2% / 0.5);

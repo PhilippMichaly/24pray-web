@@ -7,6 +7,7 @@ import {
   isGapStart,
   dayCollapseState,
   leadingPastCount,
+  coverageByHour,
 } from './logic';
 import type { SlotView } from '@/types';
 import type { DerivationContext } from './types';
@@ -211,5 +212,50 @@ describe('leadingPastCount — führende vergangene Slots zu einer Ghost-Zeile f
     const slots = [slot(1), slot(2)];
     const { models } = buildViewModels(slots, { now: NOW, projectTz: TZ, pendingKeys: new Set(), conflictKey: null });
     expect(leadingPastCount(models)).toBe(2);
+  });
+});
+
+describe('coverageByHour — Tagesstunden-Abdeckung für die „Wache über den Tag"-Statistik', () => {
+  function m(startISO: string, status: 'FREE' | 'BOOKED') {
+    return { startTime: startISO, status };
+  }
+
+  it('liefert ein 24-Element-Array', () => {
+    expect(coverageByHour([], 'UTC')).toHaveLength(24);
+  });
+
+  it('alle Buckets 0 ohne Slots', () => {
+    expect(coverageByHour([], 'UTC')).toEqual(new Array(24).fill(0));
+  });
+
+  it('zählt nur BOOKED, ignoriert FREE', () => {
+    const models = [m('2026-07-06T05:00:00.000Z', 'BOOKED'), m('2026-07-06T06:00:00.000Z', 'FREE')];
+    const result = coverageByHour(models, 'UTC');
+    expect(result[5]).toBe(1);
+    expect(result[6]).toBe(0);
+  });
+
+  it('summiert dieselbe Tagesstunde über mehrere Kalendertage', () => {
+    const models = [
+      m('2026-07-06T14:00:00.000Z', 'BOOKED'),
+      m('2026-07-07T14:00:00.000Z', 'BOOKED'),
+      m('2026-07-08T14:00:00.000Z', 'BOOKED'),
+    ];
+    const result = coverageByHour(models, 'UTC');
+    expect(result[14]).toBe(3);
+    expect(result.reduce((a, b) => a + b, 0)).toBe(3);
+  });
+
+  it('bucketet nach Projekt-Zeitzone, nicht nach UTC', () => {
+    // 02:00 UTC ist im Sommer 04:00 in Europe/Berlin (UTC+2)
+    const models = [m('2026-07-06T02:00:00.000Z', 'BOOKED')];
+    expect(coverageByHour(models, 'Europe/Berlin')[4]).toBe(1);
+    expect(coverageByHour(models, 'Europe/Berlin')[2]).toBe(0);
+  });
+
+  it('zählt vergangene (gehaltene) und zukünftige Buchungen gleichermaßen (BOOKED+COMPLETED)', () => {
+    // Slot in der Vergangenheit — status bleibt BOOKED unabhängig vom abgeleiteten PAST-State.
+    const models = [m('2020-01-01T09:00:00.000Z', 'BOOKED')];
+    expect(coverageByHour(models, 'UTC')[9]).toBe(1);
   });
 });

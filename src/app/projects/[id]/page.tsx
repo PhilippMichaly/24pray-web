@@ -211,7 +211,7 @@ function ProjectPageInner() {
               />
             </TabPanel>
             <TabPanel value="stats" className="pt-5">
-              <StatsPanel projectId={project.id} invite={invite} />
+              <StatsPanel projectId={project.id} invite={invite} models={grid.models} tz={grid.tz} />
             </TabPanel>
           </Tabs>
 

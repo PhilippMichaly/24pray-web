@@ -12,13 +12,13 @@ class ApiClient {
     path: string,
     body?: unknown,
   ): Promise<T> {
+    // Content-Type NUR mit Body senden: Fastify beantwortet application/json
+    // ohne Body mit 400 — das brach Logout und „Jede Woche" (body-lose POSTs).
     const res = await fetch(`${this.baseUrl}${path}`, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
       credentials: 'include', // für httpOnly Cookies
-      body: body ? JSON.stringify(body) : undefined,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
     });
 
     if (!res.ok) {

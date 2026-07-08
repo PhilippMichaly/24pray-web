@@ -27,6 +27,9 @@ export interface PrayerProject {
   startDate: string;
   endDate: string;
   timezone: string;
+  slotDurationMinutes: number;
+  maskNames?: boolean;
+  locationName?: string | null;
   inviteToken: string;
   organizerId: string;
   createdAt: string;
@@ -41,14 +44,17 @@ export interface PrayerSlot {
   status: SlotStatus;
   guestName?: string | null;
   guestEmail?: string | null;
+  guestToken?: string | null; // nur bei Gast-Buchung im Create-Response (§6.3)
   notifyChannel: NotificationChannel;
 }
 
 export interface SlotView {
+  slotId: string | null; // null wenn FREE (§6.1)
   startTime: string;
   endTime: string;
   status: 'FREE' | 'BOOKED';
-  userName?: string | null;
+  userName?: string | null; // ggf. serverseitig maskiert (§E5)
+  isMine: boolean;
 }
 
 // ── API Responses ──────────────────────────────
@@ -64,4 +70,18 @@ export interface BookSlotRequest {
   guestName?: string;
   guestEmail?: string;
   notifyChannel: NotificationChannel;
+}
+
+// ── Welle 3 ────────────────────────────────────
+
+export interface PrayerRequestView {
+  id: string;
+  authorName: string | null; // für Anonyme serverseitig maskiert (§E5)
+  text: string;
+  createdAt: string;
+}
+
+export interface ProjectStats {
+  completedHours: number;
+  perPerson: { name: string | null; hours: number }[];
 }

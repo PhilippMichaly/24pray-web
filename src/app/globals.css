@@ -2,20 +2,132 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
-
 :root {
-  --bg: #FAF9F6;
-  --surface: #FFFFFF;
-  --text: #1A1814;
-  --text-muted: #6B6560;
-  --accent: #C47D2A;
-  --accent-soft: #F5E6D0;
+  /* ---- Farbe: Light „Kraft der Morgenröte" — hoffnungsvoll, energetisch (V3, 2026-07-07) ----
+     Sonnenhelles Weiß + Indigo-Tinte + LEUCHTENDES Sonnenaufgangs-Orange.
+     Fills sind strahlend (--accent) mit dunkler Schrift (--accent-ink);
+     Akzent-TEXT auf hellen Flächen nutzt --accent-strong (AA). */
+  --bg: 48 80% 98%;
+  --surface: 0 0% 100%;
+  --surface-sunken: 46 60% 94%;
+  --border: 42 30% 86%;
+  --ink: 235 32% 12%;
+  --ink-muted: 233 14% 36%;
+  --accent: 25 96% 49%;            /* strahlender Sonnenaufgang (Fill) */
+  --accent-ink: 235 35% 10%;       /* Schrift AUF Accent-Fills */
+  --accent-strong: 22 96% 33%;     /* Akzent als Text/Hover, AA auf hell */
+  --accent-soft: 30 100% 92%;
+  --gold: 45 98% 52%;
+  --night: 250 65% 56%;            /* elektrisches Violett */
+  --positive: 152 70% 28%;         /* energetisches Hoffnungsgrün */
+  --danger: 5 75% 42%;
+  --focus: 25 96% 42%;
+
+  /* ---- Komponenten-Tokens (zweite Ebene, White-Label-Hebel) ---- */
+  --slot-free-bg: var(--surface);
+  --slot-booked-bg: var(--accent);
+  --slot-mine-bg: var(--accent-soft);
+  --slot-night-overlay: var(--night);
+  --chain-gap-color: var(--gold);
+
+  /* ---- Typo ---- */
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-dm-sans);
+  --text-xs: 0.75rem;   --lh-xs: 1rem;
+  --text-sm: 0.875rem;  --lh-sm: 1.25rem;
+  --text-base: 1rem;    --lh-base: 1.5rem;
+  --text-lg: 1.25rem;   --lh-lg: 1.75rem;
+  --text-xl: 1.5625rem; --lh-xl: 2rem;
+  --text-2xl: 1.953rem; --lh-2xl: 2.25rem;
+  --text-3xl: 2.441rem; --lh-3xl: 2.75rem;
+
+  /* ---- Radius ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* ---- Elevation (warm getönt) ---- */
+  --shadow-1: 0 1px 2px hsl(35 30% 10% / 0.05);
+  --shadow-2: 0 2px 8px hsl(35 30% 10% / 0.08);
+  --shadow-3: 0 8px 32px hsl(35 30% 10% / 0.14);
+
+  /* ---- Motion ---- */
+  --dur-fast: 150ms;
+  --dur-mid: 250ms;
+  --dur-slow: 400ms;
+  --ease-enter: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: ease-in;
 }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
+/* Dark „Nachtwache" — blaue Stunde unterm Sternenhimmel (statt Braun-Schwarz).
+   Nur Farb-Tokens werden überschrieben. */
+[data-theme="dark"] {
+  --bg: 232 26% 9%;
+  --surface: 232 22% 13%;
+  --surface-sunken: 232 24% 11%;
+  --border: 230 16% 25%;
+  --ink: 46 50% 95%;
+  --ink-muted: 231 14% 70%;
+  --accent: 30 100% 60%;
+  --accent-ink: 232 26% 9%;
+  --accent-strong: 36 100% 70%;
+  --accent-soft: 28 60% 21%;
+  --gold: 47 100% 62%;
+  --night: 250 70% 72%;
+  --positive: 152 55% 55%;
+  --danger: 5 80% 64%;
+  --focus: 30 100% 60%;
+  --shadow-1: 0 1px 2px hsl(230 40% 2% / 0.3);
+  --shadow-2: 0 2px 8px hsl(230 40% 2% / 0.38);
+  --shadow-3: 0 8px 32px hsl(230 40% 2% / 0.5);
+}
+
+/* System-Default vor Hydration / bei JS-off. next-themes stempelt data-theme
+   synchron; dieser Block deckt nur das Millisekunden-Fenster ab (Dark-Tokens dupliziert). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: 232 26% 9%;
+    --surface: 232 22% 13%;
+    --surface-sunken: 232 24% 11%;
+    --border: 230 16% 25%;
+    --ink: 46 50% 95%;
+    --ink-muted: 231 14% 70%;
+    --accent: 30 100% 60%;
+    --accent-ink: 232 26% 9%;
+    --accent-strong: 36 100% 70%;
+    --accent-soft: 28 60% 21%;
+    --gold: 47 100% 62%;
+    --night: 250 70% 72%;
+    --positive: 152 55% 55%;
+    --danger: 5 80% 64%;
+    --focus: 30 100% 60%;
+    --shadow-1: 0 1px 2px hsl(230 40% 2% / 0.3);
+    --shadow-2: 0 2px 8px hsl(230 40% 2% / 0.38);
+    --shadow-3: 0 8px 32px hsl(230 40% 2% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--bg));
+    color: hsl(var(--ink));
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11";
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

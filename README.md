@@ -1,27 +1,60 @@
 # 24pray Web
 
-Frontend für die 24pray Gebetsplattform.
+Frontend der Gebetsketten-Plattform **https://24pray.org** — Communities
+organisieren 24/7-Gebet, indem Teilnehmer Stunden-Slots einer Kette übernehmen.
 
 ## Stack
-- **Next.js 14** (App Router, TypeScript)
-- **TailwindCSS**
-- **Zustand** (State Management)
-- **Zod** (Validation)
 
-## Setup
+- **Next.js 14** (App Router, TypeScript), **TailwindCSS** (semantische Tokens,
+  Light/Dark via `next-themes`), **Zustand**, **Zod**, **Radix** (Dialog/Tabs/Tooltip),
+  **Lucide** Icons, Fraunces + DM Sans (self-hosted via `next/font`)
+- Landing-Signature: interaktive **NASA-Erde** (Canvas, Blue/Black-Marble-Texturen
+  unter `public/earth/`, Drag-Rotation, Nerven-Netz aus echten Gebets-Standorten)
+- PWA (Manifest + Icons unter `public/`)
+
+## Entwicklung
 
 ```bash
-# 1. Dependencies installieren
 npm install
-
-# 2. Env-Datei erstellen
-cp .env.example .env.local
-
-# 3. Dev-Server starten
-npm run dev
+cp .env.example .env.local     # NEXT_PUBLIC_API_URL=http://localhost:3001
+npm run dev                    # http://localhost:3000
 ```
 
-App läuft auf http://localhost:3000
+Dazu die API starten (Repo `24pray-server`, `npm run dev` → :3001). Ohne
+`SMTP_URL` läuft der **Testmodus-Login**: die Login-Seite zeigt einen
+Direkt-Button, kein Postfach nötig.
 
-## Deployment
-Automatisch via Vercel bei Push auf `main`.
+```bash
+npm test          # Vitest (lib/time, Slot-Zustandslogik)
+npx next lint     # inkl. Roh-Paletten-Verbot (nur semantische Farb-Tokens)
+npx tsc --noEmit
+```
+
+⚠️ Nie `npm run build` neben laufendem `npm run dev` — beide teilen `.next/`,
+der Dev-Server verliert sonst seine Assets.
+
+## Struktur
+
+```
+src/app/            Screens (Landing, auth/, dashboard, projects/, join/)
+src/components/ui/       Primitives (Button, Sheet, Toast, …)
+src/components/patterns/ Domänen-Muster (Brand, Globe, AppShell, InviteCard, …)
+src/components/slots/    Herzstück: Slot-Grid (ChainBand, SlotList, SlotSheet, Logik+Store)
+src/lib/            api-Client, time (Projekt-TZ), i18n (de vollständig, en vollständig),
+                    cities (Ort-Autocomplete), mylocation („Mein Ort", localStorage)
+docs/               DESIGN-VISION.md · specs/ (technische Spec) · WHITE-LABEL.md
+```
+
+## Design-System
+
+- `docs/DESIGN-VISION.md` — Konzept „Vigil" / Palette „Kraft der Morgenröte"
+- `docs/specs/2026-07-06-design-system-and-slot-grid-spec.md` — verbindliche Spec
+  (Tokens, Komponenten-Contracts, Slot-Zustands-Matrix)
+- `docs/WHITE-LABEL.md` — eigene Instanz einfärben (reiner Token-Swap)
+
+## Deployment (Produktion)
+
+Läuft auf einem VPS hinter nginx zusammen mit der API (eine Origin,
+`NEXT_PUBLIC_API_URL=/api` → kein CORS, kein Rebuild bei Domain-Wechsel).
+**Vollständiges, reproduzierbares Runbook:** `24pray-server/deploy/README.md`
+(Erst-Setup, Update-Deploy, HTTPS, SMTP, Betrieb).

@@ -1,64 +1,83 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { CheckCircle2, XCircle } from 'lucide-react';
 import { api } from '@/lib/api';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
+import { CenterShell } from '@/components/patterns/CenterShell';
+import { t } from '@/lib/i18n';
 
-export default function VerifyPage() {
+function VerifyLoading() {
+  return (
+    <div className="flex flex-col items-center gap-3 text-center">
+      <Spinner size={40} className="text-accent" />
+      <p className="text-ink-muted">{t('verifying')}</p>
+    </div>
+  );
+}
+
+function VerifyInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const ran = useRef(false); // Guard gegen StrictMode-Doppel-Effect (Spec §6.4 FE-Teil)
 
   useEffect(() => {
+    if (ran.current) return;
+    ran.current = true;
+
     const token = searchParams.get('token');
     if (!token) {
       setStatus('error');
       return;
     }
-
     api
       .post('/auth/verify', { token })
       .then(() => {
         setStatus('success');
-        setTimeout(() => router.push('/dashboard'), 1500);
+        setTimeout(() => router.push('/dashboard'), 1200);
       })
-      .catch(() => {
-        setStatus('error');
-      });
+      .catch(() => setStatus('error'));
   }, [searchParams, router]);
 
+  if (status === 'loading') return <VerifyLoading />;
+
+  if (status === 'success') {
+    return (
+      <Card elevation={2} className="w-full max-w-[380px] text-center">
+        <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-positive/15 text-positive">
+          <CheckCircle2 size={26} />
+        </span>
+        <h1 className="font-display text-2xl font-semibold text-ink">{t('loggedIn')}</h1>
+        <p className="mt-2 text-sm text-ink-muted">{t('redirecting')}</p>
+      </Card>
+    );
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      {status === 'loading' && (
-        <>
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-brand-100 border-t-brand-400" />
-          <p className="text-[var(--text-muted)]">Link wird verifiziert...</p>
-        </>
-      )}
+    <Card elevation={2} className="w-full max-w-[380px] text-center">
+      <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-danger/15 text-danger">
+        <XCircle size={26} />
+      </span>
+      <h1 className="font-display text-2xl font-semibold text-ink">{t('linkInvalid')}</h1>
+      <p className="mt-2 text-sm text-ink-muted">{t('linkInvalidBody')}</p>
+      <Button asChild variant="secondary" className="mt-5">
+        <Link href="/auth/login">{t('requestNewLink')}</Link>
+      </Button>
+    </Card>
+  );
+}
 
-      {status === 'success' && (
-        <>
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
-            <span className="text-3xl">✓</span>
-          </div>
-          <h1 className="font-display text-2xl font-bold">Eingeloggt!</h1>
-          <p className="mt-2 text-sm text-[var(--text-muted)]">
-            Du wirst weitergeleitet...
-          </p>
-        </>
-      )}
-
-      {status === 'error' && (
-        <>
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
-            <span className="text-3xl">✕</span>
-          </div>
-          <h1 className="font-display text-2xl font-bold">Link ungültig</h1>
-          <p className="mt-2 text-sm text-[var(--text-muted)]">
-            Dieser Link ist abgelaufen oder wurde bereits verwendet.
-          </p>
-        </>
-      )}
-    </main>
+export default function VerifyPage() {
+  return (
+    <CenterShell>
+      <Suspense fallback={<VerifyLoading />}>
+        <VerifyInner />
+      </Suspense>
+    </CenterShell>
   );
 }

@@ -1,25 +1,53 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { MailCheck } from 'lucide-react';
 import { api } from '@/lib/api';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Label, FieldError } from '@/components/ui/Label';
+import { Card } from '@/components/ui/Card';
+import { CenterShell } from '@/components/patterns/CenterShell';
+import { Brand } from '@/components/patterns/Brand';
 import { t } from '@/lib/i18n';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [devLoginUrl, setDevLoginUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [code, setCode] = useState('');
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeError, setCodeError] = useState('');
+
+  // Alternative zum Link: 6-stelliger Code aus der Mail (praktisch auf einem anderen Gerät).
+  const handleCodeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCodeLoading(true);
+    setCodeError('');
+    try {
+      await api.post('/auth/verify-code', { email, code });
+      router.push('/dashboard');
+    } catch (err) {
+      setCodeError((err as Error).message);
+      setCodeLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
-      await api.post('/auth/magic-link', { email });
+      // Testmodus (kein SMTP): API liefert devLoginUrl → direkt einloggbar ohne Postfach.
+      const res = await api.post<{ devLoginUrl?: string }>('/auth/magic-link', { email });
+      setDevLoginUrl(res?.devLoginUrl ?? null);
       setSent(true);
     } catch {
-      setError('Etwas ist schiefgelaufen. Bitte versuche es erneut.');
+      setError(t('loginError'));
     } finally {
       setLoading(false);
     }
@@ -27,53 +55,75 @@ export default function LoginPage() {
 
   if (sent) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
-          <span className="text-3xl">✉️</span>
-        </div>
-        <h1 className="font-display text-2xl font-bold">{t('checkEmail')}</h1>
-        <p className="mt-2 max-w-[300px] text-sm text-[var(--text-muted)]">
-          Wir haben dir einen Login-Link an <strong>{email}</strong> geschickt.
-          Klicke den Link in der E-Mail um dich einzuloggen.
-        </p>
-      </main>
+      <CenterShell>
+        <Card elevation={2} className="w-full max-w-[380px] text-center">
+          <span className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-positive/15 text-positive">
+            <MailCheck size={26} />
+          </span>
+          <h1 className="font-display text-2xl font-semibold text-ink">{t('checkEmail')}</h1>
+          <p className="mt-2 text-sm text-ink-muted">{t('checkEmailBody', { email })}</p>
+          {devLoginUrl && (
+            <div className="mt-5 rounded-md border border-accent/30 bg-accent-soft/40 p-3">
+              <p className="mb-2 text-xs text-ink-muted">{t('devModeHint')}</p>
+              <Button asChild className="w-full">
+                <a href={devLoginUrl}>{t('devLoginNow')}</a>
+              </Button>
+            </div>
+          )}
+
+          <form onSubmit={handleCodeSubmit} className="mt-6 border-t border-border pt-5 text-left">
+            <Label htmlFor="code">{t('codeLabel')}</Label>
+            <Input
+              id="code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="\d{6}"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="000000"
+              invalid={!!codeError}
+              className="tnum tracking-[0.3em]"
+            />
+            <p className="mt-1 text-xs text-ink-muted">{t('codeHint')}</p>
+            <FieldError>{codeError}</FieldError>
+            <Button type="submit" variant="secondary" loading={codeLoading} disabled={code.length !== 6} className="mt-3 w-full">
+              {t('codeSubmit')}
+            </Button>
+          </form>
+        </Card>
+      </CenterShell>
     );
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6">
-      <div className="w-full max-w-[360px]">
-        <h1 className="font-display text-2xl font-bold">{t('login')}</h1>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
-          Wir senden dir einen Login-Link per E-Mail.
-        </p>
+    <CenterShell>
+      <div className="w-full max-w-[380px]">
+        <Brand size="sm" className="mb-6" />
+        <Card elevation={2}>
+          <h1 className="font-display text-2xl font-semibold text-ink">{t('login')}</h1>
+          <p className="mt-1 text-sm text-ink-muted">{t('loginSubtitle')}</p>
 
-        <form onSubmit={handleSubmit} className="mt-8">
-          <label className="mb-1.5 block text-sm font-medium text-[var(--text-muted)]">
-            E-Mail
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="deine@email.de"
-            required
-            className="w-full rounded-xl border-[1.5px] border-[#E8E4DE] bg-white px-4 py-3 text-[15px] outline-none transition-colors focus:border-brand-400"
-          />
+          <form onSubmit={handleSubmit} className="mt-6">
+            <Label htmlFor="email">{t('emailLabel')}</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t('emailPlaceholder')}
+              required
+              invalid={!!error}
+              autoComplete="email"
+            />
+            <FieldError>{error}</FieldError>
 
-          {error && (
-            <p className="mt-2 text-sm text-red-500">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || !email}
-            className="mt-4 w-full rounded-xl bg-brand-400 px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-brand-500 disabled:opacity-50"
-          >
-            {loading ? 'Wird gesendet...' : 'Magic Link senden'}
-          </button>
-        </form>
+            <Button type="submit" loading={loading} disabled={!email} className="mt-4 w-full">
+              {loading ? t('sending') : t('sendMagicLink')}
+            </Button>
+          </form>
+        </Card>
       </div>
-    </main>
+    </CenterShell>
   );
 }

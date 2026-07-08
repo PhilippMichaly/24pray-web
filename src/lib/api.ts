@@ -56,7 +56,7 @@ class ApiClient {
 export const api = new ApiClient(API_URL);
 
 // ── Slot-Helper (Welle 2/3) ────────────────────
-import type { PrayerSlot, SlotView, PrayerRequestView, ProjectStats } from '@/types';
+import type { PrayerSlot, SlotView, PrayerRequestView, ProjectStats, User } from '@/types';
 
 /** Query-Suffix für den Invite-Token (PRIVATE-Ketten per Einladungslink, W3). */
 const inviteQ = (invite?: string) => (invite ? `?invite=${encodeURIComponent(invite)}` : '');
@@ -120,6 +120,18 @@ export interface GeoCity {
 /** Orts-Suche (GeoNames, W3.6): weltweit, alle Sprachvarianten. */
 export function geocodeCity(q: string) {
   return api.get<GeoCity[]>(`/geocode?q=${encodeURIComponent(q)}`);
+}
+
+// ── Mini-Profil (Punkt 2 + 5) ───────────────────
+
+/** Anzeigenamen ändern. */
+export function updateMe(name: string) {
+  return api.patch<User>('/me', { name });
+}
+
+/** Konto endgültig löschen (Cascade siehe API). */
+export function deleteMe() {
+  return api.delete<void>('/me');
 }
 
 export function getReminderPref() {

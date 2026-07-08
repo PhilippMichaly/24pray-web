@@ -29,6 +29,7 @@ export interface PrayerProject {
   timezone: string;
   slotDurationMinutes: number;
   maskNames?: boolean;
+  notifyOnBooking?: boolean;
   linkWhatsapp?: string | null;
   linkTelegram?: string | null;
   linkSignal?: string | null;

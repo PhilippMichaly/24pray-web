@@ -12,6 +12,7 @@ import { InviteCard } from '@/components/patterns/InviteCard';
 import { LocationCard } from '@/components/patterns/LocationCard';
 import { GroupLinksBar } from '@/components/patterns/GroupLinksBar';
 import { GroupLinksCard } from '@/components/patterns/GroupLinksCard';
+import { ConcernCard } from '@/components/patterns/ConcernCard';
 import { NextSlotCard } from '@/components/patterns/NextSlotCard';
 import { Tabs, TabPanel } from '@/components/ui/Tabs';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -155,6 +156,7 @@ function ProjectPageInner() {
           {inviteUrl && (
             <div className="mb-6 space-y-3">
               <LocationCard project={project} onUpdated={setProject} />
+              <ConcernCard project={project} onUpdated={setProject} />
               <GroupLinksCard project={project} onUpdated={setProject} />
               <InviteCard inviteUrl={inviteUrl} />
             </div>

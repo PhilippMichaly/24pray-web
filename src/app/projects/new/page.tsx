@@ -38,6 +38,7 @@ export default function NewProjectPage() {
   const [hours, setHours] = useState<number>(48);
   const [visibility, setVisibility] = useState<ProjectVisibility>('PRIVATE');
   const [maskNames, setMaskNames] = useState(false); // Opt-in (§E5-Revision): Default Klartext
+  const [notifyOnBooking, setNotifyOnBooking] = useState(true); // Default an (Punkt 10)
   const [links, setLinks] = useState({ linkWhatsapp: '', linkTelegram: '', linkSignal: '' });
   const [selectedCity, setSelectedCity] = useState<GeoCity | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +66,7 @@ export default function NewProjectPage() {
         timezone: tz,
         visibility,
         maskNames,
+        notifyOnBooking,
         ...(links.linkWhatsapp.trim() ? { linkWhatsapp: links.linkWhatsapp.trim() } : {}),
         ...(links.linkTelegram.trim() ? { linkTelegram: links.linkTelegram.trim() } : {}),
         ...(links.linkSignal.trim() ? { linkSignal: links.linkSignal.trim() } : {}),
@@ -196,6 +198,19 @@ export default function NewProjectPage() {
               <span className="min-w-0">
                 <span className="block text-sm text-ink">{t('maskNamesLabel')}</span>
                 <span className="block text-xs text-ink-muted">{t('maskNamesHint')}</span>
+              </span>
+            </label>
+
+            <label className="flex cursor-pointer items-start gap-2.5 rounded-md border bg-surface px-3 py-3">
+              <input
+                type="checkbox"
+                checked={notifyOnBooking}
+                onChange={(e) => setNotifyOnBooking(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[hsl(var(--accent))]"
+              />
+              <span className="min-w-0">
+                <span className="block text-sm text-ink">{t('notifyOnBookingLabel')}</span>
+                <span className="block text-xs text-ink-muted">{t('notifyOnBookingHint')}</span>
               </span>
             </label>
 

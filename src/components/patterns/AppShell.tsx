@@ -33,7 +33,14 @@ function UserMenu() {
 
   return (
     <div className="flex items-center gap-2">
-      <Avatar name={user.name} size="sm" />
+      <Link
+        href="/profil"
+        className="flex min-w-0 items-center gap-2 rounded-md py-1 pl-1 pr-2 transition-colors hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        title={t('profileTitle')}
+      >
+        <Avatar name={user.name} size="sm" />
+        <span className="hidden max-w-[8rem] truncate text-sm text-ink sm:inline">{user.name}</span>
+      </Link>
       <button
         onClick={onLogout}
         aria-label={t('logout')}

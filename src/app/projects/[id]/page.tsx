@@ -10,6 +10,8 @@ import { AppShell } from '@/components/patterns/AppShell';
 import { TimezoneHint } from '@/components/patterns/TimezoneHint';
 import { InviteCard } from '@/components/patterns/InviteCard';
 import { LocationCard } from '@/components/patterns/LocationCard';
+import { GroupLinksBar } from '@/components/patterns/GroupLinksBar';
+import { GroupLinksCard } from '@/components/patterns/GroupLinksCard';
 import { NextSlotCard } from '@/components/patterns/NextSlotCard';
 import { Tabs, TabPanel } from '@/components/ui/Tabs';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -110,7 +112,18 @@ function ProjectPageInner() {
           <header className="mb-5">
             <h1 className="font-display text-2xl font-semibold text-ink">{project.title}</h1>
             <p className="mt-1 text-sm text-ink-muted">{t('organizerLabel', { name: project.organizerName })}</p>
+            <div className="mt-3">
+              <GroupLinksBar project={project} />
+            </div>
           </header>
+
+          {/* Eine Kette = EIN Anliegen: die Beschreibung ist das Herzstück, nicht Beiwerk. */}
+          {project.description && (
+            <section className="mb-5 rounded-md border border-gold/30 bg-gold/5 px-4 py-3">
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">{t('concernHeading')}</h2>
+              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-ink">{project.description}</p>
+            </section>
+          )}
 
           <div className="mb-5">
             <ChainProgress
@@ -142,6 +155,7 @@ function ProjectPageInner() {
           {inviteUrl && (
             <div className="mb-6 space-y-3">
               <LocationCard project={project} onUpdated={setProject} />
+              <GroupLinksCard project={project} onUpdated={setProject} />
               <InviteCard inviteUrl={inviteUrl} />
             </div>
           )}
@@ -169,7 +183,13 @@ function ProjectPageInner() {
               )}
             </TabPanel>
             <TabPanel value="requests" className="pt-5">
-              <RequestsFeed projectId={project.id} projectTz={grid.tz} isLoggedIn={!!currentUserId} invite={invite} />
+              <RequestsFeed
+                projectId={project.id}
+                projectTz={grid.tz}
+                isLoggedIn={!!currentUserId}
+                isOrganizer={!!currentUserId && project.organizerId === currentUserId}
+                invite={invite}
+              />
             </TabPanel>
             <TabPanel value="stats" className="pt-5">
               <StatsPanel projectId={project.id} invite={invite} />

@@ -38,6 +38,7 @@ export default function NewProjectPage() {
   const [hours, setHours] = useState<number>(48);
   const [visibility, setVisibility] = useState<ProjectVisibility>('PRIVATE');
   const [maskNames, setMaskNames] = useState(false); // Opt-in (§E5-Revision): Default Klartext
+  const [links, setLinks] = useState({ linkWhatsapp: '', linkTelegram: '', linkSignal: '' });
   const [selectedCity, setSelectedCity] = useState<GeoCity | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -64,6 +65,9 @@ export default function NewProjectPage() {
         timezone: tz,
         visibility,
         maskNames,
+        ...(links.linkWhatsapp.trim() ? { linkWhatsapp: links.linkWhatsapp.trim() } : {}),
+        ...(links.linkTelegram.trim() ? { linkTelegram: links.linkTelegram.trim() } : {}),
+        ...(links.linkSignal.trim() ? { linkSignal: links.linkSignal.trim() } : {}),
         ...(city
           ? { locationName: city.name, locationLat: city.lat, locationLon: city.lon }
           : {}),
@@ -194,6 +198,29 @@ export default function NewProjectPage() {
                 <span className="block text-xs text-ink-muted">{t('maskNamesHint')}</span>
               </span>
             </label>
+
+            <div>
+              <span className="mb-1.5 block text-sm font-medium text-ink-muted">{t('groupLinksTitle')}</span>
+              <p className="mb-2 text-xs text-ink-muted">{t('groupLinksHint')}</p>
+              <div className="space-y-2">
+                {([
+                  ['linkWhatsapp', 'WhatsApp', 'https://chat.whatsapp.com/…'],
+                  ['linkTelegram', 'Telegram', 'https://t.me/…'],
+                  ['linkSignal', 'Signal', 'https://signal.group/…'],
+                ] as const).map(([key, label, ph]) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="w-20 shrink-0 text-sm text-ink">{label}</span>
+                    <Input
+                      aria-label={label}
+                      type="url"
+                      value={links[key]}
+                      onChange={(e) => setLinks((l) => ({ ...l, [key]: e.target.value }))}
+                      placeholder={ph}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {startDate && endIso && (
               <div className="rounded-md bg-surface-sunken px-3 py-2 text-sm text-ink-muted tnum">

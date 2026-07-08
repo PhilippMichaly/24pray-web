@@ -6,7 +6,6 @@ import { getRequests, postRequest } from '@/lib/api';
 import type { PrayerRequestView } from '@/types';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Input';
 import { Label, FieldError } from '@/components/ui/Label';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -18,13 +17,14 @@ export interface RequestsFeedProps {
   projectId: string;
   projectTz: string;
   isLoggedIn: boolean;
+  /** Eine Kette = ein Anliegen des Erstellers: nur der Owner postet Updates. */
+  isOrganizer?: boolean;
   invite?: string;
 }
 
-export function RequestsFeed({ projectId, projectTz, isLoggedIn, invite }: RequestsFeedProps) {
+export function RequestsFeed({ projectId, projectTz, isLoggedIn, isOrganizer, invite }: RequestsFeedProps) {
   const [items, setItems] = useState<PrayerRequestView[] | null>(null);
   const [text, setText] = useState('');
-  const [guestName, setGuestName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
@@ -41,15 +41,10 @@ export function RequestsFeed({ projectId, projectTz, isLoggedIn, invite }: Reque
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (text.trim().length < 2) return setError(t('errRequestTooShort'));
-    if (!isLoggedIn && guestName.trim().length < 2) return setError(t('errNameRequired'));
     setError(null);
     setSending(true);
     try {
-      await postRequest(
-        projectId,
-        { text: text.trim(), authorName: isLoggedIn ? undefined : guestName.trim() },
-        invite,
-      );
+      await postRequest(projectId, { text: text.trim() }, invite);
       setText('');
       load();
     } catch (err) {
@@ -61,13 +56,8 @@ export function RequestsFeed({ projectId, projectTz, isLoggedIn, invite }: Reque
 
   return (
     <div className="space-y-6">
+      {isOrganizer && (
       <form onSubmit={submit} className="space-y-3">
-        {!isLoggedIn && (
-          <div>
-            <Label htmlFor="reqName">{t('name')}</Label>
-            <Input id="reqName" value={guestName} onChange={(e) => setGuestName(e.target.value)} autoComplete="name" />
-          </div>
-        )}
         <div>
           <Label htmlFor="reqText">{t('requestLabel')}</Label>
           <Textarea
@@ -84,6 +74,7 @@ export function RequestsFeed({ projectId, projectTz, isLoggedIn, invite }: Reque
           {t('shareRequest')}
         </Button>
       </form>
+      )}
 
       {items === null ? (
         <div className="space-y-3">

@@ -28,6 +28,7 @@ export interface PrayerProject {
   endDate: string;
   timezone: string;
   slotDurationMinutes: number;
+  maskNames?: boolean;
   locationName?: string | null;
   inviteToken: string;
   organizerId: string;

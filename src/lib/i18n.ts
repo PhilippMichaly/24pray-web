@@ -53,6 +53,8 @@ const de = {
   // Dashboard
   yourProjects: 'Deine Gebetsketten',
   openChains: 'Offene Gebetsketten',
+  maskNamesLabel: 'Namen für Außenstehende maskieren',
+  maskNamesHint: 'Standard: Namen sind sichtbar — das schafft Verbindung. Aktivieren, wenn Betende anonym bleiben sollen („Ruth K.").',
   openChainsHint: 'Zum Mitbeten brauchst du kein Konto — öffne eine Kette und übernimm eine Stunde.',
   newProject: 'Neue Kette',
   pleaseLogin: 'Bitte {login}.',
@@ -237,6 +239,8 @@ const en: Record<keyof typeof de, string> = {
 
   yourProjects: 'Your prayer chains',
   openChains: 'Open prayer chains',
+  maskNamesLabel: 'Mask names for outside viewers',
+  maskNamesHint: 'Default: names are visible — it builds connection. Enable if intercessors should stay anonymous (“Ruth K.”).',
   openChainsHint: 'No account needed to join — open a chain and take an hour.',
   newProject: 'New chain',
   pleaseLogin: 'Please {login}.',

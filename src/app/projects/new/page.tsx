@@ -37,6 +37,7 @@ export default function NewProjectPage() {
   const [startDate, setStartDate] = useState('');
   const [hours, setHours] = useState<number>(48);
   const [visibility, setVisibility] = useState<ProjectVisibility>('PRIVATE');
+  const [maskNames, setMaskNames] = useState(false); // Opt-in (§E5-Revision): Default Klartext
   const [selectedCity, setSelectedCity] = useState<GeoCity | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -62,6 +63,7 @@ export default function NewProjectPage() {
         endDate: new Date(start.getTime() + hours * 3600_000).toISOString(),
         timezone: tz,
         visibility,
+        maskNames,
         ...(city
           ? { locationName: city.name, locationLat: city.lat, locationLon: city.lon }
           : {}),
@@ -179,6 +181,19 @@ export default function NewProjectPage() {
                 })}
               </div>
             </div>
+
+            <label className="flex cursor-pointer items-start gap-2.5 rounded-md border bg-surface px-3 py-3">
+              <input
+                type="checkbox"
+                checked={maskNames}
+                onChange={(e) => setMaskNames(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[hsl(var(--accent))]"
+              />
+              <span className="min-w-0">
+                <span className="block text-sm text-ink">{t('maskNamesLabel')}</span>
+                <span className="block text-xs text-ink-muted">{t('maskNamesHint')}</span>
+              </span>
+            </label>
 
             {startDate && endIso && (
               <div className="rounded-md bg-surface-sunken px-3 py-2 text-sm text-ink-muted tnum">

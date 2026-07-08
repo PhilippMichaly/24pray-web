@@ -3,11 +3,11 @@
  * ⚠️ VOR DEM DEPLOY AUSFÜLLEN — einzige Stelle, beide Seiten lesen von hier.
  */
 export const ANBIETER = {
-  name: '[Vor- und Nachname eintragen]',
-  strasse: '[Straße und Hausnummer eintragen]',
-  ort: '[PLZ und Ort eintragen]',
+  name: 'Philipp Michaly',
+  strasse: 'Über der Glonn 16',
+  ort: '85238 Petershausen',
   land: 'Deutschland',
-  email: '[kontakt@24pray.org — E-Mail-Adresse bestätigen/ändern]',
+  email: 'info@24pray.org',
 };
 
 /** true, solange die Platzhalter noch nicht ersetzt sind (zeigt Hinweisbanner). */

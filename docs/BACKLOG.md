@@ -32,8 +32,12 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
    drei Punkte „alle Stunden / Erinnerungen / Name gemerkt"; im Gast-Erfolgs-Screen kompakt
    unter dem Einladungs-Block, auf der Login-Seite zwischen Subtitle und Formular. Kein Zwang,
    nur Sichtbarkeit.)
-7. **Web-Push (PWA)** — opt-in für Stunden-Erinnerung + Owner-Updates; ohne Dritt-Dienst
-   (VAPID self-hosted). Zweiter Kanal neben Mail.
+7. ~~**Web-Push (PWA)**~~ — GEBAUT 2026-07-09 (Opt-in pro Gerät auf der Profil-Seite, nur für
+   Konten; Stunden-Erinnerung + Owner-Updates als Zweitkanal neben Mail; self-hosted VAPID,
+   kein Drittdienst; abgelaufene Subscriptions werden beim Senden automatisch aufgeräumt.
+   Deploy: `npx web-push generate-vapid-keys` → VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY/VAPID_SUBJECT
+   in /etc/24pray-api.env; ohne Keys ist das Feature serverseitig aus und die Profil-Karte
+   erklärt das ehrlich.)
 8. ~~**Cookiefreies, aggregiertes Server-Zählen**~~ — GEBAUT 2026-07-09 (Tageszähler
    landing/list/watch per Seiten-Ping, booking serverseitig im Buchungs-Handler; gespeichert
    wird AUSSCHLIESSLICH date+step+count. Lesen: GET /stats/funnel?token=… — FUNNEL_TOKEN
@@ -83,6 +87,11 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 - POST /projects/:id/slots prüft kein canReadProject (Buchung auf PRIVATE-Wachen nur mit
   projectId möglich; cuid praktisch nicht ratbar) — Hardening: Check + invite-Mitgabe im
   bookSlot-Client (Review Backlog-4 F2)
+- Web-Push iOS-Safari: Push nur als installierte Home-Screen-PWA — Profil-Karte sollte das
+  erklären statt generisch zu scheitern; zudem Permission-Anfrage nach await-Roundtrips
+  (User-Activation-Risiko Safari) prüfen (Review P7)
+- Push-Test Owner-Ausschluss: kein push-spezifischer Test, dass der Owner beim eigenen Update
+  keinen Push bekommt (transitiv gedeckt; Review P7, Low)
 
 ## Beim User (nicht baubar)
 

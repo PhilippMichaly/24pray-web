@@ -69,6 +69,10 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
   sauberer (Review P8, Low)
 - Feedback-Dialog: API-Fehlertexte lokalisieren (404 „Nicht gefunden" nach Deploy ohne Env,
   429/Zod englisch) — eigene i18n-Fehlermeldung statt roher API-Message (Review P9, Low)
+- me.ts deleteMe: pushSubscription nur via DB-Cascade geloescht (funktioniert), explizites
+  tx.deleteMany waere konsistenter zum uebrigen tx-Muster (Review P7-F2, Kosmetik)
+- sw.js notificationclick: navigate() auf uncontrolled Client kann rejecten (erster Besuch) —
+  Klick fokussiert dann nur; Selbstheilung beim naechsten Load (Review P7-F3, Low)
 - Wachen-Sprache nachträglich änderbar machen (UpdateProjectBody hat kein language-Feld; Review P5)
 - Dashboard: Filter-Select vs. UI-Sprach-Umschalter besser unterscheidbar machen (Mini-Label/Filter-Icon; Review P5, Low)
 - Alt-Mails (Buchung, Erinnerung, Verschiebung, Farewell) auf Empfänger-Locale umstellen

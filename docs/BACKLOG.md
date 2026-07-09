@@ -21,9 +21,10 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
    (Bestätigungs-Geste nach der Stunde statt bloßem Zeitablauf?)
 3. **Über-uns-/Werte-Seite** — wer steht dahinter, Glaubensbasis, warum kostenlos/werbefrei,
    Datensparsamkeit als Haltung. Vertrauensfundament im Gebets-Kontext. Reiner Text + Footer-Link.
-4. **Einladungs-Moment nach Buchung** — Erfolgs-Screen + Bestätigungsmail: „Lade jemanden ein,
-   die Stunde neben dir zu übernehmen" (Share-/Copy-Link auf die Wache). Virale Geste am
-   Punkt höchster Motivation.
+4. ~~**Einladungs-Moment nach Buchung**~~ — GEBAUT 2026-07-09 (Gast-Erfolgs-Screen: „Lade
+   jemanden ein, die Stunde neben dir zu übernehmen" + Share-Trio WhatsApp/Telegram/Signal-
+   System-Share; Bestätigungsmail: Einladungs-Absatz mit Wachen-Link, PRIVATE mit ?invite=.
+   Share-Logik in gemeinsame Lib src/lib/share.ts extrahiert, RequestsFeed nutzt sie mit.)
 5. **Listen-Filter im Dashboard** — mindestens Sprache (Wache bekommt language-Feld beim
    Anlegen, default = UI-Sprache), sortiert nach „braucht Hilfe" (größte Lücke zuerst?);
    Vorstufe zu Kategorien.

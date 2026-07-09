@@ -299,6 +299,17 @@ const de = {
   noStatsHintDay: 'Sobald Tage vorbei sind, erscheinen sie hier.',
   dayRunsFromToLabel: 'Läuft von {start} bis {start} des Folgetags',
   nextSlotTitleDay: 'Dein nächster Tag',
+
+  // Feedback + Open-Source-Hinweis
+  feedbackLink: 'Feedback',
+  feedbackTitle: 'Dein Feedback',
+  feedbackHint: 'Fehler gefunden oder eine Idee? Schreib uns — ohne Anmeldung.',
+  feedbackMessageLabel: 'Nachricht',
+  feedbackEmailLabel: 'Antwort-Adresse (optional)',
+  feedbackSend: 'Absenden',
+  feedbackThanks: 'Danke! Dein Feedback ist angekommen.',
+  feedbackGithub: 'Oder auf GitHub melden',
+  githubRepoLabel: 'Quellcode auf GitHub — 24pray ist Open Source',
 } as const;
 
 // English — vollständig (W3.3). `Record<…>` erzwingt: neuer de-Key ⇒ en-Pflicht.
@@ -582,6 +593,16 @@ const en: Record<keyof typeof de, string> = {
   noStatsHintDay: 'Completed days will show up here.',
   dayRunsFromToLabel: 'Runs from {start} to {start} the next day',
   nextSlotTitleDay: 'Your next day',
+
+  feedbackLink: 'Feedback',
+  feedbackTitle: 'Your feedback',
+  feedbackHint: 'Found a bug or have an idea? Write to us — no sign-in needed.',
+  feedbackMessageLabel: 'Message',
+  feedbackEmailLabel: 'Reply address (optional)',
+  feedbackSend: 'Send',
+  feedbackThanks: 'Thank you! Your feedback has arrived.',
+  feedbackGithub: 'Or report on GitHub',
+  githubRepoLabel: 'Source code on GitHub — 24pray is open source',
 };
 
 // Español — vollständig (i18n-Erweiterung W4). Leitbegriffe: „vigilia de oración"
@@ -867,6 +888,16 @@ const es: Record<keyof typeof de, string> = {
   noStatsHintDay: 'En cuanto pasen los días, aparecerán aquí.',
   dayRunsFromToLabel: 'Va de {start} a {start} del día siguiente',
   nextSlotTitleDay: 'Tu próximo día',
+
+  feedbackLink: 'Comentarios',
+  feedbackTitle: 'Tu opinión',
+  feedbackHint: '¿Encontraste un error o tienes una idea? Escríbenos — sin registro.',
+  feedbackMessageLabel: 'Mensaje',
+  feedbackEmailLabel: 'Dirección de respuesta (opcional)',
+  feedbackSend: 'Enviar',
+  feedbackThanks: '¡Gracias! Tu mensaje ha llegado.',
+  feedbackGithub: 'O repórtalo en GitHub',
+  githubRepoLabel: 'Código fuente en GitHub — 24pray es open source',
 };
 
 // עברית — vollständig (i18n-Erweiterung W4, RTL). Leitbegriffe: „משמרת תפילה"
@@ -1152,6 +1183,16 @@ const he: Record<keyof typeof de, string> = {
   noStatsHintDay: 'ברגע שהימים יחלפו, הם יופיעו כאן.',
   dayRunsFromToLabel: 'נמשך מ-{start} עד {start} ביום שלמחרת',
   nextSlotTitleDay: 'היום הבא שלך',
+
+  feedbackLink: 'משוב',
+  feedbackTitle: 'המשוב שלך',
+  feedbackHint: 'מצאתם באג או יש לכם רעיון? כתבו לנו — בלי הרשמה.',
+  feedbackMessageLabel: 'הודעה',
+  feedbackEmailLabel: 'כתובת לתשובה (לא חובה)',
+  feedbackSend: 'שליחה',
+  feedbackThanks: 'תודה! המשוב שלכם התקבל.',
+  feedbackGithub: 'או דווחו ב-GitHub',
+  githubRepoLabel: 'קוד המקור ב-GitHub — ‏24pray הוא קוד פתוח',
 };
 
 // العربية — vollständig (i18n-Erweiterung W4, RTL, MSA/فصحى). Leitbegriffe: „سهرة صلاة"
@@ -1437,6 +1478,16 @@ const ar: Record<keyof typeof de, string> = {
   noStatsHintDay: 'بمجرد مرور الأيام، ستظهر هنا.',
   dayRunsFromToLabel: 'يمتد من {start} إلى {start} في اليوم التالي',
   nextSlotTitleDay: 'يومك القادم',
+
+  feedbackLink: 'ملاحظات',
+  feedbackTitle: 'ملاحظاتك',
+  feedbackHint: 'وجدت خطأ أو لديك فكرة؟ اكتب لنا — دون تسجيل.',
+  feedbackMessageLabel: 'الرسالة',
+  feedbackEmailLabel: 'عنوان للرد (اختياري)',
+  feedbackSend: 'إرسال',
+  feedbackThanks: 'شكرًا! وصلت ملاحظاتك.',
+  feedbackGithub: 'أو أبلغ عبر GitHub',
+  githubRepoLabel: 'الشيفرة المصدرية على GitHub — ‏24pray مفتوح المصدر',
 };
 
 type TranslationKey = keyof typeof de;

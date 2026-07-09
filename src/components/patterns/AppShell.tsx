@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut } from 'lucide-react';
+import { LogOut, GitFork } from 'lucide-react';
 import { Brand } from './Brand';
 import { ThemeToggle } from './ThemeToggle';
 import { LocaleToggle } from './LocaleToggle';
+import { FeedbackDialog, GITHUB_REPO_URL } from './FeedbackDialog';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/use-auth';
@@ -72,6 +73,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-border">
         <div className="mx-auto max-w-3xl px-4 py-6 text-center text-xs text-ink-muted">
           24pray · {t('tagline')}
+          <span className="mx-2">·</span>
+          <FeedbackDialog />
+          <span className="mx-2">·</span>
+          <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer"
+             aria-label={t('githubRepoLabel')} title={t('githubRepoLabel')}
+             className="inline-flex align-middle text-ink-muted hover:text-ink">
+            <GitFork size={14} aria-hidden />
+          </a>
           <span className="mx-2">·</span>
           <Link href="/impressum" className="underline underline-offset-2 hover:text-ink">{t('legalImprint')}</Link>
           <span className="mx-2">·</span>

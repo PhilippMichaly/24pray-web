@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogIn, HeartHandshake, PlusCircle, X, MapPin, type LucideIcon } from 'lucide-react';
+import { LogIn, HeartHandshake, PlusCircle, X, MapPin, GitFork, type LucideIcon } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useFunnelPing } from '@/lib/funnel';
 import { Sheet } from '@/components/ui/Sheet';
@@ -11,6 +11,7 @@ import { Brand } from '@/components/patterns/Brand';
 import { ThemeToggle } from '@/components/patterns/ThemeToggle';
 import { LocaleToggle } from '@/components/patterns/LocaleToggle';
 import { Globe, type ChainPoint } from '@/components/patterns/Globe';
+import { FeedbackDialog, GITHUB_REPO_URL } from '@/components/patterns/FeedbackDialog';
 import { Button } from '@/components/ui/Button';
 import { t } from '@/lib/i18n';
 
@@ -139,6 +140,14 @@ export default function HomePage() {
       <footer className="z-10 pb-4 pt-4 text-center text-xs text-ink-muted opacity-70">
         <p className="mb-1 text-xs text-ink-muted">{t('lightOfWorld')}</p>
         24pray · {t('earthCredit')}
+        <span className="mx-2">·</span>
+        <FeedbackDialog />
+        <span className="mx-2">·</span>
+        <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer"
+           aria-label={t('githubRepoLabel')} title={t('githubRepoLabel')}
+           className="inline-flex align-middle text-ink-muted hover:text-ink">
+          <GitFork size={14} aria-hidden />
+        </a>
         <span className="mx-2">·</span>
         <Link href="/impressum" className="underline underline-offset-2 hover:text-ink">{t('legalImprint')}</Link>
         <span className="mx-2">·</span>

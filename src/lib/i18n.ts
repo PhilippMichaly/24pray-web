@@ -54,6 +54,8 @@ const de = {
   // Dashboard
   yourProjects: 'Deine Gebetswachen',
   openChains: 'Offene Gebetswachen',
+  filterAllLanguages: 'Alle Sprachen',
+  filterNoMatches: 'Keine Wachen in dieser Sprache.',
   legalImprint: 'Impressum',
   legalPrivacy: 'Datenschutz',
   consentLogin: 'Mit der Anmeldung stimmst du der',
@@ -345,6 +347,8 @@ const en: Record<keyof typeof de, string> = {
 
   yourProjects: 'Your prayer watches',
   openChains: 'Open prayer watches',
+  filterAllLanguages: 'All languages',
+  filterNoMatches: 'No watches in this language.',
   legalImprint: 'Legal notice',
   legalPrivacy: 'Privacy',
   consentLogin: 'By signing in you agree to the',
@@ -623,6 +627,8 @@ const es: Record<keyof typeof de, string> = {
 
   yourProjects: 'Tus vigilias de oración',
   openChains: 'Vigilias de oración abiertas',
+  filterAllLanguages: 'Todos los idiomas',
+  filterNoMatches: 'No hay vigilias en este idioma.',
   legalImprint: 'Aviso legal',
   legalPrivacy: 'Privacidad',
   consentLogin: 'Al iniciar sesión aceptas la',
@@ -902,6 +908,8 @@ const he: Record<keyof typeof de, string> = {
 
   yourProjects: 'משמרות התפילה שלך',
   openChains: 'משמרות תפילה פתוחות',
+  filterAllLanguages: 'כל השפות',
+  filterNoMatches: 'אין משמרות בשפה זו.',
   legalImprint: 'פרטי החברה',
   legalPrivacy: 'פרטיות',
   consentLogin: 'בהתחברות אתם מסכימים ל',
@@ -1181,6 +1189,8 @@ const ar: Record<keyof typeof de, string> = {
 
   yourProjects: 'سهرات الصلاة الخاصة بك',
   openChains: 'سهرات الصلاة المفتوحة',
+  filterAllLanguages: 'كل اللغات',
+  filterNoMatches: 'لا توجد سهرات بهذه اللغة.',
   legalImprint: 'بيانات قانونية',
   legalPrivacy: 'الخصوصية',
   consentLogin: 'بتسجيل الدخول، فإنك توافق على',
@@ -1443,8 +1453,16 @@ const INTL_LOCALE_MAP: Record<Locale, string> = {
 export function intlLocale(): string {
   return INTL_LOCALE_MAP[currentLocale];
 }
+/** Native Sprachnamen — bewusst NICHT übersetzt (jeder erkennt seine Sprache im Original). */
+export const LOCALE_NAMES: Record<Locale, string> = {
+  de: 'Deutsch',
+  en: 'English',
+  es: 'Español',
+  he: 'עברית',
+  ar: 'العربية',
+};
 const LOCALE_KEY = '24pray:locale';
-const SUPPORTED_LOCALES: readonly Locale[] = ['de', 'en', 'es', 'he', 'ar'];
+export const SUPPORTED_LOCALES: readonly Locale[] = ['de', 'en', 'es', 'he', 'ar'];
 /** Manuelle Wahl (localStorage) schlägt Browser-Sprache; unbekannte Sprachen → Englisch. */
 export function detectLocale(): Locale {
   try {

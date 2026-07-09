@@ -27,6 +27,7 @@ export interface PrayerProject {
   startDate: string;
   endDate: string;
   timezone: string;
+  language?: string; // Sprache der Wache (de|en|es|he|ar) — Backlog 5; optional für alte API-Antworten
   slotDurationMinutes: number;
   maskNames?: boolean;
   notifyOnBooking?: boolean;

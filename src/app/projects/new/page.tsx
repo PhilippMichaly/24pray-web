@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { browserTz, formatDayHeader } from '@/lib/time';
 import { CityInput } from '@/components/patterns/CityInput';
 import type { GeoCity } from '@/lib/api';
-import { t } from '@/lib/i18n';
+import { t, getLocale } from '@/lib/i18n';
 
 type SplitUnit = 'hour' | 'day';
 
@@ -84,6 +84,7 @@ export default function NewProjectPage() {
         startDate: start.toISOString(),
         endDate: new Date(start.getTime() + hours * 3600_000).toISOString(),
         timezone: tz,
+        language: getLocale(), // Wachen-Sprache = UI-Sprache beim Anlegen (Backlog 5), wie tz still erfasst
         slotDurationMinutes,
         visibility,
         maskNames,

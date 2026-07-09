@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/use-auth';
 import type { ProjectWithStats } from '@/types';
 import { AppShell } from '@/components/patterns/AppShell';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FieldError } from '@/components/ui/Label';
@@ -15,7 +16,7 @@ import { ProjectCard } from '@/components/patterns/ProjectCard';
 import { NextSlotCard } from '@/components/patterns/NextSlotCard';
 import { buildViewModels } from '@/components/slots/logic';
 import type { SlotViewModel } from '@/components/slots/types';
-import { t } from '@/lib/i18n';
+import { t, LOCALE_NAMES, SUPPORTED_LOCALES } from '@/lib/i18n';
 
 interface Loaded {
   project: ProjectWithStats;
@@ -26,6 +27,7 @@ export default function DashboardPage() {
   const { user, loading } = useAuth();
   const [loaded, setLoaded] = useState<Loaded[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [langFilter, setLangFilter] = useState<string>('all');
   const now = Date.now();
 
   useEffect(() => {
@@ -64,6 +66,12 @@ export default function DashboardPage() {
       .sort((a, b) => Date.parse(a.m.startTime) - Date.parse(b.m.startTime));
     return mine[0] ?? null;
   }, [loaded, now]);
+
+  const visible = useMemo(() => {
+    if (!loaded) return null;
+    if (langFilter === 'all') return loaded;
+    return loaded.filter(({ project }) => (project.language ?? 'de') === langFilter);
+  }, [loaded, langFilter]);
 
   return (
     <AppShell>
@@ -119,13 +127,33 @@ export default function DashboardPage() {
               now={now}
             />
           )}
-          <ul className="space-y-3">
-            {loaded.map(({ project, models }) => (
-              <li key={project.id}>
-                <ProjectCard project={project} models={models} />
-              </li>
-            ))}
-          </ul>
+          {loaded.length > 1 && (
+            <div className="flex items-center justify-end">
+              <label htmlFor="langFilter" className="sr-only">{t('filterAllLanguages')}</label>
+              <Select
+                id="langFilter"
+                value={langFilter}
+                onChange={(e) => setLangFilter(e.target.value)}
+                className="w-auto py-1.5 text-sm"
+              >
+                <option value="all">{t('filterAllLanguages')}</option>
+                {SUPPORTED_LOCALES.map((l) => (
+                  <option key={l} value={l}>{LOCALE_NAMES[l]}</option>
+                ))}
+              </Select>
+            </div>
+          )}
+          {(visible ?? []).length === 0 ? (
+            <p className="py-6 text-center text-sm text-ink-muted">{t('filterNoMatches')}</p>
+          ) : (
+            <ul className="space-y-3">
+              {(visible ?? []).map(({ project, models }) => (
+                <li key={project.id}>
+                  <ProjectCard project={project} models={models} />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </AppShell>

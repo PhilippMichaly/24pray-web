@@ -5,10 +5,12 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 
 ## Paket „Web2-Loops" (Review-Erkenntnisse, in dieser Reihenfolge)
 
-1. **Update-Benachrichtigung an Beter** — Owner postet im „Neues"-Tab → Mail (opt-out)
-   an alle Teilnehmer der Wache mit E-Mail. Schließt den emotionalen Loop
-   („dein Gebet hat Anteil"); derzeit erfährt NIEMAND von Updates. Kleinster
-   Aufwand, größte Wirkung. (Mailer-Muster existiert; Empfänger-Dedup wie sendScheduleChange.)
+1. ~~**Update-Benachrichtigung an Beter**~~ — GEBAUT 2026-07-09 (lokalisierte Mail in 5 Sprachen
+   an alle Teilnehmer, HMAC-Abmelde-Link, Share pro Update (WhatsApp/Telegram/Signal-System-Share);
+   Empfänger-Locale wird seitdem bei Login/Buchung erfasst). DEPLOY AUSSTEHEND — vorher
+   `UNSUBSCRIBE_SECRET` in `/etc/24pray-api.env` setzen (`openssl rand -base64 32`); Schema
+   geändert ⇒ auf dem VPS `npx prisma generate` nicht vergessen. Mail-i18n der ALT-Mails =
+   neuer Merkposten unten.
 2. **Kumulative Zahlen + Schwellwert** — Landing/Dashboard: „Bereits N Stunden gemeinsam
    gebetet" (kumulativ, COMPLETED gesamt) statt kleiner Live-Zahlen; Live-Zahlen unter
    Schwelle (z. B. <5) ausblenden. Kaltstart-Wahrnehmung.
@@ -36,6 +38,9 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 
 ## Kleinere Merkposten
 
+- Alt-Mails (Buchung, Erinnerung, Verschiebung, Farewell) auf Empfänger-Locale umstellen
+  (Locale liegt seit Backlog 1 am User/Slot; Katalog-Muster: `UPDATE_NOTICE_TEXTS` in mailer.ts)
+- Update-Mail he/ar Texte: Muttersprachler-Review (zusammen mit bestehendem he/ar-Merkposten)
 - Titel-Editing bestehender Wachen (Anliegen-Karte erweitern)
 - PLZ-Suche für Orte <500 EW (GeoNames-Postal-Dump)
 - Muttersprachler-Review he/ar (Bidi-Kandidat: `pastFoldLabel` ar)

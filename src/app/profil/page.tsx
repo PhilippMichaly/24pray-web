@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { updateMe, deleteMe } from '@/lib/api';
 import { AppShell } from '@/components/patterns/AppShell';
+import { PushSettingsCard } from '@/components/patterns/PushSettingsCard';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -100,6 +101,10 @@ export default function ProfilePage() {
           {t('save')}
         </Button>
       </Card>
+
+      <div className="mt-6">
+        <PushSettingsCard />
+      </div>
 
       <div className="mt-6">
         <DangerZone />

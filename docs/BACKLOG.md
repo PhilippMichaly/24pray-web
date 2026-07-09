@@ -41,7 +41,7 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 9. ~~**Feedback-Button + Open-Source-Hinweis**~~ (User-Zusatz 2026-07-09) — GEBAUT: Footer-
    „Feedback"-Dialog (Mail an FEEDBACK_TO, keine DB-Speicherung, ohne Login, fail-closed ohne
    Env) + GitHub-Icon-Link auf das öffentliche Repo in beiden Footern; „Auf GitHub melden"-Link
-   im Dialog. FEEDBACK_TO beim Deploy in /etc/24pray-api.env setzen (philipp@michaly.de).
+   im Dialog. FEEDBACK_TO beim Deploy in /etc/24pray-api.env setzen (Betreiber-Adresse — bewusst nur dort, nie im Repo).
 
 ## SEO (eigenes Paket, aus Review + früherem Merkposten)
 
@@ -63,6 +63,8 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
   wird nichts) — reine Lehre: dedizierter fetch mit credentials:'omit' (Review P8, Low)
 - FUNNEL_TOKEN lang+zufällig wählen (Query-String landet im nginx-Log); Header-Token wäre
   sauberer (Review P8, Low)
+- Feedback-Dialog: API-Fehlertexte lokalisieren (404 „Nicht gefunden" nach Deploy ohne Env,
+  429/Zod englisch) — eigene i18n-Fehlermeldung statt roher API-Message (Review P9, Low)
 - Wachen-Sprache nachträglich änderbar machen (UpdateProjectBody hat kein language-Feld; Review P5)
 - Dashboard: Filter-Select vs. UI-Sprach-Umschalter besser unterscheidbar machen (Mini-Label/Filter-Icon; Review P5, Low)
 - Alt-Mails (Buchung, Erinnerung, Verschiebung, Farewell) auf Empfänger-Locale umstellen

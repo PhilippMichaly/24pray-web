@@ -47,6 +47,8 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 - Titelbild pro Wache (Design fertig, User-verworfen wegen Sizing — bei Bedarf reaktivieren;
   dann Backup um uploads/ erweitern + Datenschutz-Absatz)
 - ScheduleCard im Tages-Modus zeigt Uhrzeit (kosmetisch)
+- API-Startup-Guard: warnen/abbrechen wenn SMTP_URL gesetzt aber UNSUBSCRIBE_SECRET noch der Dev-Default ist (Review-Fund F2, Suppression-Angriff-Risiko bei vergessenem Secret)
+- Wachen-Titel: max-Länge/Newline-Guard im CreateProjectBody (Review-Fund F5, Mail-Subject-Hygiene; pre-existing)
 
 ## Beim User (nicht baubar)
 

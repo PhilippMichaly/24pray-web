@@ -10,7 +10,6 @@ import { Brand } from '@/components/patterns/Brand';
 import { ThemeToggle } from '@/components/patterns/ThemeToggle';
 import { LocaleToggle } from '@/components/patterns/LocaleToggle';
 import { Globe, type ChainPoint } from '@/components/patterns/Globe';
-import { LandingStats } from '@/components/patterns/LandingStats';
 import { Button } from '@/components/ui/Button';
 import { t } from '@/lib/i18n';
 
@@ -128,9 +127,11 @@ export default function HomePage() {
           {t('prayCta')}
         </button>
 
-        {stats && (
-          <LandingStats completedHours={stats.completedHours ?? 0} activeChains={stats.activeChains} />
-        )}
+        {/* Zahlen-Zeile bewusst AUSGEBLENDET (User-Entscheidung 2026-07-09): solange real
+            noch nicht gebetet wurde, ist jede Zahl — auch die alte „N Stunden gehalten" —
+            unwahr (COMPLETED = Zeitablauf, nicht belegtes Gebet). Reaktivierung, wenn echte
+            Gebetsstunden auflaufen: <LandingStats completedHours={stats.completedHours ?? 0}
+            activeChains={stats.activeChains} /> — Komponente + Tests liegen bereit. */}
       </main>
 
       <footer className="z-10 pb-4 pt-4 text-center text-xs text-ink-muted opacity-70">

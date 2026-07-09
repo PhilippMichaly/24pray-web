@@ -11,11 +11,14 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
    `UNSUBSCRIBE_SECRET` in `/etc/24pray-api.env` setzen (`openssl rand -base64 32`); Schema
    geändert ⇒ auf dem VPS `npx prisma generate` nicht vergessen. Mail-i18n der ALT-Mails =
    neuer Merkposten unten.
-2. ~~**Kumulative Zahlen + Schwellwert**~~ — GEBAUT 2026-07-09 (Landing: „Bereits N Stunden
-   gemeinsam gebetet" = COMPLETED-Slots × Slot-Dauer über alle Wachen; Live-Zahl „N laufen
-   gerade" nur noch ab 5 aktiven Wachen, unter 5 kumulierten Stunden gar keine Zahlen.
-   Fixt nebenbei das Mislabeling heldSlots=Slot-Anzahl≠Stunden. Dashboard bewusst
-   ausgelassen — dort gibt es kein globales Aggregat.)
+2. **Kumulative Zahlen + Schwellwert** — GEBAUT, aber AUSGEBLENDET (User-Entscheidung
+   2026-07-09): Solange real noch nicht gebetet wurde, ist jede Zahl unwahr — COMPLETED-Slots
+   entstehen durch Zeitablauf gebuchter Stunden, nicht durch belegtes Gebet. Die Landing zeigt
+   deshalb GAR KEINE Zahlen mehr (auch die alte, falsch beschriftete „N Stunden gehalten"-Zeile
+   ist raus). Code liegt fertig bereit: API `completedHours` in `/stats/public` (live),
+   Komponente `LandingStats` (Schwelle 5) + Tests. Reaktivierung = eine Zeile in
+   `src/app/(public)/page.tsx` (siehe Kommentar dort). Vorher klären: Was zählt als „gebetet"?
+   (Bestätigungs-Geste nach der Stunde statt bloßem Zeitablauf?)
 3. **Über-uns-/Werte-Seite** — wer steht dahinter, Glaubensbasis, warum kostenlos/werbefrei,
    Datensparsamkeit als Haltung. Vertrauensfundament im Gebets-Kontext. Reiner Text + Footer-Link.
 4. **Einladungs-Moment nach Buchung** — Erfolgs-Screen + Bestätigungsmail: „Lade jemanden ein,

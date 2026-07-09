@@ -96,6 +96,8 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
   (User-Activation-Risiko Safari) prüfen (Review P7)
 - Push-Test Owner-Ausschluss: kein push-spezifischer Test, dass der Owner beim eigenen Update
   keinen Push bekommt (transitiv gedeckt; Review P7, Low)
+- Benachrichtigungs-Matrix: offene Zellen aus docs/NOTIFICATIONS.md (api-Repo) bewusst entscheiden
+  (Push bei Verschiebung/Löschung, Owner-Push bei Buchung, Storno-Info — siehe Matrix)
 
 ## Beim User (nicht baubar)
 

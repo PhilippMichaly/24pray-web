@@ -10,12 +10,14 @@ import { Brand } from '@/components/patterns/Brand';
 import { ThemeToggle } from '@/components/patterns/ThemeToggle';
 import { LocaleToggle } from '@/components/patterns/LocaleToggle';
 import { Globe, type ChainPoint } from '@/components/patterns/Globe';
+import { LandingStats } from '@/components/patterns/LandingStats';
 import { Button } from '@/components/ui/Button';
 import { t } from '@/lib/i18n';
 
 interface PublicStats {
   activeChains: number;
   heldSlots: number;
+  completedHours?: number; // optional: tolerant gegen gecachte/alte API-Antworten
   points?: ChainPoint[];
 }
 
@@ -126,11 +128,8 @@ export default function HomePage() {
           {t('prayCta')}
         </button>
 
-        {stats && stats.activeChains > 0 && (
-          <p className="mt-5 text-sm text-gold tnum" aria-live="polite">
-            {t('statsChainsActive', { n: stats.activeChains })}
-            {stats.heldSlots > 0 && <> · {t('statsHoursHeld', { n: stats.heldSlots })}</>}
-          </p>
+        {stats && (
+          <LandingStats completedHours={stats.completedHours ?? 0} activeChains={stats.activeChains} />
         )}
       </main>
 

@@ -46,6 +46,10 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 
 ## Kleinere Merkposten
 
+- Guest-Booking-Adoption bei Konto-Erstellung (E-Mail-Match guestEmail→userId), damit „alle
+  deine Stunden" auch Vor-Konto-Buchungen einschließt (Review P6, Low)
+- returnTo-Parameter für den Login-Flow (Konversion aus einer Wache führt zurück zur Wache;
+  vorbestehend, Review P6)
 - Wachen-Sprache nachträglich änderbar machen (UpdateProjectBody hat kein language-Feld; Review P5)
 - Dashboard: Filter-Select vs. UI-Sprach-Umschalter besser unterscheidbar machen (Mini-Label/Filter-Icon; Review P5, Low)
 - Alt-Mails (Buchung, Erinnerung, Verschiebung, Farewell) auf Empfänger-Locale umstellen

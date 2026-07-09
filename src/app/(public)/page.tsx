@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogIn, HeartHandshake, PlusCircle, X, MapPin, GitFork, type LucideIcon } from 'lucide-react';
+import { LogIn, HeartHandshake, PlusCircle, X, MapPin, type LucideIcon } from 'lucide-react';
+import { GitHubMark } from '@/components/patterns/GitHubMark';
 import { api } from '@/lib/api';
 import { useFunnelPing } from '@/lib/funnel';
 import { Sheet } from '@/components/ui/Sheet';
@@ -146,7 +147,7 @@ export default function HomePage() {
         <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer"
            aria-label={t('githubRepoLabel')} title={t('githubRepoLabel')}
            className="inline-flex align-middle text-ink-muted hover:text-ink">
-          <GitFork size={14} aria-hidden />
+          <GitHubMark size={14} />
         </a>
         <span className="mx-2">·</span>
         <Link href="/impressum" className="underline underline-offset-2 hover:text-ink">{t('legalImprint')}</Link>

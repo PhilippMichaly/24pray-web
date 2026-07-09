@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, GitFork } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { Brand } from './Brand';
+import { GitHubMark } from './GitHubMark';
 import { ThemeToggle } from './ThemeToggle';
 import { LocaleToggle } from './LocaleToggle';
 import { FeedbackDialog, GITHUB_REPO_URL } from './FeedbackDialog';
@@ -79,7 +80,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <a href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer"
              aria-label={t('githubRepoLabel')} title={t('githubRepoLabel')}
              className="inline-flex align-middle text-ink-muted hover:text-ink">
-            <GitFork size={14} aria-hidden />
+            <GitHubMark size={14} />
           </a>
           <span className="mx-2">·</span>
           <Link href="/impressum" className="underline underline-offset-2 hover:text-ink">{t('legalImprint')}</Link>

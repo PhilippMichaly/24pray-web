@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { GitFork } from 'lucide-react';
 import { Sheet } from '@/components/ui/Sheet';
+import { GitHubMark } from '@/components/patterns/GitHubMark';
 import { Button } from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/Input';
 import { Label, FieldError } from '@/components/ui/Label';
@@ -72,7 +72,7 @@ export function FeedbackDialog() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-xs text-ink-muted underline underline-offset-2 hover:text-ink"
             >
-              <GitFork size={14} aria-hidden /> {t('feedbackGithub')}
+              <GitHubMark size={14} /> {t('feedbackGithub')}
             </a>
           </div>
         ) : (
@@ -100,7 +100,7 @@ export function FeedbackDialog() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs text-ink-muted underline underline-offset-2 hover:text-ink"
               >
-                <GitFork size={13} aria-hidden /> {t('feedbackGithub')}
+                <GitHubMark size={13} /> {t('feedbackGithub')}
               </a>
               <Button type="submit" loading={sending}>
                 {t('feedbackSend')}

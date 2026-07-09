@@ -11,7 +11,7 @@ import { Label, FieldError } from '@/components/ui/Label';
 import { Card } from '@/components/ui/Card';
 import { CenterShell } from '@/components/patterns/CenterShell';
 import { Brand } from '@/components/patterns/Brand';
-import { t } from '@/lib/i18n';
+import { t, getLocale } from '@/lib/i18n';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,7 +44,7 @@ export default function LoginPage() {
     setError('');
     try {
       // Testmodus (kein SMTP): API liefert devLoginUrl → direkt einloggbar ohne Postfach.
-      const res = await api.post<{ devLoginUrl?: string }>('/auth/magic-link', { email });
+      const res = await api.post<{ devLoginUrl?: string }>('/auth/magic-link', { email, locale: getLocale() });
       setDevLoginUrl(res?.devLoginUrl ?? null);
       setSent(true);
     } catch {

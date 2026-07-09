@@ -57,6 +57,7 @@ export const api = new ApiClient(API_URL);
 
 // ── Slot-Helper (Welle 2/3) ────────────────────
 import type { PrayerSlot, SlotView, PrayerRequestView, ProjectStats, ProjectWithStats, User } from '@/types';
+import { getLocale } from '@/lib/i18n';
 
 /** Query-Suffix für den Invite-Token (PRIVATE-Ketten per Einladungslink, W3). */
 const inviteQ = (invite?: string) => (invite ? `?invite=${encodeURIComponent(invite)}` : '');
@@ -78,6 +79,7 @@ export function bookSlot(
   return api.post<PrayerSlot>(`/projects/${projectId}/slots`, {
     ...input,
     notifyChannel: 'EMAIL',
+    locale: getLocale(), // Gast-Update-Mails in der UI-Sprache der Buchung (Backlog 1)
   });
 }
 

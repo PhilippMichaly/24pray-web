@@ -52,6 +52,13 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
   deine Stunden" auch Vor-Konto-Buchungen einschließt (Review P6, Low)
 - returnTo-Parameter für den Login-Flow (Konversion aus einer Wache führt zurück zur Wache;
   vorbestehend, Review P6)
+- API hinter nginx ohne trustProxy: req.ip ist immer 127.0.0.1 → ALLE Rate-Limits sind faktisch
+  global statt pro IP (erklärt auch das bekannte magic-link-429-Symptom). Fix: fastify
+  trustProxy + X-Forwarded-For, mit Tests (Review P8, repo-weit)
+- Funnel-Ping sendet credentials:'include' mit (Session-Cookie bei Eingeloggten; gespeichert
+  wird nichts) — reine Lehre: dedizierter fetch mit credentials:'omit' (Review P8, Low)
+- FUNNEL_TOKEN lang+zufällig wählen (Query-String landet im nginx-Log); Header-Token wäre
+  sauberer (Review P8, Low)
 - Wachen-Sprache nachträglich änderbar machen (UpdateProjectBody hat kein language-Feld; Review P5)
 - Dashboard: Filter-Select vs. UI-Sprach-Umschalter besser unterscheidbar machen (Mini-Label/Filter-Icon; Review P5, Low)
 - Alt-Mails (Buchung, Erinnerung, Verschiebung, Farewell) auf Empfänger-Locale umstellen

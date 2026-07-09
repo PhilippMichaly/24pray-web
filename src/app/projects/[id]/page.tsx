@@ -234,6 +234,7 @@ function ProjectPageInner() {
             project={project}
             mode={sheet.mode}
             isOrganizer={!!currentUserId && project.organizerId === currentUserId}
+            invite={invite}
             onCancel={async (guestToken) => {
               if (sheet.slot?.slotId) await grid.cancelBooked(sheet.slot.slotId, sheet.slot.key, guestToken);
             }}

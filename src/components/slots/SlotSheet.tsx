@@ -28,6 +28,7 @@ export interface SlotSheetProps {
   project: ProjectWithStats;
   mode: SlotSheetMode;
   isOrganizer?: boolean; // Organisator darf fremde/Gast-Buchungen entfernen (F2)
+  invite?: string; // Invite-Searchparam der Seite (Review Backlog-4 F1) — für PRIVATE-Wachen bis in den Gast-Erfolgs-Screen durchreichen
   onCancel?: (guestToken?: string) => Promise<void> | void; // Storno (mine, Gast via Token, Organisator)
   onGuestBooked?: (slotId: string, guestToken: string) => void;
   onRecurred?: () => void; // Grid neu laden nach „Jede Woche" (W3)
@@ -166,7 +167,7 @@ function MineExtras({ slot, project, onRecurred }: { slot: SlotViewModel; projec
 
 const guestTokenKey = (slotId: string) => `24pray:guest:${slotId}`;
 
-export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer, onCancel, onGuestBooked, onRecurred }: SlotSheetProps) {
+export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer, invite, onCancel, onGuestBooked, onRecurred }: SlotSheetProps) {
   if (!slot) return null;
   const dayMode = isDayMode(project.slotDurationMinutes);
   const times = formatDualTz(slot.startTime, slot.endTime, project.timezone);
@@ -266,7 +267,7 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
             projectTitle={project.title}
             projectTz={project.timezone}
             projectId={project.id}
-            invite={project.visibility === 'PRIVATE' ? project.inviteToken || undefined : undefined}
+            invite={project.visibility === 'PRIVATE' ? (invite ?? (project.inviteToken || undefined)) : undefined}
             dayMode={dayMode}
             onSubmit={async (data) => {
               const created = await bookSlot(project.id, {

@@ -1,6 +1,17 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+
+// Review Backlog-4 F1: guest-book-Modus ruft intern bookSlot() auf (kein Props-Hook dafür) —
+// echten API-Call mocken, damit die Wiring-Tests deterministisch bleiben. mine-Modus-Tests
+// (MineExtras: getReminderPref/recurSlot/putReminderPref) laufen unberührt mit über diese Mocks.
+vi.mock('@/lib/api', () => ({
+  bookSlot: vi.fn(async () => ({ id: 'new-slot-1', guestToken: 'gtok' })),
+  recurSlot: vi.fn(async () => ({ recurringId: 'r1', createdSlotIds: [] })),
+  getReminderPref: vi.fn(async () => ({ minutesBefore: 60, channel: 'none' })),
+  putReminderPref: vi.fn(async (minutesBefore: number) => ({ minutesBefore, channel: 'none' })),
+}));
+
 import { SlotSheet } from './SlotSheet';
 import type { SlotViewModel } from './types';
 import type { ProjectWithStats } from '@/types';
@@ -117,5 +128,55 @@ describe('SlotSheet Tages-Modus (dayMode, P3) — Titel/Zeitanzeige/Storno-Texte
   it('guest-book-Modus: Titel sagt "Tag übernehmen"', () => {
     renderSheet({ project: dayProject, slot: { ...daySlot, status: 'FREE', slotId: null }, mode: 'guest-book' });
     expect(screen.getByText('Tag übernehmen')).toBeTruthy();
+  });
+});
+
+// Review Backlog-4 F1: invite-Searchparam muss bis in den Gast-Erfolgs-Screen durchgereicht
+// werden (SlotSheet -> GuestBookingForm), sonst hat der geteilte Link auf PRIVATE-Wachen kein
+// ?invite= und der Empfänger läuft in 403.
+describe('SlotSheet guest-book-Modus — invite-Wiring (Review Backlog-4 F1)', () => {
+  const freeSlot: SlotViewModel = {
+    ...bookedSlot,
+    slotId: null,
+    userName: null,
+    status: 'FREE',
+    state: 'FREE',
+  };
+
+  beforeEach(() => {
+    cleanup();
+    localStorage.clear();
+  });
+
+  it('PRIVATE-Projekt + invite-Prop: WhatsApp-Link im Erfolgs-Screen enthält ?invite=tok1', async () => {
+    renderSheet({
+      project: { ...project, visibility: 'PRIVATE' } as ProjectWithStats,
+      slot: freeSlot,
+      mode: 'guest-book',
+      invite: 'tok1',
+    });
+
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Maria' } });
+    fireEvent.click(screen.getByRole('button', { name: /Stunde|übernehmen/i }));
+
+    await waitFor(() => expect(screen.getByText(/gehört dir/i)).toBeTruthy());
+    const wa = screen.getByRole('link', { name: /whatsapp/i }) as HTMLAnchorElement;
+    expect(decodeURIComponent(wa.href)).toContain('?invite=tok1');
+  });
+
+  it('PUBLIC-Projekt: WhatsApp-Link im Erfolgs-Screen enthält kein ?invite=', async () => {
+    renderSheet({
+      project: { ...project, visibility: 'PUBLIC' } as ProjectWithStats,
+      slot: freeSlot,
+      mode: 'guest-book',
+      invite: 'tok1',
+    });
+
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Maria' } });
+    fireEvent.click(screen.getByRole('button', { name: /Stunde|übernehmen/i }));
+
+    await waitFor(() => expect(screen.getByText(/gehört dir/i)).toBeTruthy());
+    const wa = screen.getByRole('link', { name: /whatsapp/i }) as HTMLAnchorElement;
+    expect(decodeURIComponent(wa.href)).not.toContain('invite=');
   });
 });

@@ -55,6 +55,9 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 - ScheduleCard im Tages-Modus zeigt Uhrzeit (kosmetisch)
 - API-Startup-Guard: warnen/abbrechen wenn SMTP_URL gesetzt aber UNSUBSCRIBE_SECRET noch der Dev-Default ist (Review-Fund F2, Suppression-Angriff-Risiko bei vergessenem Secret)
 - Wachen-Titel: max-Länge/Newline-Guard im CreateProjectBody (Review-Fund F5, Mail-Subject-Hygiene; pre-existing)
+- POST /projects/:id/slots prüft kein canReadProject (Buchung auf PRIVATE-Wachen nur mit
+  projectId möglich; cuid praktisch nicht ratbar) — Hardening: Check + invite-Mitgabe im
+  bookSlot-Client (Review Backlog-4 F2)
 
 ## Beim User (nicht baubar)
 

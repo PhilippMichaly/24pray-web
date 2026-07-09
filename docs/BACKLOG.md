@@ -7,10 +7,9 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 
 1. ~~**Update-Benachrichtigung an Beter**~~ — GEBAUT 2026-07-09 (lokalisierte Mail in 5 Sprachen
    an alle Teilnehmer, HMAC-Abmelde-Link, Share pro Update (WhatsApp/Telegram/Signal-System-Share);
-   Empfänger-Locale wird seitdem bei Login/Buchung erfasst). DEPLOY AUSSTEHEND — vorher
-   `UNSUBSCRIBE_SECRET` in `/etc/24pray-api.env` setzen (`openssl rand -base64 32`); Schema
-   geändert ⇒ auf dem VPS `npx prisma generate` nicht vergessen. Mail-i18n der ALT-Mails =
-   neuer Merkposten unten.
+   Empfänger-Locale wird seitdem bei Login/Buchung erfasst). DEPLOYED 2026-07-09
+   (UNSUBSCRIBE_SECRET gesetzt, Migration auf Prod applied). Mail-i18n der ALT-Mails =
+   Merkposten unten.
 2. **Kumulative Zahlen + Schwellwert** — GEBAUT, aber AUSGEBLENDET (User-Entscheidung
    2026-07-09): Solange real noch nicht gebetet wurde, ist jede Zahl unwahr — COMPLETED-Slots
    entstehen durch Zeitablauf gebuchter Stunden, nicht durch belegtes Gebet. Die Landing zeigt
@@ -25,9 +24,10 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
    jemanden ein, die Stunde neben dir zu übernehmen" + Share-Trio WhatsApp/Telegram/Signal-
    System-Share; Bestätigungsmail: Einladungs-Absatz mit Wachen-Link, PRIVATE mit ?invite=.
    Share-Logik in gemeinsame Lib src/lib/share.ts extrahiert, RequestsFeed nutzt sie mit.)
-5. **Listen-Filter im Dashboard** — mindestens Sprache (Wache bekommt language-Feld beim
-   Anlegen, default = UI-Sprache), sortiert nach „braucht Hilfe" (größte Lücke zuerst?);
-   Vorstufe zu Kategorien.
+5. ~~**Listen-Filter im Dashboard**~~ — GEBAUT 2026-07-09 (Wache bekommt language-Feld beim
+   Anlegen, still aus der UI-Sprache wie die Zeitzone; Sprach-Filter über der Liste, native
+   Sprachnamen. Sortierung bewusst NICHT geändert — bleibt neueste zuerst, User-Entscheidung.
+   Kategorien = spätere Ausbaustufe.)
 6. **Konto-Nutzen sichtbar machen** — nach Gast-Buchung + auf Login-Seite: was ein Konto
    bringt (alle meine Stunden, Erinnerungs-Einstellungen, Name). Sanfte Konversion, kein Zwang.
 7. **Web-Push (PWA)** — opt-in für Stunden-Erinnerung + Owner-Updates; ohne Dritt-Dienst
@@ -44,6 +44,8 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 
 ## Kleinere Merkposten
 
+- Wachen-Sprache nachträglich änderbar machen (UpdateProjectBody hat kein language-Feld; Review P5)
+- Dashboard: Filter-Select vs. UI-Sprach-Umschalter besser unterscheidbar machen (Mini-Label/Filter-Icon; Review P5, Low)
 - Alt-Mails (Buchung, Erinnerung, Verschiebung, Farewell) auf Empfänger-Locale umstellen
   (Locale liegt seit Backlog 1 am User/Slot; Katalog-Muster: `UPDATE_NOTICE_TEXTS` in mailer.ts)
 - Update-Mail he/ar Texte: Muttersprachler-Review (zusammen mit bestehendem he/ar-Merkposten)

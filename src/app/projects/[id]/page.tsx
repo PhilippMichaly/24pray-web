@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { CalendarClock } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useFunnelPing } from '@/lib/funnel';
 import type { ProjectWithStats } from '@/types';
 import { useAuth } from '@/hooks/use-auth';
 import { AppShell } from '@/components/patterns/AppShell';
@@ -33,6 +34,7 @@ import type { SlotViewModel } from '@/components/slots/types';
 import { t } from '@/lib/i18n';
 
 function ProjectPageInner() {
+  useFunnelPing('watch');
   const { id } = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const invite = searchParams.get('invite') ?? undefined; // PRIVATE-Kette per Einladungslink (W3)

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Plus, FolderHeart } from 'lucide-react';
 import { api, getSlotGrid } from '@/lib/api';
+import { useFunnelPing } from '@/lib/funnel';
 import { useAuth } from '@/hooks/use-auth';
 import type { ProjectWithStats } from '@/types';
 import { AppShell } from '@/components/patterns/AppShell';
@@ -24,6 +25,7 @@ interface Loaded {
 }
 
 export default function DashboardPage() {
+  useFunnelPing('list');
   const { user, loading } = useAuth();
   const [loaded, setLoaded] = useState<Loaded[] | null>(null);
   const [error, setError] = useState<string | null>(null);

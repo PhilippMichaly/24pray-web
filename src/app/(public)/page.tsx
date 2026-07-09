@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LogIn, HeartHandshake, PlusCircle, X, MapPin, type LucideIcon } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useFunnelPing } from '@/lib/funnel';
 import { Sheet } from '@/components/ui/Sheet';
 import { Brand } from '@/components/patterns/Brand';
 import { ThemeToggle } from '@/components/patterns/ThemeToggle';
@@ -48,6 +49,7 @@ function PrayOption({
 }
 
 export default function HomePage() {
+  useFunnelPing('landing');
   const router = useRouter();
   const [stats, setStats] = useState<PublicStats | null>(null);
   const [choiceOpen, setChoiceOpen] = useState(false);

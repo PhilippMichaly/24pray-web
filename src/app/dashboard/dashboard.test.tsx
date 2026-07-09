@@ -24,7 +24,7 @@ vi.mock('@/hooks/use-auth', () => ({
   useAuth: () => ({ user: null, loading: false }),
 }));
 vi.mock('@/lib/api', () => ({
-  api: { get: vi.fn(async () => [publicProject]) },
+  api: { get: vi.fn(async () => [publicProject]), post: vi.fn(async () => undefined) },
   getSlotGrid: vi.fn(async () => []),
 }));
 

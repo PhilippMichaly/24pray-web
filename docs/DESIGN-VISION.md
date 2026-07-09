@@ -5,6 +5,18 @@
 > authentifizierten Kern-Screens (Dashboard, Projekt-Detail mit Slot-Liste, Desktop + 390px Mobile).
 > Dieses Dokument definiert das **Was und Warum**; die Spec definiert das Wie.
 
+## Stand 2026-07-09
+
+Zwei intensive Feature-Tage seit der Erarbeitung dieser Vision. Das „Vigil"-Konzept
+(„Gebetswache" statt „Gebetskette") ist produktiv umgesetzt und im gesamten Produkt
+konsistent benannt (UI-Texte, Mails, API-Fehlermeldungen). Palette V3 im Einsatz.
+Feinschliff an Lichtband/Kollaps-Darstellung des Slot-Grids abgeschlossen. Die
+Statistik-Ansicht wurde nach dem `dataviz`-Skill neu gebaut (Hero-Zahl, Coverage-
+Chart, Personen-Tabelle). 5 Sprachen inkl. RTL (de/en/es/he/ar) sind umgesetzt —
+Details dazu in `docs/I18N.md`. Der historische Bewertungstext unten bleibt als
+Ausgangspunkt unverändert stehen; viele der dort benannten Lücken (Slot-Grid-
+Rohdarstellung, fehlende Komponenten-Schicht, Emoji-Icons) sind seither geschlossen.
+
 ---
 
 ## 0. Ehrliche Bewertung des Ist-Zustands

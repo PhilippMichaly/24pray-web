@@ -33,6 +33,26 @@ npx tsc --noEmit
 ⚠️ Nie `npm run build` neben laufendem `npm run dev` — beide teilen `.next/`,
 der Dev-Server verliert sonst seine Assets.
 
+## Funktionsumfang (Stand 2026-07-09)
+
+- Gebetswachen in Stunden- ODER Tages-Aufteilung (`slotDurationMinutes` 60 | 1440,
+  pro Kette fest gewählt bei Erstellung)
+- Gast-Buchung ohne Konto (E-Mail optional) mit Storno-Token — Gast kann seinen Slot
+  ohne Login wieder stornieren
+- Owner-Lebenszyklus: Anliegen pflegen, Ort setzen, Gruppen-Links (WhatsApp/Telegram/
+  Signal), Zeitplan verschieben (alle Slots wandern im Delta mit), Wache löschen
+  (Benachrichtigungs-Mails an alle mit künftigen Buchungen)
+- Owner-Update-Feed („Neues") — eine Wache = ein Anliegen, nur der Ersteller postet
+  Updates dazu
+- Namens-Abkürzung als Opt-in pro Wache (Default: Klartext)
+- 5 Sprachen (de/en/es/he/ar) mit RTL-Unterstützung + Browser-Spracherkennung +
+  Sprachmenü (siehe `docs/I18N.md`)
+- OpenGraph-Vorschau pro Wache + Teilen-Button (mit erklärendem Clipboard-Fallback)
+- Statistik-Tab (Hero-Zahl, 24h-Coverage-Chart im Stunden-Modus, Personen-Tabelle)
+- Login per Magic-Link ODER 6-stelligem Code (praktisch für ein anderes Gerät)
+- Profil (Anzeigename ändern, Konto löschen)
+- Impressum + Datenschutzerklärung (bewusst nur Deutsch — Rechtsseiten)
+
 ## Struktur
 
 ```
@@ -40,9 +60,10 @@ src/app/            Screens (Landing, auth/, dashboard, projects/, join/)
 src/components/ui/       Primitives (Button, Sheet, Toast, …)
 src/components/patterns/ Domänen-Muster (Brand, Globe, AppShell, InviteCard, …)
 src/components/slots/    Herzstück: Slot-Grid (ChainBand, SlotList, SlotSheet, Logik+Store)
-src/lib/            api-Client, time (Projekt-TZ), i18n (de vollständig, en vollständig),
-                    cities (Ort-Autocomplete), mylocation („Mein Ort", localStorage)
-docs/               DESIGN-VISION.md · specs/ (technische Spec) · WHITE-LABEL.md
+src/lib/            api-Client, time (Projekt-TZ), i18n (5 Sprachen typvollständig,
+                    siehe docs/I18N.md), cities (Ort-Autocomplete),
+                    mylocation („Mein Ort", localStorage)
+docs/               DESIGN-VISION.md · I18N.md · specs/ (technische Spec) · WHITE-LABEL.md
 ```
 
 ## Design-System

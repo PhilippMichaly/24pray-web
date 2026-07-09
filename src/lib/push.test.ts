@@ -10,7 +10,7 @@ vi.mock('@/lib/api', () => ({ api: {
   delete: (...a: unknown[]) => apiDelete(...a),
 } }));
 
-import { enablePush, disablePush, isPushSupported } from './push';
+import { enablePush, disablePush, isPushSupported, getPushState } from './push';
 
 function mockPushEnv(existingSub: unknown = null) {
   const subscribe = vi.fn(async () => ({
@@ -56,5 +56,26 @@ describe('push client lib (Backlog 7)', () => {
     await disablePush();
     expect(sub.unsubscribe).toHaveBeenCalled();
     expect(apiDelete).toHaveBeenCalledWith('/me/push-subscriptions', { endpoint: 'https://push.example/e1' });
+  });
+
+  it('getPushState: iOS-Browser-Tab ohne Push-API → ios-install statt unsupported', async () => {
+    // vorherige Tests hinterlassen serviceWorker/PushManager/Notification auf window/navigator — entfernen,
+    // damit isPushSupported() hier wieder korrekt false liefert.
+    // @ts-expect-error - test cleanup
+    delete navigator.serviceWorker;
+    // @ts-expect-error - test cleanup
+    delete window.PushManager;
+    // @ts-expect-error - test cleanup
+    delete window.Notification;
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
+      configurable: true,
+    });
+    Object.defineProperty(window, 'matchMedia', {
+      value: vi.fn(() => ({ matches: false })),
+      configurable: true,
+    });
+    expect(isPushSupported()).toBe(false);
+    await expect(getPushState()).resolves.toBe('ios-install');
   });
 });

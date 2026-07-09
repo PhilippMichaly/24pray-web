@@ -249,6 +249,7 @@ const de = {
   pushStateSubscribed: 'Aktiv auf diesem Gerät.',
   pushStateDenied: 'Im Browser blockiert — bitte in den Website-Einstellungen erlauben.',
   pushStateUnsupported: 'Dieser Browser unterstützt keine Push-Benachrichtigungen.',
+  pushStateIosInstall: 'Auf dem iPhone/iPad gibt es Push nur als installierte App: Teilen-Symbol → „Zum Home-Bildschirm", dann 24pray vom Home-Bildschirm öffnen und Push hier aktivieren.',
   pushStateUnavailable: 'Push ist auf dem Server noch nicht eingerichtet.',
 
   // Ersteller-Lebenszyklus: Wache verschieben (Zeitplan-Karte)
@@ -555,6 +556,7 @@ const en: Record<keyof typeof de, string> = {
   pushStateSubscribed: 'Active on this device.',
   pushStateDenied: 'Blocked in the browser — please allow it in the site settings.',
   pushStateUnsupported: 'This browser does not support push notifications.',
+  pushStateIosInstall: 'On iPhone/iPad, push only works as an installed app: Share icon → "Add to Home Screen", then open 24pray from your Home Screen and enable push here.',
   pushStateUnavailable: 'Push is not set up on the server yet.',
 
   scheduleCardTitle: 'Schedule',
@@ -858,6 +860,7 @@ const es: Record<keyof typeof de, string> = {
   pushStateSubscribed: 'Activo en este dispositivo.',
   pushStateDenied: 'Bloqueado en el navegador — permítelo en la configuración del sitio.',
   pushStateUnsupported: 'Este navegador no admite notificaciones push.',
+  pushStateIosInstall: 'En iPhone/iPad el push solo funciona como app instalada: icono Compartir → «Añadir a pantalla de inicio», luego abre 24pray desde la pantalla de inicio y activa el push aquí.',
   pushStateUnavailable: 'El push aún no está configurado en el servidor.',
 
   scheduleCardTitle: 'Calendario',
@@ -1161,6 +1164,7 @@ const he: Record<keyof typeof de, string> = {
   pushStateSubscribed: 'פעיל במכשיר הזה.',
   pushStateDenied: 'חסום בדפדפן — אנא אפשרו זאת בהגדרות האתר.',
   pushStateUnsupported: 'דפדפן זה אינו תומך בהתראות דחיפה.',
+  pushStateIosInstall: 'ב-iPhone/iPad התראות דחיפה פועלות רק כאפליקציה מותקנת: סמל השיתוף ← „הוסף למסך הבית", ואז פתחו את 24pray ממסך הבית והפעילו כאן את ההתראות.',
   pushStateUnavailable: 'התראות דחיפה עדיין לא הוגדרו בשרת.',
 
   scheduleCardTitle: 'לוח זמנים',
@@ -1464,6 +1468,7 @@ const ar: Record<keyof typeof de, string> = {
   pushStateSubscribed: 'مفعّل على هذا الجهاز.',
   pushStateDenied: 'محظور في المتصفح — يرجى السماح به في إعدادات الموقع.',
   pushStateUnsupported: 'هذا المتصفح لا يدعم الإشعارات الفورية.',
+  pushStateIosInstall: 'على iPhone/iPad تعمل الإشعارات فقط كتطبيق مثبّت: رمز المشاركة ← «إضافة إلى الشاشة الرئيسية»، ثم افتح 24pray من الشاشة الرئيسية وفعّل الإشعارات هنا.',
   pushStateUnavailable: 'الإشعارات لم تُهيّأ على الخادم بعد.',
 
   scheduleCardTitle: 'الجدول الزمني',

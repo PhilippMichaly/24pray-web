@@ -19,9 +19,23 @@ function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
 }
 
-export type PushState = 'unsupported' | 'unavailable' | 'denied' | 'subscribed' | 'unsubscribed';
+export type PushState = 'unsupported' | 'unavailable' | 'denied' | 'subscribed' | 'unsubscribed' | 'ios-install';
+
+/** iOS(-WebKit) im Browser-Tab: Push gibt es dort erst als installierte Home-Screen-App (iOS 16.4+). */
+function isIosBrowserTab(): boolean {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isIos = /iPad|iPhone|iPod/.test(ua)
+    // iPadOS meldet sich als Mac — Touch verrät es
+    || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
+  if (!isIos) return false;
+  const standalone = window.matchMedia?.('(display-mode: standalone)').matches
+    || (navigator as { standalone?: boolean }).standalone === true;
+  return !standalone;
+}
 
 export async function getPushState(): Promise<PushState> {
+  if (isIosBrowserTab() && !isPushSupported()) return 'ios-install';
   if (!isPushSupported()) return 'unsupported';
   if (Notification.permission === 'denied') return 'denied';
   try {

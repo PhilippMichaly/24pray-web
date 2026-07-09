@@ -29,4 +29,11 @@ describe('PushSettingsCard (Backlog 7)', () => {
     await waitFor(() => expect(screen.getByText(/unterstützt keine push/i)).toBeTruthy());
     expect(screen.queryByRole('button')).toBeNull();
   });
+
+  it('ios-install → kein Button, Home-Bildschirm-Anleitung', async () => {
+    getPushState.mockResolvedValueOnce('ios-install');
+    render(<PushSettingsCard />);
+    await waitFor(() => expect(screen.getByText(/home-bildschirm/i)).toBeTruthy());
+    expect(screen.queryByRole('button')).toBeNull();
+  });
 });

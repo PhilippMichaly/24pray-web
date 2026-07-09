@@ -39,6 +39,7 @@ export function PushSettingsCard() {
   const hint =
     state === 'subscribed' ? t('pushStateSubscribed')
     : state === 'denied' ? t('pushStateDenied')
+    : state === 'ios-install' ? t('pushStateIosInstall')
     : state === 'unsupported' ? t('pushStateUnsupported')
     : state === 'unavailable' ? t('pushStateUnavailable')
     : t('pushCardHint');

@@ -28,8 +28,10 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
    Anlegen, still aus der UI-Sprache wie die Zeitzone; Sprach-Filter über der Liste, native
    Sprachnamen. Sortierung bewusst NICHT geändert — bleibt neueste zuerst, User-Entscheidung.
    Kategorien = spätere Ausbaustufe.)
-6. **Konto-Nutzen sichtbar machen** — nach Gast-Buchung + auf Login-Seite: was ein Konto
-   bringt (alle meine Stunden, Erinnerungs-Einstellungen, Name). Sanfte Konversion, kein Zwang.
+6. ~~**Konto-Nutzen sichtbar machen**~~ — GEBAUT 2026-07-09 (AccountBenefits-Komponente:
+   drei Punkte „alle Stunden / Erinnerungen / Name gemerkt"; im Gast-Erfolgs-Screen kompakt
+   unter dem Einladungs-Block, auf der Login-Seite zwischen Subtitle und Formular. Kein Zwang,
+   nur Sichtbarkeit.)
 7. **Web-Push (PWA)** — opt-in für Stunden-Erinnerung + Owner-Updates; ohne Dritt-Dienst
    (VAPID self-hosted). Zweiter Kanal neben Mail.
 8. **Cookiefreies, aggregiertes Server-Zählen** — nur Pfad-Zähler (Landing→Sheet→Wache→Buchung),

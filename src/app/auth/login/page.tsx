@@ -11,6 +11,7 @@ import { Label, FieldError } from '@/components/ui/Label';
 import { Card } from '@/components/ui/Card';
 import { CenterShell } from '@/components/patterns/CenterShell';
 import { Brand } from '@/components/patterns/Brand';
+import { AccountBenefits } from '@/components/patterns/AccountBenefits';
 import { t, getLocale } from '@/lib/i18n';
 
 export default function LoginPage() {
@@ -104,6 +105,10 @@ export default function LoginPage() {
         <Card elevation={2}>
           <h1 className="font-display text-2xl font-semibold text-ink">{t('login')}</h1>
           <p className="mt-1 text-sm text-ink-muted">{t('loginSubtitle')}</p>
+
+          <div className="mb-4 mt-3">
+            <AccountBenefits />
+          </div>
 
           <form onSubmit={handleSubmit} className="mt-6">
             <Label htmlFor="email">{t('emailLabel')}</Label>

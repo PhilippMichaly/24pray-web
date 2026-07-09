@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Label, FieldError } from '@/components/ui/Label';
 import { formatDualTz, buildIcs, formatDayHeader } from '@/lib/time';
 import { CityInput } from '@/components/patterns/CityInput';
+import { AccountBenefits } from '@/components/patterns/AccountBenefits';
 import { setMyCity, getMyCity } from '@/lib/mylocation';
 import type { GeoCity } from '@/lib/api';
 import { t, tUnit } from '@/lib/i18n';
@@ -158,12 +159,15 @@ export function GuestBookingForm({
             </div>
           );
         })()}
-        <p className="mt-4 text-xs text-ink-muted">
-          {t('guestAccountOffer')}{' '}
-          <Link href="/auth/login" className="text-accent-strong underline underline-offset-2">
-            {t('login')}
-          </Link>
-        </p>
+        <div className="mt-4 rounded-md bg-surface-sunken p-3 text-start">
+          <AccountBenefits compact />
+          <p className="mt-2 text-xs text-ink-muted">
+            {t('guestAccountOffer')}{' '}
+            <Link href="/auth/login" className="text-accent-strong underline underline-offset-2">
+              {t('login')}
+            </Link>
+          </p>
+        </div>
       </div>
     );
   }

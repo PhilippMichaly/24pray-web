@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatDayHeader } from '@/lib/time';
 import { t } from '@/lib/i18n';
+import { toast } from '@/components/ui/toast-store';
 
 export interface RequestsFeedProps {
   projectId: string;
@@ -51,6 +52,32 @@ export function RequestsFeed({ projectId, projectTz, isLoggedIn, isOrganizer, in
       setError((err as Error).message);
     } finally {
       setSending(false);
+    }
+  }
+
+  // Update-Weitergabe dorthin, wo Gebetsgruppen real kommunizieren (Backlog 1):
+  // reine Share-Intents (wa.me / t.me), keine Messenger-APIs, keine Daten an Dritte aus unserer Hand.
+  // Signal hat keinen Text-Share-Deep-Link → System-Share-Sheet (navigator.share) mit Clipboard-Fallback.
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://24pray.org';
+  const watchUrl = `${origin}/projects/${projectId}${invite ? `?invite=${encodeURIComponent(invite)}` : ''}`;
+  const waHref = (text: string) => `https://wa.me/?text=${encodeURIComponent(`${text}\n\n${watchUrl}`)}`;
+  const tgHref = (text: string) =>
+    `https://t.me/share/url?url=${encodeURIComponent(watchUrl)}&text=${encodeURIComponent(text)}`;
+
+  async function shareViaSystem(text: string) {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ text, url: watchUrl });
+      } catch (e) {
+        if ((e as Error)?.name === 'AbortError') return; // Nutzer bricht Share-Sheet ab — still schlucken
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(`${text}\n\n${watchUrl}`);
+      toast({ message: t('linkCopiedToast'), variant: 'positive' });
+    } catch {
+      toast({ message: `${t('shareCopyFailed')} ${watchUrl}` });
     }
   }
 
@@ -95,6 +122,20 @@ export function RequestsFeed({ projectId, projectTz, isLoggedIn, isOrganizer, in
                 </span>
               </div>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink">{r.text}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs font-medium text-ink-muted">
+                <a href={waHref(r.text)} target="_blank" rel="noopener noreferrer"
+                   className="underline underline-offset-2 hover:text-ink">
+                  {t('shareUpdateWhatsapp')}
+                </a>
+                <a href={tgHref(r.text)} target="_blank" rel="noopener noreferrer"
+                   className="underline underline-offset-2 hover:text-ink">
+                  {t('shareUpdateTelegram')}
+                </a>
+                <button type="button" onClick={() => shareViaSystem(r.text)}
+                        className="underline underline-offset-2 hover:text-ink">
+                  {t('shareUpdateOther')}
+                </button>
+              </div>
             </li>
           ))}
         </ul>

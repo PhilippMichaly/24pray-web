@@ -52,7 +52,9 @@ export function ShareButton({ project, isOrganizer, inviteUrl }: ShareButtonProp
       await navigator.clipboard.writeText(shareUrl as string);
       toast({ message: t('linkCopiedToast'), variant: 'positive' });
     } catch {
-      toast({ message: shareUrl as string });
+      // fix2 (KOSMETIK, End-User-Test v2 Befund 4): Toast zeigte bisher nur die nackte
+      // URL ohne Erklärung, warum sie plötzlich auftaucht.
+      toast({ message: `${t('shareCopyFailed')} ${shareUrl}` });
     }
   }
 

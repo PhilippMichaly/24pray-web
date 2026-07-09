@@ -14,9 +14,13 @@ import type { GeoCity } from '@/lib/api';
 import { t, tUnit } from '@/lib/i18n';
 import type { SlotViewModel } from './types';
 
+// fix2 (HOCH, End-User-Test v2 Befund 3): guestEmail ist im Backend optional
+// (BookSlotBody erlaubt fehlende E-Mail), das Frontend-Schema erzwang sie aber —
+// leeres Feld ist erlaubt (-> undefined), eine NICHT-leere aber ungültige E-Mail
+// bleibt weiterhin ein Validierungsfehler.
 const GuestSchema = z.object({
   guestName: z.string().min(2, 'errNameRequired'),
-  guestEmail: z.string().email('errEmailInvalid'),
+  guestEmail: z.union([z.literal(''), z.string().email('errEmailInvalid')]).optional(),
 });
 
 export interface GuestBookingFormProps {
@@ -27,7 +31,7 @@ export interface GuestBookingFormProps {
   dayMode?: boolean;
   onSubmit: (data: {
     guestName: string;
-    guestEmail: string;
+    guestEmail?: string; // fix2: optional — Gast kann ohne E-Mail buchen
     locationLat?: number;
     locationLon?: number;
   }) => Promise<{ guestToken: string }>;
@@ -78,6 +82,7 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, dayMode, onSub
       setMyCity(city);
       await onSubmit({
         ...parsed.data,
+        guestEmail: parsed.data.guestEmail || undefined, // leerer String -> undefined (fix2)
         ...(city ? { locationLat: city.lat, locationLon: city.lon } : {}),
       });
       setDone(true);
@@ -142,7 +147,9 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, dayMode, onSub
         <FieldError>{errors.name}</FieldError>
       </div>
       <div>
-        <Label htmlFor="guestEmail">{t('emailForReminder')}</Label>
+        <Label htmlFor="guestEmail">
+          {t('emailForReminder')} <span className="text-ink-muted">({t('optional')})</span>
+        </Label>
         <Input
           id="guestEmail"
           type="email"

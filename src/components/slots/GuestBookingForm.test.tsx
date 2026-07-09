@@ -32,7 +32,13 @@ describe('GuestBookingForm — E-Mail ist optional (fix2)', () => {
   it('Buchung ohne E-Mail: onSubmit wird mit guestEmail: undefined aufgerufen, kein Validierungsfehler', async () => {
     const onSubmit = vi.fn().mockResolvedValue({ guestToken: 'tok' });
     const { container } = render(
-      <GuestBookingForm slot={slot} projectTitle="fix2-Wache" projectTz="Europe/Berlin" onSubmit={onSubmit} />,
+      <GuestBookingForm
+        slot={slot}
+        projectTitle="fix2-Wache"
+        projectTz="Europe/Berlin"
+        projectId="p-fix2"
+        onSubmit={onSubmit}
+      />,
     );
 
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'fix2 Gast' } });
@@ -46,7 +52,13 @@ describe('GuestBookingForm — E-Mail ist optional (fix2)', () => {
   it('ungültige, nicht-leere E-Mail bleibt ein Validierungsfehler', async () => {
     const onSubmit = vi.fn().mockResolvedValue({ guestToken: 'tok' });
     const { container } = render(
-      <GuestBookingForm slot={slot} projectTitle="fix2-Wache" projectTz="Europe/Berlin" onSubmit={onSubmit} />,
+      <GuestBookingForm
+        slot={slot}
+        projectTitle="fix2-Wache"
+        projectTz="Europe/Berlin"
+        projectId="p-fix2"
+        onSubmit={onSubmit}
+      />,
     );
 
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'fix2 Gast' } });
@@ -55,5 +67,34 @@ describe('GuestBookingForm — E-Mail ist optional (fix2)', () => {
 
     await waitFor(() => expect(screen.queryByText(/gültige e-mail/i)).not.toBeNull());
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+});
+
+// Backlog 4, Task 2: Einladungs-Moment nach Buchung — Einladungs-Absatz + Share-Trio
+// (WhatsApp/Telegram/Signal) im Gast-Erfolgs-Screen, mit der Wachen-URL (Task 1: src/lib/share.ts).
+describe('GuestBookingForm — Einladungs-Moment nach Buchung (Backlog 4)', () => {
+  afterEach(() => cleanup());
+
+  it('Erfolgs-Screen zeigt Einladung + Share-Zeile (WhatsApp/Telegram/Signal) mit Wachen-URL', async () => {
+    render(
+      <GuestBookingForm
+        slot={slot}
+        projectTitle="Wache Lena"
+        projectTz="UTC"
+        projectId="p1"
+        invite="tok1"
+        onSubmit={async () => ({ guestToken: 'g1' })}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'Maria' } });
+    fireEvent.click(screen.getByRole('button', { name: /Stunde|übernehmen/i }));
+    await waitFor(() => expect(screen.getByText(/gehört dir/i)).toBeTruthy());
+    // Einladungs-Absatz + Trio
+    expect(screen.getByText(/Lade jemanden ein/i)).toBeTruthy();
+    const wa = screen.getByRole('link', { name: /whatsapp/i }) as HTMLAnchorElement;
+    expect(wa.href).toContain('https://wa.me/?text=');
+    expect(decodeURIComponent(wa.href)).toContain('/projects/p1?invite=tok1');
+    expect(screen.getByRole('link', { name: /telegram/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /signal/i })).toBeTruthy();
   });
 });

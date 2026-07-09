@@ -265,6 +265,8 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
             slot={slot}
             projectTitle={project.title}
             projectTz={project.timezone}
+            projectId={project.id}
+            invite={project.visibility === 'PRIVATE' ? project.inviteToken || undefined : undefined}
             dayMode={dayMode}
             onSubmit={async (data) => {
               const created = await bookSlot(project.id, {

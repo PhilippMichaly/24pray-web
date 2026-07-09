@@ -12,6 +12,7 @@ import { CityInput } from '@/components/patterns/CityInput';
 import { setMyCity, getMyCity } from '@/lib/mylocation';
 import type { GeoCity } from '@/lib/api';
 import { t, tUnit } from '@/lib/i18n';
+import { buildWatchUrl, waShareHref, tgShareHref, shareViaSystem } from '@/lib/share';
 import type { SlotViewModel } from './types';
 
 // fix2 (HOCH, End-User-Test v2 Befund 3): guestEmail ist im Backend optional
@@ -27,6 +28,8 @@ export interface GuestBookingFormProps {
   slot: SlotViewModel;
   projectTitle: string;
   projectTz: string;
+  projectId: string;
+  invite?: string; // PRIVATE-Wache: inviteToken, damit der geteilte Link funktioniert
   /** Tages-Wache (slotDurationMinutes=1440): Ganztages-ICS + Tages-Texte statt Stunden. */
   dayMode?: boolean;
   onSubmit: (data: {
@@ -37,7 +40,15 @@ export interface GuestBookingFormProps {
   }) => Promise<{ guestToken: string }>;
 }
 
-export function GuestBookingForm({ slot, projectTitle, projectTz, dayMode, onSubmit }: GuestBookingFormProps) {
+export function GuestBookingForm({
+  slot,
+  projectTitle,
+  projectTz,
+  projectId,
+  invite,
+  dayMode,
+  onSubmit,
+}: GuestBookingFormProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [city, setCity] = useState<GeoCity | null>(() => getMyCity());
@@ -113,6 +124,40 @@ export function GuestBookingForm({ slot, projectTitle, projectTz, dayMode, onSub
         <Button variant="secondary" icon={CalendarPlus} className="mt-4 w-full" onClick={downloadIcs}>
           {t('addToCalendar')}
         </Button>
+        {(() => {
+          const url = buildWatchUrl(projectId, invite);
+          const text = t('inviteShareText', { title: projectTitle });
+          return (
+            <div className="mt-5 border-t border-border pt-4">
+              <p className="text-sm text-ink">{t('inviteAfterBooking')}</p>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-xs font-medium text-ink-muted">
+                <a
+                  href={waShareHref(text, url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-ink"
+                >
+                  {t('shareUpdateWhatsapp')}
+                </a>
+                <a
+                  href={tgShareHref(text, url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-ink"
+                >
+                  {t('shareUpdateTelegram')}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => shareViaSystem(text, url)}
+                  className="underline underline-offset-2 hover:text-ink"
+                >
+                  {t('shareUpdateOther')}
+                </button>
+              </div>
+            </div>
+          );
+        })()}
         <p className="mt-4 text-xs text-ink-muted">
           {t('guestAccountOffer')}{' '}
           <Link href="/auth/login" className="text-accent-strong underline underline-offset-2">

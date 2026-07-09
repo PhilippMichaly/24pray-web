@@ -38,6 +38,10 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
    landing/list/watch per Seiten-Ping, booking serverseitig im Buchungs-Handler; gespeichert
    wird AUSSCHLIESSLICH date+step+count. Lesen: GET /stats/funnel?token=… — FUNNEL_TOKEN
    beim Deploy in /etc/24pray-api.env setzen, ohne Token antwortet der Endpoint 404.)
+9. ~~**Feedback-Button + Open-Source-Hinweis**~~ (User-Zusatz 2026-07-09) — GEBAUT: Footer-
+   „Feedback"-Dialog (Mail an FEEDBACK_TO, keine DB-Speicherung, ohne Login, fail-closed ohne
+   Env) + GitHub-Icon-Link auf das öffentliche Repo in beiden Footern; „Auf GitHub melden"-Link
+   im Dialog. FEEDBACK_TO beim Deploy in /etc/24pray-api.env setzen (philipp@michaly.de).
 
 ## SEO (eigenes Paket, aus Review + früherem Merkposten)
 

@@ -34,8 +34,10 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
    nur Sichtbarkeit.)
 7. **Web-Push (PWA)** — opt-in für Stunden-Erinnerung + Owner-Updates; ohne Dritt-Dienst
    (VAPID self-hosted). Zweiter Kanal neben Mail.
-8. **Cookiefreies, aggregiertes Server-Zählen** — nur Pfad-Zähler (Landing→Sheet→Wache→Buchung),
-   keine Personenbezüge, kein Banner nötig. Beendet die Funnel-Blindheit werte-konform.
+8. ~~**Cookiefreies, aggregiertes Server-Zählen**~~ — GEBAUT 2026-07-09 (Tageszähler
+   landing/list/watch per Seiten-Ping, booking serverseitig im Buchungs-Handler; gespeichert
+   wird AUSSCHLIESSLICH date+step+count. Lesen: GET /stats/funnel?token=… — FUNNEL_TOKEN
+   beim Deploy in /etc/24pray-api.env setzen, ohne Token antwortet der Endpoint 404.)
 
 ## SEO (eigenes Paket, aus Review + früherem Merkposten)
 
@@ -57,6 +59,8 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 - Update-Mail he/ar Texte: Muttersprachler-Review (zusammen mit bestehendem he/ar-Merkposten)
 - Titel-Editing bestehender Wachen (Anliegen-Karte erweitern)
 - PLZ-Suche für Orte <500 EW (GeoNames-Postal-Dump)
+- Funnel: watch-Ping zählt auch 403/404-Aufrufe (Seitenaufruf ≠ erfolgreiche Ansicht) — falls
+  später „erfolgreiche Ansicht"-Metrik gewünscht, Ping hinter den Load-Erfolg ziehen (Review P8)
 - Muttersprachler-Review he/ar (Bidi-Kandidat: `pastFoldLabel` ar)
 - Titelbild pro Wache (Design fertig, User-verworfen wegen Sizing — bei Bedarf reaktivieren;
   dann Backup um uploads/ erweitern + Datenschutz-Absatz)

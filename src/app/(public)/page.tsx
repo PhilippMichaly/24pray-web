@@ -120,7 +120,16 @@ export default function HomePage() {
           )}
         </div>
 
-        <h1 className="-mt-2 max-w-[560px] text-center font-display text-2xl font-semibold leading-tight tracking-tight">
+        {/* Der Vers als Bildunterschrift der leuchtenden Erde (Design-Entscheidung 2026-07-09):
+            der Globus zeigt die Lichter der Welt bei Nacht — Matthäus 5,14 deutet genau dieses Bild. */}
+        <p className="mt-2 max-w-[460px] text-center font-display text-xl italic leading-snug text-gold">
+          {t('verseLightOfWorld')}
+        </p>
+        <p className="mt-1.5 text-center text-[11px] uppercase tracking-[0.25em] text-ink-muted">
+          {t('verseLightOfWorldSource')}
+        </p>
+
+        <h1 className="mt-5 max-w-[560px] text-center font-display text-2xl font-semibold leading-tight tracking-tight">
           {t('heroTitle')}
         </h1>
 
@@ -139,7 +148,6 @@ export default function HomePage() {
       </main>
 
       <footer className="z-10 pb-4 pt-4 text-center text-xs text-ink-muted opacity-70">
-        <p className="mb-1 text-xs text-ink-muted">{t('lightOfWorld')}</p>
         24pray · {t('earthCredit')}
         <span className="mx-2">·</span>
         <FeedbackDialog />

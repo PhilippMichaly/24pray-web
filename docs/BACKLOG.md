@@ -78,7 +78,12 @@ neue öffentliche Listen-Route, Technik + Landing-Text + Über-uns):
 es fehlt der Inhalt vom Betreiber: wer dahintersteht, Glaubensbasis, warum kostenlos/werbefrei.
 Erst danach sinnvoll indexierbar — eine dünne Platzhalterseite schadet mehr als sie nützt.
 
-**Nach dem Deploy zu tun:** Search Console einrichten, Property verifizieren, Sitemap
+DEPLOYED 2026-07-27. Live verifiziert: `/` → `/de` (307), `/projects/:id?invite=` behält den
+Query-String, `/en/watches` → `/en/prayer-watches` (308), `/de/gebetswachen` liefert h1 +
+Wachen-Titel im Quelltext, `/ar` liefert `lang="ar" dir="rtl"`, robots.txt + sitemap.xml (17 URLs),
+Mail-Links (`/join`, `/auth/login`) unverändert erreichbar.
+
+**Nach dem Deploy zu tun (beim User):** Search Console einrichten, Property verifizieren, Sitemap
 (`https://24pray.org/sitemap.xml`) einreichen. Ohne das dauert die Erstindexierung deutlich länger.
 
 ## Kleinere Merkposten
@@ -123,6 +128,15 @@ Erst danach sinnvoll indexierbar — eine dünne Platzhalterseite schadet mehr a
   (User-Activation-Risiko Safari) prüfen (Review P7)
 - Push-Test Owner-Ausschluss: kein push-spezifischer Test, dass der Owner beim eigenen Update
   keinen Push bekommt (transitiv gedeckt; Review P7, Low)
+- Betreiber-Benachrichtigungen: LIVE-Beweis steht noch aus. Auf Produktion wird bewusst nicht
+  geschrieben (GET-only-Regel), die drei Pfade sind nur durch Tests gedeckt. Erstes echtes
+  Ereignis (Wache anlegen / Buchung / erster Login eines neuen Kontos) beobachten; falls keine
+  Mail kommt: `journalctl -u 24pray-api | grep "admin notice"` zeigt Versandfehler
+- Neue SEO-Texte (27 Keys: seoSiteTitle…faqPrivateA) für he/ar durch Muttersprachler prüfen —
+  zusammen mit dem bestehenden he/ar-Merkposten abarbeiten
+- Neue Landing-Abschnitte (Erklärteil, 3 Schritte, FAQ) und die Wachen-Liste sind noch nie
+  visuell abgenommen worden — beim nächsten Mal Screenshots ansehen, Textlängen in he/ar/es
+  prüfen (Umbrüche in der Schritt-Liste)
 - Betreiber-Benachrichtigung „jede Buchung": bei einer vollen 24-Stunden-Wache bis zu 24 Mails.
   Bewusste User-Entscheidung 2026-07-27; falls es zu laut wird, ist der Filter eine Bedingung in
   `notifyAdmin`-Aufrufer `slots.ts` (z. B. nur erste Stunde + jede zehnte)
@@ -135,3 +149,8 @@ Erst danach sinnvoll indexierbar — eine dünne Platzhalterseite schadet mehr a
 
 - `gh auth refresh -h github.com -s workflow` → Uptime-Cron scharf schalten
 - SMTP-Passwort-Rotation Strato → danach `/etc/24pray-api.env` aktualisieren
+- Google Search Console: Property für 24pray.org verifizieren + Sitemap einreichen (SEO-Paket)
+- Datenschutzerklärung §7, Absatz zu den Betreiber-Benachrichtigungen: gegenlesen (ist seit
+  2026-07-27 live)
+- Inhalt der Über-uns-Seite liefern: wer steht dahinter, Glaubensbasis, warum kostenlos und
+  werbefrei. Route + Slug-Map sind vorbereitet, Text fehlt (SEO-Paket + Web2-Punkt 3)

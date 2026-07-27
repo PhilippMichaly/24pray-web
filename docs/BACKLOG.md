@@ -59,10 +59,27 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
 
 ## SEO (eigenes Paket, aus Review + früherem Merkposten)
 
-- robots.txt + dynamische sitemap.xml (PUBLIC-Wachen), Canonical-URLs
-- schema.org-Events pro Wache
-- SSR-Inhalte für öffentliche Wachenseiten (derzeit client-gerendert → Crawler sehen wenig)
-- hreflang erst NACH Entscheidung URL-basierte Locales (/es/…) — bewusste Architekturfrage!
+GEBAUT 2026-07-27 (User-Entscheidung: volle URL-basierte Locales für alle 5 Sprachen,
+neue öffentliche Listen-Route, Technik + Landing-Text + Über-uns):
+
+- ~~robots.txt + dynamische sitemap.xml (PUBLIC-Wachen), Canonical-URLs~~ — `src/app/robots.ts`,
+  `src/app/sitemap.ts` (alle PUBLIC-Wachen × 5 Sprachen mit hreflang, stündlich revalidiert)
+- ~~schema.org-Events pro Wache~~ — plus Organization/WebSite auf der Landing, ItemList auf der
+  Liste und FAQPage zur Landing-FAQ (`src/lib/seo.ts`)
+- ~~SSR-Inhalte für öffentliche Wachenseiten~~ — `src/lib/api-server.ts` holt die PUBLIC-Wache
+  serverseitig und reicht sie als `initialProject` in die Client-Insel; Titel/Anliegen/
+  Fortschritt stehen dadurch im ersten HTML, ohne die interaktive Seite aufzuspalten
+- ~~hreflang / URL-basierte Locales~~ — `/{locale}/…` für alle öffentlichen Seiten,
+  lokalisierte Slugs, `src/middleware.ts` für Erkennung/Redirect/Rewrite. App-Routen bleiben
+  bewusst unpräfigiert (API mailt Links dorthin) und tragen `noindex`.
+- ~~Landing-Erklärteil + FAQ~~ — serverseitig gerendert, 27 neue i18n-Keys in allen 5 Sprachen
+
+**Noch offen:** Über-uns-/Werte-Seite (= Punkt 3 oben). Route und Slug-Map sind vorbereitet,
+es fehlt der Inhalt vom Betreiber: wer dahintersteht, Glaubensbasis, warum kostenlos/werbefrei.
+Erst danach sinnvoll indexierbar — eine dünne Platzhalterseite schadet mehr als sie nützt.
+
+**Nach dem Deploy zu tun:** Search Console einrichten, Property verifizieren, Sitemap
+(`https://24pray.org/sitemap.xml`) einreichen. Ohne das dauert die Erstindexierung deutlich länger.
 
 ## Kleinere Merkposten
 

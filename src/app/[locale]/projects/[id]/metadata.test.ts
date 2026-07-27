@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { ProjectWithStats } from '@/types';
+import { SUPPORTED_LOCALES } from '@/lib/i18n';
 
 const publicProject = {
   id: 'p-pub',
@@ -25,7 +26,9 @@ const publicProjectNoDescription = {
   description: null,
 } as ProjectWithStats;
 
-describe('generateMetadata — Projektseite (OpenGraph pro Kette)', () => {
+const load = async () => (await import('./metadata')).generateMetadata;
+
+describe('generateMetadata — Wachenseite', () => {
   const fetchMock = vi.fn();
   beforeEach(() => {
     fetchMock.mockReset();
@@ -33,12 +36,11 @@ describe('generateMetadata — Projektseite (OpenGraph pro Kette)', () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it('PUBLIC-Projekt: Titel + gekürzte Beschreibung aus der Kette', async () => {
+  it('PUBLIC: Titel + gekürzte Beschreibung aus der Wache', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify(publicProject), { status: 200 }));
-    const { generateMetadata } = await import('./layout');
-    const meta = await generateMetadata({ params: { id: 'p-pub' } });
+    const meta = await (await load())({ params: { locale: 'de', id: 'p-pub' } });
 
-    expect(meta.title).toBe('Nachtgebet für die Stadt — Gebetswache auf 24pray');
+    expect(meta.title).toBe('Nachtgebet für die Stadt — 24pray');
     expect(typeof meta.description).toBe('string');
     expect((meta.description as string).length).toBeLessThanOrEqual(160);
     expect((meta.description as string).endsWith('…')).toBe(true);
@@ -50,12 +52,31 @@ describe('generateMetadata — Projektseite (OpenGraph pro Kette)', () => {
     expect(String(url)).toBe('http://localhost:3001/projects/p-pub');
   });
 
-  it('PUBLIC-Projekt ohne Beschreibung: Fallback mit Stunden-Zahlen', async () => {
+  it('PUBLIC: Canonical zeigt auf die eigene Sprache, hreflang deckt alle fünf ab', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify(publicProject), { status: 200 }));
+    const meta = await (await load())({ params: { locale: 'es', id: 'p-pub' } });
+
+    expect(String(meta.alternates?.canonical)).toContain('/es/projects/p-pub');
+    const languages = meta.alternates?.languages as Record<string, string>;
+    for (const l of SUPPORTED_LOCALES) {
+      expect(String(languages[l]), l).toContain(`/${l}/projects/p-pub`);
+    }
+    expect(languages['x-default']).toBe(languages.en);
+  });
+
+  it('PUBLIC: Titel wird pro Sprache lokalisiert beschrieben', async () => {
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify(publicProjectNoDescription), { status: 200 }),
     );
-    const { generateMetadata } = await import('./layout');
-    const meta = await generateMetadata({ params: { id: 'p-pub-nodesc' } });
+    const meta = await (await load())({ params: { locale: 'en', id: 'p-pub-nodesc' } });
+    expect(meta.description).toContain('hours held');
+  });
+
+  it('ohne Beschreibung: Fallback nennt gehaltene Stunden', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify(publicProjectNoDescription), { status: 200 }),
+    );
+    const meta = await (await load())({ params: { locale: 'de', id: 'p-pub-nodesc' } });
 
     expect(meta.description).toContain('3');
     expect(meta.description).toContain('24');
@@ -65,44 +86,41 @@ describe('generateMetadata — Projektseite (OpenGraph pro Kette)', () => {
   it('Tages-Wache ohne Beschreibung: Fallback sagt "Tagen" statt "Stunden"', async () => {
     const dayProject = { ...publicProjectNoDescription, id: 'p-pub-day', slotDurationMinutes: 1440 };
     fetchMock.mockResolvedValue(new Response(JSON.stringify(dayProject), { status: 200 }));
-    const { generateMetadata } = await import('./layout');
-    const meta = await generateMetadata({ params: { id: 'p-pub-day' } });
+    const meta = await (await load())({ params: { locale: 'de', id: 'p-pub-day' } });
 
     expect(meta.description).toContain('Tagen');
     expect(meta.description).not.toContain('Stunden');
   });
 
-  it('403 (PRIVATE ohne Zugriff): generische Site-Defaults, kein Daten-Leak', async () => {
-    fetchMock.mockResolvedValue(new Response(JSON.stringify({ message: 'Kein Zugriff' }), { status: 403 }));
-    const { generateMetadata } = await import('./layout');
-    const meta = await generateMetadata({ params: { id: 'p-priv' } });
+  it('PRIVATE-Wache: generische Defaults UND noindex — nichts davon in den Index', async () => {
+    const priv = { ...publicProject, id: 'p-priv', visibility: 'PRIVATE' };
+    fetchMock.mockResolvedValue(new Response(JSON.stringify(priv), { status: 200 }));
+    const meta = await (await load())({ params: { locale: 'de', id: 'p-priv' } });
 
-    expect(meta.title).toBe('24pray — Gemeinsam beten');
-    expect(meta.description).not.toContain('Nachtgebet');
+    expect(JSON.stringify(meta)).not.toContain('Nachtgebet');
+    expect((meta.robots as { index?: boolean }).index).toBe(false);
   });
 
-  it('404: generische Site-Defaults', async () => {
-    fetchMock.mockResolvedValue(new Response(JSON.stringify({ message: 'nicht gefunden' }), { status: 404 }));
-    const { generateMetadata } = await import('./layout');
-    const meta = await generateMetadata({ params: { id: 'p-missing' } });
-
-    expect(meta.title).toBe('24pray — Gemeinsam beten');
-  });
-
-  it('Netzwerkfehler/Timeout: bricht nicht, liefert Site-Defaults', async () => {
+  it('403/404/Netzwerkfehler: generische Defaults, kein Bruch, noindex', async () => {
+    for (const response of [
+      new Response('{}', { status: 403 }),
+      new Response('{}', { status: 404 }),
+    ]) {
+      fetchMock.mockResolvedValue(response);
+      const meta = await (await load())({ params: { locale: 'de', id: 'x' } });
+      expect(meta.description).not.toContain('Nachtgebet');
+      expect((meta.robots as { index?: boolean }).index).toBe(false);
+    }
     fetchMock.mockRejectedValue(new Error('fetch failed'));
-    const { generateMetadata } = await import('./layout');
-    const meta = await generateMetadata({ params: { id: 'p-err' } });
-
-    expect(meta.title).toBe('24pray — Gemeinsam beten');
+    const meta = await (await load())({ params: { locale: 'de', id: 'p-err' } });
+    expect((meta.robots as { index?: boolean }).index).toBe(false);
   });
 
   it('nutzt API_URL_INTERNAL statt der öffentlichen NEXT_PUBLIC_API_URL', async () => {
     const prev = process.env.API_URL_INTERNAL;
     process.env.API_URL_INTERNAL = 'http://internal-api:4000';
     fetchMock.mockResolvedValue(new Response(JSON.stringify(publicProject), { status: 200 }));
-    const { generateMetadata } = await import('./layout');
-    await generateMetadata({ params: { id: 'p-pub' } });
+    await (await load())({ params: { locale: 'de', id: 'p-pub' } });
     const [url] = fetchMock.mock.calls[0];
     expect(String(url)).toBe('http://internal-api:4000/projects/p-pub');
     process.env.API_URL_INTERNAL = prev;

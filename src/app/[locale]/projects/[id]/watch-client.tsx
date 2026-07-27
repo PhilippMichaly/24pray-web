@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { CalendarClock } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useFunnelPing } from '@/lib/funnel';
@@ -32,16 +32,25 @@ import { RequestsFeed } from '@/components/slots/RequestsFeed';
 import { StatsPanel } from '@/components/slots/StatsPanel';
 import type { SlotViewModel } from '@/components/slots/types';
 import { t } from '@/lib/i18n';
+import { useLocale } from '@/lib/locale-context';
+import { sectionPath } from '@/lib/routes';
 
-function ProjectPageInner() {
+export interface WatchClientProps {
+  id: string;
+  /** Serverseitig geholte PUBLIC-Wache; null bei PRIVATE, Timeout oder unbekannter ID. */
+  initialProject: ProjectWithStats | null;
+}
+
+function ProjectPageInner({ id, initialProject }: WatchClientProps) {
   useFunnelPing('watch');
-  const { id } = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const invite = searchParams.get('invite') ?? undefined; // PRIVATE-Kette per Einladungslink (W3)
   const { user } = useAuth();
+  const { locale } = useLocale();
   const currentUserId = user?.id ?? null;
 
-  const [project, setProject] = useState<ProjectWithStats | null>(null);
+  // Serverseitig vorgeladen (PUBLIC) — dadurch steht der Inhalt schon im ersten HTML.
+  const [project, setProject] = useState<ProjectWithStats | null>(initialProject);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState('chain');
   const [sheet, setSheet] = useState<{ slot: SlotViewModel | null; mode: SlotSheetMode; open: boolean }>({
@@ -51,12 +60,15 @@ function ProjectPageInner() {
   });
 
   useEffect(() => {
+    // Nachladen nur, wenn der Server nichts liefern konnte (PRIVATE/Invite/Timeout) oder ein
+    // Invite-Token im Spiel ist — dann sieht der eingeladene Client mehr als der Server darf.
+    if (initialProject && !invite) return;
     const q = invite ? `?invite=${encodeURIComponent(invite)}` : '';
     api
       .get<ProjectWithStats>(`/projects/${id}${q}`)
       .then(setProject)
       .catch((e) => setLoadError((e as Error).message));
-  }, [id, invite]);
+  }, [id, invite, initialProject]);
 
   const grid = useSlotGrid(project, currentUserId, invite);
 
@@ -102,7 +114,7 @@ function ProjectPageInner() {
         <EmptyState
           icon={CalendarClock}
           title={loadError}
-          action={{ label: t('exploreProjects'), href: '/dashboard' }}
+          action={{ label: t('exploreProjects'), href: sectionPath('watches', locale) }}
         />
       </AppShell>
     );
@@ -258,11 +270,11 @@ function ProjectPageInner() {
   );
 }
 
-export default function ProjectPage() {
+export default function WatchClient(props: WatchClientProps) {
   // useSearchParams braucht eine Suspense-Boundary (Next 14 Prerender).
   return (
     <Suspense fallback={null}>
-      <ProjectPageInner />
+      <ProjectPageInner {...props} />
     </Suspense>
   );
 }

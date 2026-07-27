@@ -4,6 +4,13 @@ import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/re
 import { t, setLocale, getLocale, detectLocale } from './i18n';
 import { LocaleProvider, useLocale } from './locale-context';
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => '/de',
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+
 function langMock(lang: string) {
   vi.stubGlobal('navigator', { ...navigator, language: lang, languages: [lang] });
 }

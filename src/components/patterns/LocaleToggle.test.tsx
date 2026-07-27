@@ -1,9 +1,16 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { setLocale } from '@/lib/i18n';
 import { LocaleProvider } from '@/lib/locale-context';
 import { LocaleToggle } from './LocaleToggle';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => '/de',
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 
 describe('LocaleToggle — Sprachmenü', () => {
   afterEach(() => {

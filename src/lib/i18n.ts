@@ -320,6 +320,52 @@ const de = {
   feedbackThanks: 'Danke! Dein Feedback ist angekommen.',
   feedbackGithub: 'Oder auf GitHub melden',
   githubRepoLabel: 'Quellcode auf GitHub — 24pray ist Open Source',
+
+  // SEO: Titel/Beschreibung der indexierbaren Seiten. Bewusst getrennt von den UI-Texten —
+  // sie sprechen Suchende an, nicht Nutzer, die schon da sind.
+  seoSiteTitle: '24pray — Gebetswachen organisieren und gemeinsam beten',
+  seoSiteDescription:
+    'Kostenlose Plattform für 24/7-Gebetsketten: Gebetswache anlegen, Stunden verteilen, gemeinsam durchbeten. Mitmachen ohne Konto, werbefrei, in fünf Sprachen.',
+  seoWatchesTitle: 'Offene Gebetswachen — jetzt eine Stunde übernehmen',
+  seoWatchesDescription:
+    'Alle öffentlichen Gebetswachen auf einen Blick. Such dir eine freie Stunde und bete mit — ohne Konto und ohne Kosten.',
+
+  // Öffentliche Wachen-Liste
+  watchesHeading: 'Offene Gebetswachen',
+  watchesIntro:
+    'Jede Wache hier sucht Menschen, die eine Stunde übernehmen. Wähle eine Wache, such dir eine freie Zeit und trag dich ein — ein Konto brauchst du dafür nicht.',
+  watchesEmpty: 'Gerade läuft keine öffentliche Gebetswache. Du kannst die erste starten.',
+
+  // Landing: serverseitig gerenderter Erklärteil (das, worauf Google überhaupt ranken kann)
+  landingWhatHeading: 'Was ist eine Gebetswache?',
+  landingWhatBody:
+    'Eine Gebetswache teilt einen Zeitraum in Stunden auf, und für jede Stunde übernimmt jemand das Gebet. So entsteht eine Kette, die nicht abreißt: Wo einer aufhört, fängt der nächste an. 24pray ist das Werkzeug dafür — es zeigt, welche Stunden noch frei sind, erinnert dich rechtzeitig an deine, und hält die Kette für alle sichtbar zusammen.',
+  landingHowHeading: 'So funktioniert es',
+  landingStep1Heading: 'Wache anlegen',
+  landingStep1Body:
+    'Lege fest, wofür gebetet wird und über welchen Zeitraum. Ob in Stunden oder in Tagen aufgeteilt wird, entscheidest du beim Anlegen.',
+  landingStep2Heading: 'Teilen und Stunden verteilen',
+  landingStep2Body:
+    'Teile den Link in eure Gruppe — per WhatsApp, Telegram, Signal oder wie ihr sonst schreibt. Jeder trägt sich in die Stunden ein, die ihm passen.',
+  landingStep3Heading: 'Gemeinsam durchbeten',
+  landingStep3Body:
+    'Vor deiner Stunde bekommst du eine Erinnerung. Auf der Wachenseite siehst du jederzeit, wo noch Lücken sind und was es Neues zum Anliegen gibt.',
+  landingFaqHeading: 'Häufige Fragen',
+  faqCostQ: 'Was kostet 24pray?',
+  faqCostA:
+    'Nichts. Die Nutzung ist kostenlos und es gibt keine Werbung. 24pray ist Open Source, der Quellcode liegt öffentlich auf GitHub.',
+  faqAccountQ: 'Brauche ich ein Konto?',
+  faqAccountA:
+    'Zum Mitbeten nicht. Du kannst eine Stunde als Gast übernehmen — ein Name genügt, die E-Mail-Adresse ist freiwillig und dient nur der Bestätigung und der Erinnerung. Ein Konto brauchst du erst, wenn du selbst eine Wache anlegen willst.',
+  faqWhoQ: 'Wer kann eine Gebetswache starten?',
+  faqWhoA:
+    'Jede Gemeinde, jeder Hauskreis, jede Familie, jede Gebetsgruppe. Es gibt keine Freischaltung und keine Mindestgröße — auch zu zweit ist es eine Kette.',
+  faqTimezoneQ: 'Was ist mit verschiedenen Zeitzonen?',
+  faqTimezoneA:
+    'Jede Wache hat eine feste Zeitzone. Zeiten werden dir zusätzlich in deiner eigenen Zeitzone angezeigt, damit du dich nicht verrechnest.',
+  faqPrivateQ: 'Kann eine Wache privat bleiben?',
+  faqPrivateA:
+    'Ja. Private Wachen tauchen in keiner Liste und in keiner Suchmaschine auf, sie sind nur über den Einladungslink erreichbar. Öffentliche Wachen stehen in der Übersicht und können von jedem gefunden werden.',
 } as const;
 
 // English — vollständig (W3.3). `Record<…>` erzwingt: neuer de-Key ⇒ en-Pflicht.
@@ -623,6 +669,48 @@ const en: Record<keyof typeof de, string> = {
   feedbackThanks: 'Thank you! Your feedback has arrived.',
   feedbackGithub: 'Or report on GitHub',
   githubRepoLabel: 'Source code on GitHub — 24pray is open source',
+
+  seoSiteTitle: '24pray — organise prayer watches and pray together',
+  seoSiteDescription:
+    'Free platform for 24/7 prayer chains: create a prayer watch, share out the hours, pray it through together. Join without an account, no ads, in five languages.',
+  seoWatchesTitle: 'Open prayer watches — take an hour now',
+  seoWatchesDescription:
+    'Every public prayer watch at a glance. Find a free hour and pray along — no account, no cost.',
+
+  watchesHeading: 'Open prayer watches',
+  watchesIntro:
+    'Every watch here is looking for people to take an hour. Pick a watch, find a time that suits you and sign up — you do not need an account for that.',
+  watchesEmpty: 'No public prayer watch is running right now. You could start the first one.',
+
+  landingWhatHeading: 'What is a prayer watch?',
+  landingWhatBody:
+    'A prayer watch splits a stretch of time into hours, and someone takes on the prayer for each hour. That builds a chain which never breaks: where one person stops, the next begins. 24pray is the tool for it — it shows which hours are still free, reminds you of yours in good time, and keeps the chain visible for everyone.',
+  landingHowHeading: 'How it works',
+  landingStep1Heading: 'Create a watch',
+  landingStep1Body:
+    'Set out what you are praying for and over which period. Whether it is split into hours or into days is your choice when you create it.',
+  landingStep2Heading: 'Share it and fill the hours',
+  landingStep2Body:
+    'Share the link with your group — via WhatsApp, Telegram, Signal or wherever you write to each other. Everyone signs up for the hours that suit them.',
+  landingStep3Heading: 'Pray it through together',
+  landingStep3Body:
+    'You get a reminder before your hour. On the watch page you can see at any time where the gaps still are and what is new about the concern.',
+  landingFaqHeading: 'Common questions',
+  faqCostQ: 'What does 24pray cost?',
+  faqCostA:
+    'Nothing. It is free to use and there is no advertising. 24pray is open source, and the code is public on GitHub.',
+  faqAccountQ: 'Do I need an account?',
+  faqAccountA:
+    'Not to pray along. You can take an hour as a guest — a name is enough, an email address is optional and is only used for the confirmation and the reminder. You only need an account once you want to create a watch yourself.',
+  faqWhoQ: 'Who can start a prayer watch?',
+  faqWhoA:
+    'Any church, home group, family or prayer circle. There is no approval process and no minimum size — two people are already a chain.',
+  faqTimezoneQ: 'What about different time zones?',
+  faqTimezoneA:
+    'Every watch has one fixed time zone. Times are also shown to you in your own time zone, so you do not miscalculate.',
+  faqPrivateQ: 'Can a watch stay private?',
+  faqPrivateA:
+    'Yes. Private watches appear in no listing and in no search engine; they can only be reached through the invitation link. Public watches are in the overview and can be found by anyone.',
 };
 
 // Español — vollständig (i18n-Erweiterung W4). Leitbegriffe: „vigilia de oración"
@@ -928,6 +1016,48 @@ const es: Record<keyof typeof de, string> = {
   feedbackThanks: '¡Gracias! Tu mensaje ha llegado.',
   feedbackGithub: 'O repórtalo en GitHub',
   githubRepoLabel: 'Código fuente en GitHub — 24pray es open source',
+
+  seoSiteTitle: '24pray — organiza vigilias de oración y orad juntos',
+  seoSiteDescription:
+    'Plataforma gratuita para cadenas de oración 24/7: crea una vigilia, reparte las horas, orad juntos hasta el final. Participa sin cuenta, sin publicidad, en cinco idiomas.',
+  seoWatchesTitle: 'Vigilias de oración abiertas — toma una hora ahora',
+  seoWatchesDescription:
+    'Todas las vigilias de oración públicas de un vistazo. Busca una hora libre y ora con nosotros: sin cuenta y sin coste.',
+
+  watchesHeading: 'Vigilias de oración abiertas',
+  watchesIntro:
+    'Cada vigilia de aquí busca personas que tomen una hora. Elige una vigilia, busca un horario libre e inscríbete; para eso no necesitas cuenta.',
+  watchesEmpty: 'Ahora mismo no hay ninguna vigilia de oración pública. Puedes empezar la primera.',
+
+  landingWhatHeading: '¿Qué es una vigilia de oración?',
+  landingWhatBody:
+    'Una vigilia de oración divide un periodo de tiempo en horas, y alguien se hace cargo de la oración en cada hora. Así nace una cadena que no se rompe: donde uno termina, empieza el siguiente. 24pray es la herramienta para ello: muestra qué horas siguen libres, te recuerda la tuya a tiempo y mantiene la cadena visible para todos.',
+  landingHowHeading: 'Cómo funciona',
+  landingStep1Heading: 'Crear una vigilia',
+  landingStep1Body:
+    'Define por qué se ora y durante qué periodo. Si se divide en horas o en días lo decides tú al crearla.',
+  landingStep2Heading: 'Compartir y repartir las horas',
+  landingStep2Body:
+    'Comparte el enlace en vuestro grupo, por WhatsApp, Telegram, Signal o donde os escribáis. Cada uno se apunta a las horas que le vienen bien.',
+  landingStep3Heading: 'Orar juntos hasta el final',
+  landingStep3Body:
+    'Antes de tu hora recibes un recordatorio. En la página de la vigilia ves en todo momento dónde quedan huecos y qué novedades hay sobre la intención.',
+  landingFaqHeading: 'Preguntas frecuentes',
+  faqCostQ: '¿Cuánto cuesta 24pray?',
+  faqCostA:
+    'Nada. El uso es gratuito y no hay publicidad. 24pray es open source y el código está público en GitHub.',
+  faqAccountQ: '¿Necesito una cuenta?',
+  faqAccountA:
+    'Para orar, no. Puedes tomar una hora como invitado: basta con un nombre, y el correo electrónico es voluntario y solo sirve para la confirmación y el recordatorio. Solo necesitas cuenta cuando quieras crear tú mismo una vigilia.',
+  faqWhoQ: '¿Quién puede empezar una vigilia de oración?',
+  faqWhoA:
+    'Cualquier iglesia, grupo de casa, familia o grupo de oración. No hay ninguna autorización ni tamaño mínimo: incluso entre dos personas ya es una cadena.',
+  faqTimezoneQ: '¿Qué pasa con las distintas zonas horarias?',
+  faqTimezoneA:
+    'Cada vigilia tiene una zona horaria fija. Además, las horas se te muestran en tu propia zona horaria para que no te equivoques al calcular.',
+  faqPrivateQ: '¿Puede una vigilia permanecer privada?',
+  faqPrivateA:
+    'Sí. Las vigilias privadas no aparecen en ninguna lista ni en ningún buscador; solo se accede a ellas mediante el enlace de invitación. Las públicas están en la vista general y cualquiera puede encontrarlas.',
 };
 
 // עברית — vollständig (i18n-Erweiterung W4, RTL). Leitbegriffe: „משמרת תפילה"
@@ -1233,6 +1363,48 @@ const he: Record<keyof typeof de, string> = {
   feedbackThanks: 'תודה! המשוב שלכם התקבל.',
   feedbackGithub: 'או דווחו ב-GitHub',
   githubRepoLabel: 'קוד המקור ב-GitHub — ‏24pray הוא קוד פתוח',
+
+  seoSiteTitle: '‏24pray — לארגן משמרות תפילה ולהתפלל יחד',
+  seoSiteDescription:
+    'פלטפורמה חינמית לשרשראות תפילה 24/7: ליצור משמרת תפילה, לחלק את השעות, להתפלל יחד עד הסוף. אפשר להצטרף בלי חשבון, בלי פרסומות, בחמש שפות.',
+  seoWatchesTitle: 'משמרות תפילה פתוחות — קחו שעה עכשיו',
+  seoWatchesDescription:
+    'כל משמרות התפילה הציבוריות במבט אחד. מצאו שעה פנויה והתפללו יחד — בלי חשבון ובלי עלות.',
+
+  watchesHeading: 'משמרות תפילה פתוחות',
+  watchesIntro:
+    'כל משמרת כאן מחפשת אנשים שייקחו על עצמם שעה. בחרו משמרת, מצאו זמן פנוי והירשמו — לשם כך אינכם זקוקים לחשבון.',
+  watchesEmpty: 'כרגע לא מתקיימת שום משמרת תפילה ציבורית. אתם יכולים לפתוח את הראשונה.',
+
+  landingWhatHeading: 'מהי משמרת תפילה?',
+  landingWhatBody:
+    'משמרת תפילה מחלקת פרק זמן לשעות, ובכל שעה מישהו לוקח על עצמו את התפילה. כך נוצרת שרשרת שאינה נקטעת: היכן שאחד מסיים, הבא מתחיל. ‏24pray הוא הכלי לכך — הוא מראה אילו שעות עדיין פנויות, מזכיר לכם את שלכם בזמן, ושומר על השרשרת גלויה לכולם.',
+  landingHowHeading: 'איך זה עובד',
+  landingStep1Heading: 'ליצור משמרת',
+  landingStep1Body:
+    'קבעו על מה מתפללים ובאיזה פרק זמן. האם לחלק לשעות או לימים — אתם מחליטים בעת היצירה.',
+  landingStep2Heading: 'לשתף ולחלק את השעות',
+  landingStep2Body:
+    'שתפו את הקישור בקבוצה שלכם — בוואטסאפ, בטלגרם, בסיגנל או בכל מקום שבו אתם כותבים. כל אחד נרשם לשעות שמתאימות לו.',
+  landingStep3Heading: 'להתפלל יחד עד הסוף',
+  landingStep3Body:
+    'לפני השעה שלכם תקבלו תזכורת. בדף המשמרת תוכלו לראות בכל רגע היכן נותרו פערים ומה חדש בנוגע לבקשה.',
+  landingFaqHeading: 'שאלות נפוצות',
+  faqCostQ: 'כמה עולה ‏24pray?',
+  faqCostA:
+    'כלום. השימוש חינמי ואין פרסומות. ‏24pray הוא קוד פתוח, והקוד זמין בפומבי ב-GitHub.',
+  faqAccountQ: 'האם אני צריך חשבון?',
+  faqAccountA:
+    'כדי להתפלל — לא. אפשר לקחת שעה כאורח: שם מספיק, וכתובת האימייל היא רשות ומשמשת רק לאישור ולתזכורת. חשבון תצטרכו רק כשתרצו ליצור משמרת בעצמכם.',
+  faqWhoQ: 'מי יכול לפתוח משמרת תפילה?',
+  faqWhoA:
+    'כל קהילה, חבורת בית, משפחה או קבוצת תפילה. אין תהליך אישור ואין גודל מינימלי — גם שניים הם כבר שרשרת.',
+  faqTimezoneQ: 'ומה עם אזורי זמן שונים?',
+  faqTimezoneA:
+    'לכל משמרת יש אזור זמן קבוע אחד. השעות מוצגות לכם גם באזור הזמן שלכם, כדי שלא תטעו בחישוב.',
+  faqPrivateQ: 'האם משמרת יכולה להישאר פרטית?',
+  faqPrivateA:
+    'כן. משמרות פרטיות אינן מופיעות בשום רשימה ובשום מנוע חיפוש; אפשר להגיע אליהן רק דרך קישור ההזמנה. משמרות ציבוריות מופיעות בסקירה וכל אחד יכול למצוא אותן.',
 };
 
 // العربية — vollständig (i18n-Erweiterung W4, RTL, MSA/فصحى). Leitbegriffe: „سهرة صلاة"
@@ -1538,6 +1710,48 @@ const ar: Record<keyof typeof de, string> = {
   feedbackThanks: 'شكرًا! وصلت ملاحظاتك.',
   feedbackGithub: 'أو أبلغ عبر GitHub',
   githubRepoLabel: 'الشيفرة المصدرية على GitHub — ‏24pray مفتوح المصدر',
+
+  seoSiteTitle: '‏24pray — نظّم سهرات الصلاة وصلّوا معًا',
+  seoSiteDescription:
+    'منصة مجانية لسلاسل الصلاة على مدار الساعة: أنشئ سهرة صلاة، ووزّع الساعات، وصلّوا معًا حتى النهاية. شارك دون حساب، بلا إعلانات، بخمس لغات.',
+  seoWatchesTitle: 'سهرات صلاة مفتوحة — خذ ساعة الآن',
+  seoWatchesDescription:
+    'كل سهرات الصلاة العامة في لمحة واحدة. ابحث عن ساعة شاغرة وصلِّ معنا — دون حساب ودون تكلفة.',
+
+  watchesHeading: 'سهرات صلاة مفتوحة',
+  watchesIntro:
+    'كل سهرة هنا تبحث عن أشخاص يتولّون ساعة. اختر سهرة، وابحث عن وقت شاغر وسجّل نفسك — لا تحتاج إلى حساب لذلك.',
+  watchesEmpty: 'لا توجد حاليًا أي سهرة صلاة عامة. يمكنك أن تبدأ الأولى.',
+
+  landingWhatHeading: 'ما هي سهرة الصلاة؟',
+  landingWhatBody:
+    'تقسّم سهرة الصلاة فترة زمنية إلى ساعات، ويتولّى أحدهم الصلاة في كل ساعة. هكذا تنشأ سلسلة لا تنقطع: حيث يتوقف واحد، يبدأ الذي يليه. و‏24pray هي الأداة لذلك — تُظهر الساعات التي ما زالت شاغرة، وتذكّرك بساعتك في وقتها، وتُبقي السلسلة مرئية للجميع.',
+  landingHowHeading: 'كيف تعمل',
+  landingStep1Heading: 'إنشاء سهرة',
+  landingStep1Body:
+    'حدّد ما الذي يُصلّى من أجله وعلى أي فترة. أمّا التقسيم إلى ساعات أو إلى أيام فتقرّره أنت عند الإنشاء.',
+  landingStep2Heading: 'المشاركة وتوزيع الساعات',
+  landingStep2Body:
+    'شارك الرابط في مجموعتكم — عبر واتساب أو تيليجرام أو سيجنال أو حيثما تتراسلون. يسجّل كل واحد في الساعات التي تناسبه.',
+  landingStep3Heading: 'الصلاة معًا حتى النهاية',
+  landingStep3Body:
+    'تصلك تذكرة قبل ساعتك. وفي صفحة السهرة ترى في أي وقت أين ما زالت هناك فجوات وما الجديد بخصوص الطلب.',
+  landingFaqHeading: 'أسئلة شائعة',
+  faqCostQ: 'كم تكلفة ‏24pray؟',
+  faqCostA:
+    'لا شيء. الاستخدام مجاني ولا توجد إعلانات. ‏24pray مفتوح المصدر، والشيفرة متاحة علنًا على GitHub.',
+  faqAccountQ: 'هل أحتاج إلى حساب؟',
+  faqAccountA:
+    'للصلاة، لا. يمكنك أن تتولّى ساعة كضيف — يكفي اسم، وعنوان البريد الإلكتروني اختياري ويُستخدم فقط للتأكيد والتذكير. لن تحتاج إلى حساب إلا عندما تريد إنشاء سهرة بنفسك.',
+  faqWhoQ: 'من يستطيع أن يبدأ سهرة صلاة؟',
+  faqWhoA:
+    'أي كنيسة أو مجموعة بيتية أو عائلة أو مجموعة صلاة. لا توجد موافقة مسبقة ولا حد أدنى للعدد — حتى اثنان يشكّلان سلسلة.',
+  faqTimezoneQ: 'وماذا عن اختلاف المناطق الزمنية؟',
+  faqTimezoneA:
+    'لكل سهرة منطقة زمنية ثابتة واحدة. وتُعرض لك الأوقات أيضًا بمنطقتك الزمنية حتى لا تخطئ في الحساب.',
+  faqPrivateQ: 'هل يمكن أن تبقى السهرة خاصة؟',
+  faqPrivateA:
+    'نعم. السهرات الخاصة لا تظهر في أي قائمة ولا في أي محرك بحث؛ ولا يمكن الوصول إليها إلا عبر رابط الدعوة. أما السهرات العامة فتظهر في النظرة العامة ويمكن لأي أحد أن يجدها.',
 };
 
 type TranslationKey = keyof typeof de;
@@ -1604,11 +1818,41 @@ export function persistLocale(l: Locale): void {
   }
 }
 
-export function t(key: TranslationKey, params?: Record<string, string | number>): string {
-  const raw = catalogs[currentLocale][key] ?? de[key];
+/** Reine Übersetzung ohne Modul-Zustand. Pflicht in Server-Komponenten: `currentLocale` ist
+ *  modul-global und würde auf dem Server zwischen parallelen Requests überlaufen. */
+export function translate(
+  locale: Locale,
+  key: TranslationKey,
+  params?: Record<string, string | number>,
+): string {
+  const raw = catalogs[locale][key] ?? de[key];
   if (!params) return raw;
   return raw.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? `{${k}}`));
 }
+
+/** `t`-Fabrik für Server-Komponenten: `const t = getFixedT(locale)`. */
+export function getFixedT(locale: Locale) {
+  return (key: TranslationKey, params?: Record<string, string | number>): string =>
+    translate(locale, key, params);
+}
+
+export function t(key: TranslationKey, params?: Record<string, string | number>): string {
+  return translate(currentLocale, key, params);
+}
+
+/** Unbekanntes → null (Middleware/Route-Guard unterscheiden damit „keine Sprache" von „de"). */
+export function parseLocale(value: string | null | undefined): Locale | null {
+  return (SUPPORTED_LOCALES as string[]).includes(value ?? '') ? (value as Locale) : null;
+}
+
+/** BCP-47 für eine explizit übergebene Sprache (Server-Pendant zu `intlLocale()`). */
+export function intlLocaleFor(locale: Locale): string {
+  return INTL_LOCALE_MAP[locale];
+}
+
+/** Cookie-Name der Sprachwahl. Die Middleware liest ihn serverseitig — localStorage allein
+ *  reicht nicht, weil das Rendering der Sprache dann erst nach der Hydration stimmt. */
+export const LOCALE_COOKIE = LOCALE_KEY;
 
 /**
  * Zentrale Stunden/Tage-Textwahl (Tages-Modus, slotDurationMinutes=1440): Komponenten

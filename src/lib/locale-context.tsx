@@ -1,7 +1,16 @@
 'use client';
 
 import { createContext, Fragment, useContext, useEffect, useState } from 'react';
-import { detectLocale, getLocale, isRtl, persistLocale, setLocale, type Locale } from './i18n';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  detectLocale,
+  isRtl,
+  LOCALE_COOKIE,
+  persistLocale,
+  setLocale,
+  SUPPORTED_LOCALES,
+  type Locale,
+} from './i18n';
 
 interface LocaleCtx {
   locale: Locale;
@@ -10,27 +19,80 @@ interface LocaleCtx {
 
 const Ctx = createContext<LocaleCtx>({ locale: 'de', switchLocale: () => {} });
 
+/** Ein Jahr; die Middleware liest das Cookie, um schon serverseitig richtig zu rendern. */
+function persistCookie(l: Locale) {
+  document.cookie = `${LOCALE_COOKIE}=${l}; path=/; max-age=31536000; samesite=lax`;
+}
+
+/** Ersetzt das Sprachsegment in einer präfigierten URL: /de/gebetswachen → /en/… */
+function swapLocaleInPath(pathname: string, next: Locale): string {
+  const segments = pathname.split('/').filter(Boolean);
+  segments[0] = next;
+  return `/${segments.join('/')}`;
+}
+
 /**
- * Wendet nach dem Mount die erkannte Sprache an (Browser-Sprache bzw. gespeicherte Wahl)
- * und rendert den Baum neu — SSR bleibt de, dadurch kein Hydration-Mismatch.
+ * `initialLocale` kommt aus dem `x-locale`-Header der Middleware — auf präfigierten Seiten
+ * ist das die Sprache der URL. Damit rendert schon der Server in der richtigen Sprache;
+ * `setLocale` läuft bewusst SYNCHRON im Render-Body, weil `t()`-Aufrufer keine
+ * Context-Consumer sind und sonst die erste Ausgabe in der Vorgänger-Sprache erzeugen würden.
+ *
+ * `prefixed` unterscheidet die beiden Welten: öffentliche Seiten tragen die Sprache in der
+ * URL (Sprachwechsel = Navigation), App-Seiten wie /dashboard nicht (Sprachwechsel = Remount).
  */
-export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setState] = useState<Locale>(getLocale());
+export function LocaleProvider({
+  children,
+  initialLocale = 'de',
+  prefixed = false,
+}: {
+  children: React.ReactNode;
+  initialLocale?: Locale;
+  prefixed?: boolean;
+}) {
+  const [locale, setState] = useState<Locale>(initialLocale);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  setLocale(locale);
 
   useEffect(() => {
+    // Auf präfigierten Seiten gewinnt IMMER die URL — sie ist die kanonische Quelle und
+    // steht so auch im Canonical-Tag. Nur ohne Prefix darf die gespeicherte Wahl greifen.
+    if (prefixed) {
+      persistCookie(initialLocale);
+      persistLocale(initialLocale);
+      if (initialLocale !== locale) {
+        setLocale(initialLocale);
+        setState(initialLocale);
+      }
+      return;
+    }
     const detected = detectLocale();
-    setLocale(detected);
-    setState(detected);
-    document.documentElement.lang = detected;
-    document.documentElement.dir = isRtl(detected) ? 'rtl' : 'ltr';
-  }, []);
+    if (detected !== locale) {
+      setLocale(detected);
+      setState(detected);
+    }
+    persistCookie(detected);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefixed, initialLocale]);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.documentElement.dir = isRtl(locale) ? 'rtl' : 'ltr';
+  }, [locale]);
 
   const switchLocale = (l: Locale) => {
+    if (!(SUPPORTED_LOCALES as readonly string[]).includes(l)) return;
     persistLocale(l);
+    persistCookie(l);
+    if (prefixed) {
+      // Sprachwechsel ist hier eine echte Navigation: jede Sprache hat ihre eigene URL,
+      // damit Google sie getrennt indexieren kann.
+      router.push(swapLocaleInPath(pathname, l));
+      return;
+    }
     setLocale(l);
     setState(l);
-    document.documentElement.lang = l;
-    document.documentElement.dir = isRtl(l) ? 'rtl' : 'ltr';
   };
 
   return (

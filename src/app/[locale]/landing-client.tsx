@@ -15,6 +15,8 @@ import { Globe, type ChainPoint } from '@/components/patterns/Globe';
 import { FeedbackDialog, GITHUB_REPO_URL } from '@/components/patterns/FeedbackDialog';
 import { Button } from '@/components/ui/Button';
 import { t } from '@/lib/i18n';
+import { useLocale } from '@/lib/locale-context';
+import { sectionPath } from '@/lib/routes';
 
 interface PublicStats {
   activeChains: number;
@@ -50,9 +52,10 @@ function PrayOption({
   );
 }
 
-export default function HomePage() {
+export default function LandingClient() {
   useFunnelPing('landing');
   const router = useRouter();
+  const { locale } = useLocale();
   const [stats, setStats] = useState<PublicStats | null>(null);
   const [choiceOpen, setChoiceOpen] = useState(false);
   const [focusPoint, setFocusPoint] = useState<ChainPoint | null>(null);
@@ -170,7 +173,7 @@ export default function HomePage() {
             icon={HeartHandshake}
             label={t('optBrowse')}
             desc={t('optBrowseDesc')}
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push(sectionPath('watches', locale))}
           />
           <PrayOption
             icon={PlusCircle}

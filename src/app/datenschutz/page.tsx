@@ -91,6 +91,13 @@ export default function DatenschutzPage() {
           (Absender no-reply@24pray.org). Keine Newsletter, keine Werbung. Die
           Erinnerungs-Vorlaufzeit kannst du in der Buchung selbst ändern.
         </p>
+        <p className="mt-2">
+          Zusätzlich erhält der Betreiber eine interne Benachrichtigungsmail, wenn eine neue
+          Gebetswache angelegt, ein Konto erstmals genutzt oder eine Stunde übernommen wird.
+          Diese Mails gehen ausschließlich an das Postfach des Betreibers, enthalten den
+          angegebenen Namen und – sofern vorhanden – die E-Mail-Adresse, und dienen allein dem
+          Betrieb der Plattform. Sie werden nicht an Dritte weitergegeben.
+        </p>
 
         <H2>8. Kalender-Links</H2>
         <p>

@@ -47,6 +47,16 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
    Env) + GitHub-Icon-Link auf das öffentliche Repo in beiden Footern; „Auf GitHub melden"-Link
    im Dialog. FEEDBACK_TO beim Deploy in /etc/24pray-api.env setzen (Betreiber-Adresse — bewusst nur dort, nie im Repo).
 
+10. ~~**Betreiber-Benachrichtigungen**~~ (User-Zusatz 2026-07-27) — GEBAUT: Mail an den Betreiber
+    bei neuer Wache, erstem erfolgreichem Login eines Kontos und jeder Buchung (erste Stunde einer
+    Wache im Betreff hervorgehoben). Versand über `notifyAdmin` (api `src/lib/adminNotify.ts`),
+    fire-and-forget, fail-closed ohne Env. Neues Feld `User.activatedAt` (Migration
+    `20260727120000_add_user_activated_at`, Bestandsnutzer im Backfill als aktiviert markiert) —
+    bewusst NICHT am Magic-Link-Upsert, sonst wäre die Mail durch Eintippen fremder Adressen von
+    außen auslösbar. Matrix-Zeilen in api `docs/NOTIFICATIONS.md` (Ereignisse 1, 7, 9).
+    **Deploy: `ADMIN_NOTIFY_TO` in /etc/24pray-api.env setzen** (Betreiber-Adresse — wie FEEDBACK_TO
+    bewusst nie im Repo). Datenschutzerklärung §7 um einen Absatz dazu ergänzt.
+
 ## SEO (eigenes Paket, aus Review + früherem Merkposten)
 
 - robots.txt + dynamische sitemap.xml (PUBLIC-Wachen), Canonical-URLs
@@ -96,6 +106,11 @@ Arbeitsmodus für die Umsetzungs-Session: Skill `24pray-ops` laden, Sonnet-Worke
   (User-Activation-Risiko Safari) prüfen (Review P7)
 - Push-Test Owner-Ausschluss: kein push-spezifischer Test, dass der Owner beim eigenen Update
   keinen Push bekommt (transitiv gedeckt; Review P7, Low)
+- Betreiber-Benachrichtigung „jede Buchung": bei einer vollen 24-Stunden-Wache bis zu 24 Mails.
+  Bewusste User-Entscheidung 2026-07-27; falls es zu laut wird, ist der Filter eine Bedingung in
+  `notifyAdmin`-Aufrufer `slots.ts` (z. B. nur erste Stunde + jede zehnte)
+- Sitemap `lastmod`: `PrayerProject` hat kein `updatedAt` (nur `createdAt`) — für ein echtes
+  Änderungsdatum bräuchte es ein `@updatedAt`-Feld + Migration im api-Repo (SEO-Paket)
 - Benachrichtigungs-Matrix: offene Zellen aus docs/NOTIFICATIONS.md (api-Repo) bewusst entscheiden
   (Push bei Verschiebung/Löschung, Owner-Push bei Buchung, Storno-Info — siehe Matrix)
 

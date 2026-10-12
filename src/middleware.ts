@@ -55,20 +55,22 @@ export function middleware(req: NextRequest) {
     const rest = segments.slice(1);
     const headers = withLocaleHeaders(req, urlLocale, true);
 
-    if (rest.length === 1) {
+    if (rest.length >= 1) {
+      // Unterpfade (/de/ratgeber/<artikel>) wandern unverändert mit.
+      const tail = rest.slice(1).map((s) => `/${s}`).join('');
       // Der interne Routenname ist nie selbst ein Slug. Wird er direkt aufgerufen
       // (/en/watches), 308 auf die eine kanonische URL — sonst lieferten zwei Pfade
       // dieselbe Seite aus und Google sähe Duplicate Content.
       if ((SECTIONS as readonly string[]).includes(rest[0])) {
         const url = req.nextUrl.clone();
-        url.pathname = `/${urlLocale}/${sectionSlug(rest[0] as Section, urlLocale)}`;
+        url.pathname = `/${urlLocale}/${sectionSlug(rest[0] as Section, urlLocale)}${tail}`;
         return NextResponse.redirect(url, 308);
       }
       // Lokalisierter Slug → interne Route umschreiben (die URL bleibt lokalisiert).
       const section = sectionFromSlug(urlLocale, rest[0]);
       if (section) {
         const url = req.nextUrl.clone();
-        url.pathname = `/${urlLocale}/${section}`;
+        url.pathname = `/${urlLocale}/${section}${tail}`;
         return NextResponse.rewrite(url, { request: { headers } });
       }
     }

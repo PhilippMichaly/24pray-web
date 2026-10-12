@@ -96,3 +96,22 @@ describe('unpräfigierte Routen', () => {
     expect(isUnprefixedRoute('/dashboards')).toBe(false);
   });
 });
+
+describe('Ratgeber-Pfade und eingeschränkte Alternates', () => {
+  it('guidePath hängt den Artikel-Slug an den lokalisierten Sektions-Slug', async () => {
+    const { guidePath } = await import('./routes');
+    expect(guidePath('de', 'gebetskette-organisieren')).toBe('/de/ratgeber/gebetskette-organisieren');
+    expect(guidePath('en', 'x')).toBe('/en/guides/x');
+  });
+
+  it('alternatesFor mit Sprach-Teilmenge listet nur diese und x-default', () => {
+    const alt = alternatesFor('de', (l) => `/${l}/x`, ['de', 'en', 'es']);
+    expect(Object.keys(alt.languages).sort()).toEqual(['de', 'en', 'es', 'x-default']);
+    expect(alt.languages['x-default']).toMatch(/\/en\/x$/);
+  });
+
+  it('x-default fällt auf die erste Sprache zurück, wenn Englisch fehlt', () => {
+    const alt = alternatesFor('de', (l) => `/${l}/x`, ['de', 'es']);
+    expect(alt.languages['x-default']).toMatch(/\/de\/x$/);
+  });
+});

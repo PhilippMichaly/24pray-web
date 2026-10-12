@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { SUPPORTED_LOCALES } from '@/lib/i18n';
-import { absoluteUrl, alternatesFor, landingPath, projectPath, sectionPath } from '@/lib/routes';
+import { absoluteUrl, alternatesFor, guidePath, landingPath, projectPath, sectionPath } from '@/lib/routes';
+import { GUIDE_LOCALES, GUIDES, type GuideLocale } from '@/content/guides';
 import { fetchPublicProjects } from '@/lib/api-server';
 
 /** Stündlich neu erzeugen: neue Wachen sollen zeitnah auffindbar sein, ohne dass jeder
@@ -18,6 +19,15 @@ function entry(pathFor: (l: (typeof SUPPORTED_LOCALES)[number]) => string, lastM
   }));
 }
 
+/** Wie `entry`, aber nur für die Sprachen, in denen es die Ratgeber gibt. */
+function guideEntry(pathFor: (l: GuideLocale) => string, lastModified?: Date) {
+  return GUIDE_LOCALES.map((locale) => ({
+    url: absoluteUrl(pathFor(locale)),
+    lastModified,
+    alternates: { languages: alternatesFor(locale, pathFor, GUIDE_LOCALES).languages },
+  }));
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projects = await fetchPublicProjects();
   const listed = projects.slice(0, MAX_PROJECTS);
@@ -28,6 +38,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...entry(landingPath),
     ...entry((l) => sectionPath('watches', l)),
+    ...guideEntry((l) => sectionPath('guide', l)),
+    ...GUIDES.flatMap((g) => guideEntry((l) => guidePath(l, g.text[l].slug), new Date(g.updated))),
     ...listed.flatMap((p) =>
       // Kein echtes Änderungsdatum vorhanden: PrayerProject hat nur createdAt, kein
       // updatedAt (Merkposten im Backlog). createdAt ist die ehrlichere Angabe als "heute".

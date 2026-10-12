@@ -27,6 +27,15 @@ export const SECTION_SLUGS = {
     he: 'prayer-watches',
     ar: 'prayer-watches',
   },
+  // Ratgeber gibt es vorerst nur auf de/en/es (src/content/guides.ts). he/ar brauchen trotzdem
+  // einen Slug, damit die Map vollständig bleibt — die Seite antwortet dort mit 404.
+  guide: {
+    de: 'ratgeber',
+    en: 'guides',
+    es: 'guias',
+    he: 'guides',
+    ar: 'guides',
+  },
 } as const satisfies Record<string, Record<Locale, string>>;
 
 export type Section = keyof typeof SECTION_SLUGS;
@@ -50,6 +59,10 @@ export function sectionPath(section: Section, locale: Locale): string {
   return `/${locale}/${sectionSlug(section, locale)}`;
 }
 
+export function guidePath(locale: Locale, slug: string): string {
+  return `${sectionPath('guide', locale)}/${slug}`;
+}
+
 export function projectPath(locale: Locale, id: string): string {
   return `/${locale}/projects/${id}`;
 }
@@ -61,14 +74,18 @@ export function absoluteUrl(path: string): string {
 /**
  * Canonical + vollständiges hreflang-Set für eine öffentliche Seite.
  * `pathFor` liefert den Pfad je Sprache (Slugs unterscheiden sich!).
+ * `locales` schränkt das Set ein, wenn eine Seite nicht in allen Sprachen existiert —
+ * hreflang auf eine 404 wertet Google als Fehler.
  */
-export function alternatesFor(
-  locale: Locale,
-  pathFor: (l: Locale) => string,
+export function alternatesFor<L extends Locale = Locale>(
+  locale: L,
+  pathFor: (l: L) => string,
+  locales: readonly L[] = SUPPORTED_LOCALES as readonly L[],
 ): { canonical: string; languages: Record<string, string> } {
   const languages: Record<string, string> = {};
-  for (const l of SUPPORTED_LOCALES) languages[l] = absoluteUrl(pathFor(l));
-  languages['x-default'] = absoluteUrl(pathFor(FALLBACK_LOCALE));
+  for (const l of locales) languages[l] = absoluteUrl(pathFor(l));
+  const fallback = (locales as readonly Locale[]).includes(FALLBACK_LOCALE) ? (FALLBACK_LOCALE as L) : locales[0];
+  languages['x-default'] = absoluteUrl(pathFor(fallback));
   return { canonical: absoluteUrl(pathFor(locale)), languages };
 }
 

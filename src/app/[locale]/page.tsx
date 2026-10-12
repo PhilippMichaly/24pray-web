@@ -5,6 +5,7 @@ import { getFixedT, parseLocale } from '@/lib/i18n';
 import { alternatesFor, landingPath, sectionPath } from '@/lib/routes';
 import { FAQ_KEYS, faqJsonLd, siteJsonLd } from '@/lib/seo';
 import { JsonLd } from '@/components/patterns/JsonLd';
+import { GUIDE_UI, isGuideLocale } from '@/content/guides';
 import LandingClient from './landing-client';
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
@@ -89,10 +90,15 @@ export default function LandingPage({ params }: { params: { locale: string } }) 
         </section>
 
         {/* Interne Verlinkung: von der Startseite in die Übersicht, die alle Wachen bündelt. */}
-        <p className="mt-10 text-sm">
+        <p className="mt-10 flex flex-col gap-3 text-sm">
           <Link href={sectionPath('watches', locale)} className="font-medium text-gold underline underline-offset-4">
             {t('watchesHeading')} →
           </Link>
+          {isGuideLocale(locale) && (
+            <Link href={sectionPath('guide', locale)} className="font-medium text-gold underline underline-offset-4">
+              {GUIDE_UI[locale].navLabel} →
+            </Link>
+          )}
         </p>
       </div>
     </>

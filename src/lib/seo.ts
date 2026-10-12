@@ -1,5 +1,6 @@
 import { translate, type Locale } from './i18n';
-import { absoluteUrl, landingPath, projectPath, sectionPath, SITE_URL } from './routes';
+import { absoluteUrl, guidePath, landingPath, projectPath, sectionPath, SITE_URL } from './routes';
+import type { Guide, GuideLocale } from '@/content/guides';
 import type { ProjectWithStats } from '@/types';
 
 /**
@@ -91,6 +92,38 @@ export function watchListJsonLd(locale: Locale, projects: ProjectWithStats[]) {
       position: i + 1,
       url: absoluteUrl(projectPath(locale, p.id)),
       name: p.title,
+    })),
+  };
+}
+
+/** Ratgeber als Article. Bewusst kein HowTo: Google zeigt dafür seit 2023 keine Rich Results mehr. */
+export function guideArticleJsonLd(locale: GuideLocale, guide: Guide) {
+  const text = guide.text[locale];
+  const url = absoluteUrl(guidePath(locale, text.slug));
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: text.title,
+    description: text.description,
+    inLanguage: locale,
+    url,
+    mainEntityOfPage: url,
+    dateModified: guide.updated,
+    image: absoluteUrl('/og-image.png'),
+    author: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization`, '@type': 'Organization', name: '24pray' },
+  };
+}
+
+export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
     })),
   };
 }

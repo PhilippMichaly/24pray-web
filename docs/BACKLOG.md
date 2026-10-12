@@ -132,6 +132,11 @@ Mail-Links (`/join`, `/auth/login`) unverändert erreichbar.
   geschrieben (GET-only-Regel), die drei Pfade sind nur durch Tests gedeckt. Erstes echtes
   Ereignis (Wache anlegen / Buchung / erster Login eines neuen Kontos) beobachten; falls keine
   Mail kommt: `journalctl -u 24pray-api | grep "admin notice"` zeigt Versandfehler
+- Ratgeberseiten (src/content/guides.ts, live seit 2026-10-12) gibt es nur auf de/en/es. he/ar
+  erst nach Muttersprachler-Review ergänzen: GuideLocale + GUIDE_LOCALES erweitern, Texte rein
+- Search Console ist seit 2026-10-12 eingerichtet (Domain-Property, Sitemap eingereicht,
+  Indexierung für /de, /en, /de/gebetswachen beantragt). Nach ~1 Woche prüfen: Status der Sitemap
+  in der Console, echte Googlebot-Abrufe (66.249.x) im nginx-Log
 - Neue SEO-Texte (27 Keys: seoSiteTitle…faqPrivateA) für he/ar durch Muttersprachler prüfen —
   zusammen mit dem bestehenden he/ar-Merkposten abarbeiten
 - Neue Landing-Abschnitte (Erklärteil, 3 Schritte, FAQ) und die Wachen-Liste sind noch nie
@@ -149,7 +154,7 @@ Mail-Links (`/join`, `/auth/login`) unverändert erreichbar.
 
 - `gh auth refresh -h github.com -s workflow` → Uptime-Cron scharf schalten
 - SMTP-Passwort-Rotation Strato → danach `/etc/24pray-api.env` aktualisieren
-- Google Search Console: Property für 24pray.org verifizieren + Sitemap einreichen (SEO-Paket)
+- Bing Webmaster Tools: Import aus der Google Search Console (Ergebnisse für Bing/DuckDuckGo/Ecosia)
 - Datenschutzerklärung §7, Absatz zu den Betreiber-Benachrichtigungen: gegenlesen (ist seit
   2026-07-27 live)
 - Inhalt der Über-uns-Seite liefern: wer steht dahinter, Glaubensbasis, warum kostenlos und

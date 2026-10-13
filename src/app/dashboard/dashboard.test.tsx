@@ -41,43 +41,23 @@ describe('Dashboard ohne Account (F4) — offene Ketten sofort sichtbar', () => 
     expect(screen.getByText('Offene Gebetswachen')).toBeTruthy();
   });
 
-  it('Sprach-Filter zeigt nur Wachen der gewählten Sprache (Backlog 5)', async () => {
-    const deProject = {
-      id: 'p-de',
-      title: 'un5 Deutsche Wache',
-      status: 'ACTIVE',
-      visibility: 'PUBLIC',
-      timezone: 'UTC',
-      startDate: '2099-01-01T00:00:00.000Z',
-      endDate: '2099-01-02T00:00:00.000Z',
-      totalSlots: 24,
-      bookedSlots: 3,
-      language: 'de',
-    } as ProjectWithStats;
-    const esProject = {
-      id: 'p-es',
-      title: 'un5 Vigilia Española',
-      status: 'ACTIVE',
-      visibility: 'PUBLIC',
-      timezone: 'UTC',
-      startDate: '2099-01-01T00:00:00.000Z',
-      endDate: '2099-01-02T00:00:00.000Z',
-      totalSlots: 24,
-      bookedSlots: 3,
-      language: 'es',
-    } as ProjectWithStats;
+  it('trennt laufende und beendete Wachen; Beendetes ist eingeklappt, solange es Laufendes gibt', async () => {
+    const mk = (id: string, title: string, start: string, end: string) =>
+      ({ id, title, status: 'ACTIVE', visibility: 'PUBLIC', timezone: 'UTC', startDate: start, endDate: end,
+         totalSlots: 24, bookedSlots: 3, language: 'de' }) as ProjectWithStats;
     const { api } = await import('@/lib/api');
-    (api.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce([deProject, esProject]);
+    (api.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
+      mk('p-old', 'ux Alte Wache', '2020-01-01T00:00:00.000Z', '2020-01-02T00:00:00.000Z'),
+      mk('p-new', 'ux Kommende Wache', '2099-01-01T00:00:00.000Z', '2099-01-02T00:00:00.000Z'),
+    ]);
 
-    render(<DashboardPage />);
-    await waitFor(() => expect(screen.getByText('un5 Deutsche Wache')).toBeTruthy());
-    expect(screen.getByText('un5 Vigilia Española')).toBeTruthy();
-
-    fireEvent.change(screen.getByRole('combobox', { name: /Sprache|language/i }), { target: { value: 'es' } });
-    expect(screen.queryByText('un5 Deutsche Wache')).toBeNull();
-    expect(screen.getByText('un5 Vigilia Española')).toBeTruthy();
-
-    fireEvent.change(screen.getByRole('combobox', { name: /Sprache|language/i }), { target: { value: 'all' } });
-    expect(screen.getByText('un5 Deutsche Wache')).toBeTruthy();
+    const { container } = render(<DashboardPage />);
+    await waitFor(() => expect(screen.getByText('ux Kommende Wache')).toBeTruthy());
+    expect(screen.getByText('Laufend und geplant')).toBeTruthy();
+    expect(screen.getByText(/Abgeschlossen \(1\)/)).toBeTruthy();
+    const details = container.querySelector('details');
+    expect(details?.open).toBe(false);
+    expect(details?.textContent).toContain('ux Alte Wache');
+    expect(screen.queryByRole('combobox')).toBeNull();
   });
 });

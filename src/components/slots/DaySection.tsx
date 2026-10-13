@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
@@ -11,11 +11,16 @@ export interface DaySectionProps {
   defaultCollapsed?: boolean;
   /** Ersetzt Datum+Zähler durch eine eigene Zeile, z. B. „Montag — noch ganz frei · 8 Stunden zu vergeben" (P2). */
   headerOverride?: string;
+  /** Von außen aufklappen (Sprung zu einer Stunde aus Band, Lücken-Link oder „Freie Stunde"-Knopf). */
+  forceOpen?: boolean;
   children: React.ReactNode;
 }
 
-export function DaySection({ dateLabel, dayProgress, defaultCollapsed, headerOverride, children }: DaySectionProps) {
+export function DaySection({ dateLabel, dayProgress, defaultCollapsed, headerOverride, forceOpen, children }: DaySectionProps) {
   const [open, setOpen] = useState(!defaultCollapsed);
+  useEffect(() => {
+    if (forceOpen) setOpen(true);
+  }, [forceOpen]);
   return (
     <section>
       <button

@@ -9,7 +9,6 @@ import { useAuth } from '@/hooks/use-auth';
 import type { ProjectWithStats } from '@/types';
 import { AppShell } from '@/components/patterns/AppShell';
 import { Button } from '@/components/ui/Button';
-import { Select } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FieldError } from '@/components/ui/Label';
@@ -17,7 +16,7 @@ import { ProjectCard } from '@/components/patterns/ProjectCard';
 import { NextSlotCard } from '@/components/patterns/NextSlotCard';
 import { buildViewModels } from '@/components/slots/logic';
 import type { SlotViewModel } from '@/components/slots/types';
-import { t, LOCALE_NAMES, SUPPORTED_LOCALES } from '@/lib/i18n';
+import { t } from '@/lib/i18n';
 
 interface Loaded {
   project: ProjectWithStats;
@@ -29,8 +28,8 @@ export default function DashboardPage() {
   const { user, loading } = useAuth();
   const [loaded, setLoaded] = useState<Loaded[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [langFilter, setLangFilter] = useState<string>('all');
-  const now = Date.now();
+  // Eine Uhr pro Seitenaufruf — sonst rechnete jedes Re-Render die Einteilung neu.
+  const [now] = useState(() => Date.now());
 
   useEffect(() => {
     let cancelled = false;
@@ -69,20 +68,25 @@ export default function DashboardPage() {
     return mine[0] ?? null;
   }, [loaded, now]);
 
-  const visible = useMemo(() => {
-    if (!loaded) return null;
-    if (langFilter === 'all') return loaded;
-    return loaded.filter(({ project }) => (project.language ?? 'de') === langFilter);
-  }, [loaded, langFilter]);
+  // Laufende/geplante zuerst (nach Start), beendete getrennt darunter (neueste zuerst). Vorher stand
+  // alles gemischt untereinander, und „bis Samstag, 11. Juli" verriet nicht, dass es vorbei ist.
+  const { active, ended } = useMemo(() => {
+    const all = loaded ?? [];
+    const isEnded = (l: Loaded) => Date.parse(l.project.endDate) <= now;
+    return {
+      active: all.filter((l) => !isEnded(l)).sort((a, b) => Date.parse(a.project.startDate) - Date.parse(b.project.startDate)),
+      ended: all.filter(isEnded).sort((a, b) => Date.parse(b.project.endDate) - Date.parse(a.project.endDate)),
+    };
+  }, [loaded, now]);
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold text-ink">
           {user ? t('yourProjects') : t('openChains')}
         </h1>
         {user ? (
-          <Button asChild icon={Plus} size="sm">
+          <Button asChild icon={Plus} size="sm" className="shrink-0 whitespace-nowrap">
             <Link href="/projects/new">{t('newProject')}</Link>
           </Button>
         ) : (
@@ -129,32 +133,35 @@ export default function DashboardPage() {
               now={now}
             />
           )}
-          {loaded.length > 1 && (
-            <div className="flex items-center justify-end">
-              <label htmlFor="langFilter" className="sr-only">{t('filterAllLanguages')}</label>
-              <Select
-                id="langFilter"
-                value={langFilter}
-                onChange={(e) => setLangFilter(e.target.value)}
-                className="w-auto py-1.5 text-sm"
-              >
-                <option value="all">{t('filterAllLanguages')}</option>
-                {SUPPORTED_LOCALES.map((l) => (
-                  <option key={l} value={l}>{LOCALE_NAMES[l]}</option>
+          {active.length > 0 && (
+            <section>
+              {ended.length > 0 && (
+                <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-muted">{t('dashActiveHeading')}</h2>
+              )}
+              <ul className="space-y-3">
+                {active.map(({ project, models }) => (
+                  <li key={project.id}>
+                    <ProjectCard project={project} models={models} now={now} />
+                  </li>
                 ))}
-              </Select>
-            </div>
+              </ul>
+            </section>
           )}
-          {(visible ?? []).length === 0 ? (
-            <p className="py-6 text-center text-sm text-ink-muted">{t('filterNoMatches')}</p>
-          ) : (
-            <ul className="space-y-3">
-              {(visible ?? []).map(({ project, models }) => (
-                <li key={project.id}>
-                  <ProjectCard project={project} models={models} />
-                </li>
-              ))}
-            </ul>
+          {ended.length > 0 && (
+            // Eingeklappt, sobald es Laufendes gibt — das Abgeschlossene ist Archiv, nicht Arbeit.
+            <details open={active.length === 0} className="group">
+              <summary className="mb-3 cursor-pointer list-none text-xs font-semibold uppercase tracking-wide text-ink-muted hover:text-ink">
+                <span className="me-1 inline-block transition-transform group-open:rotate-90" aria-hidden>›</span>
+                {t('dashEndedHeading', { n: ended.length })}
+              </summary>
+              <ul className="space-y-3">
+                {ended.map(({ project, models }) => (
+                  <li key={project.id}>
+                    <ProjectCard project={project} models={models} now={now} />
+                  </li>
+                ))}
+              </ul>
+            </details>
           )}
         </div>
       )}

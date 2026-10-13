@@ -50,3 +50,12 @@ export async function fetchPublicProjects(revalidate = 300): Promise<ProjectWith
   if (!Array.isArray(projects)) return [];
   return projects.filter((p) => p.visibility === 'PUBLIC');
 }
+
+/** Nur noch nicht beendete Wachen, die zuerst endende vorne. Beendete Wachen gehören weder in
+ *  „Offene Gebetswachen" noch in die Sitemap — live stand dort monatelang nur eine Testwache
+ *  vom Juli und ließ die Plattform verlassen wirken. Die Seiten selbst bleiben erreichbar. */
+export function onlyOpenWatches(projects: ProjectWithStats[], now = Date.now()): ProjectWithStats[] {
+  return projects
+    .filter((p) => Date.parse(p.endDate) > now)
+    .sort((a, b) => Date.parse(a.endDate) - Date.parse(b.endDate));
+}

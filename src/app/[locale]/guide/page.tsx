@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AppShell } from '@/components/patterns/AppShell';
 import { notFound } from 'next/navigation';
 import { parseLocale } from '@/lib/i18n';
 import { alternatesFor, guidePath, sectionPath } from '@/lib/routes';
@@ -34,7 +35,8 @@ export default function GuidesPage({ params }: { params: { locale: string } }) {
   const ui = GUIDE_UI[locale];
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10">
+    <AppShell>
+      <div className="mx-auto w-full max-w-2xl">
       <h1 className="font-display text-2xl font-semibold text-ink">{ui.indexTitle}</h1>
       <p className="mt-2 text-sm leading-relaxed text-ink-muted">{ui.indexIntro}</p>
 
@@ -64,6 +66,7 @@ export default function GuidesPage({ params }: { params: { locale: string } }) {
           ← 24pray
         </Link>
       </p>
-    </main>
+      </div>
+    </AppShell>
   );
 }

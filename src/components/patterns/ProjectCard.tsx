@@ -7,7 +7,7 @@ import { Badge, type BadgeProps } from '@/components/ui/Badge';
 import type { ProjectStatus, ProjectWithStats } from '@/types';
 import type { SlotViewModel } from '@/components/slots/types';
 import { formatDayHeader } from '@/lib/time';
-import { t, tUnit } from '@/lib/i18n';
+import { intlLocale, t, tUnit } from '@/lib/i18n';
 import { isDayMode } from '@/components/slots/logic';
 
 const statusMeta: Record<ProjectStatus, { variant: BadgeProps['variant']; key: string }> = {
@@ -27,10 +27,23 @@ function cellColor(m: SlotViewModel): string {
 export interface ProjectCardProps {
   project: ProjectWithStats;
   models: SlotViewModel[];
+  /** Für den Beendet-Status; Default jetzt (Tests/Aufrufer ohne gemeinsame Uhr). */
+  now?: number;
+}
+
+/** Datum mit Jahr, wenn es nicht das laufende ist — „11. Juli" allein ist im Oktober mehrdeutig. */
+function formatEndDate(iso: string, tz: string, now: number): string {
+  const sameYear = new Date(iso).getFullYear() === new Date(now).getFullYear();
+  return new Intl.DateTimeFormat(intlLocale(), {
+    timeZone: tz,
+    day: 'numeric',
+    month: 'long',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  }).format(new Date(iso));
 }
 
 // Mini-ChainBand: kompakter, nicht interaktiver Streifen (aggregiert, wrap).
-export function ProjectCard({ project, models }: ProjectCardProps) {
+export function ProjectCard({ project, models, now = Date.now() }: ProjectCardProps) {
   const meta = statusMeta[project.status as ProjectStatus] ?? statusMeta.DRAFT;
   const isActive = project.status === 'ACTIVE';
   // Bei sehr vielen Slots ausdünnen, damit der Streifen kompakt bleibt.
@@ -38,7 +51,10 @@ export function ProjectCard({ project, models }: ProjectCardProps) {
   const cells = models.filter((_, i) => i % step === 0);
   const showBand = project.bookedSlots > 0 && cells.length > 0;
 
-  const untilLabel = t('untilDate', { date: formatDayHeader(project.endDate, project.timezone) });
+  const ended = Date.parse(project.endDate) <= now;
+  const untilLabel = ended
+    ? t('endedOnDate', { date: formatEndDate(project.endDate, project.timezone, now) })
+    : t('untilDate', { date: formatDayHeader(project.endDate, project.timezone) });
   const metaLine = project.locationName ? `${project.locationName} · ${untilLabel}` : untilLabel;
 
   return (
@@ -50,7 +66,11 @@ export function ProjectCard({ project, models }: ProjectCardProps) {
         <div className="flex items-start justify-between gap-3">
           <h2 className="font-display text-lg font-semibold text-ink">{project.title}</h2>
           {/* Abweichung vom Standard (ACTIVE) ist die Information — nicht jede Karte braucht ein Label. */}
-          {!isActive && <Badge variant={meta.variant}>{t(meta.key as never)}</Badge>}
+          {ended ? (
+            <Badge variant="neutral">{t('statusEnded')}</Badge>
+          ) : (
+            !isActive && <Badge variant={meta.variant}>{t(meta.key as never)}</Badge>
+          )}
         </div>
         {project.description && (
           <p className="mt-1 line-clamp-2 text-sm text-ink-muted">{project.description}</p>

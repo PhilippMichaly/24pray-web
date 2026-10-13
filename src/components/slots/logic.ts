@@ -236,3 +236,35 @@ export function groupByWeek(models: SlotViewModel[]): { key: string; slots: Slot
 export function displayUnits(hours: number, dayMode: boolean): number {
   return dayMode ? hours / 24 : hours;
 }
+
+const FREE_STATES: ReadonlySet<SlotViewModel['state']> = new Set(['FREE', 'FREE_LARGEST_GAP', 'NOW_FREE']);
+
+/** Erste noch übernehmbare Stunde (die laufende zählt mit) — Ziel des „Freie Stunde übernehmen"-Knopfs. */
+export function nextFreeSlot(models: SlotViewModel[]): SlotViewModel | null {
+  return models.find((m) => FREE_STATES.has(m.state)) ?? null;
+}
+
+/** Erster Tag mit einer freien Stunde: der bleibt aufgeklappt, damit „Übernehmen" ohne Suchen sichtbar ist. */
+export function firstFreeDayKey(days: { key: string; slots: SlotViewModel[] }[]): string | null {
+  return days.find((d) => d.slots.some((m) => FREE_STATES.has(m.state)))?.key ?? null;
+}
+
+export type FoldedDay<D> = { kind: 'past'; key: string; count: number } | { kind: 'day'; key: string; day: D };
+
+/**
+ * Aufeinanderfolgende komplett vergangene Tage zu EINER Ghost-Zeile zusammenfassen.
+ * Vorher stand bei einer beendeten Wochen-Wache achtmal „24 Stunden vorüber" untereinander.
+ */
+export function foldPastDays<D extends { key: string; slots: SlotViewModel[] }>(days: D[]): FoldedDay<D>[] {
+  const out: FoldedDay<D>[] = [];
+  for (const day of days) {
+    if (dayCollapseState(day.slots) === 'all-past') {
+      const last = out[out.length - 1];
+      if (last?.kind === 'past') last.count += day.slots.length;
+      else out.push({ kind: 'past', key: `past-${day.key}`, count: day.slots.length });
+    } else {
+      out.push({ kind: 'day', key: day.key, day });
+    }
+  }
+  return out;
+}

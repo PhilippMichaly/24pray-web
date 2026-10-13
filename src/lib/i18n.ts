@@ -43,20 +43,10 @@ const de = {
   silentChainHint: 'Privat — nur als Licht sichtbar.',
   nIntercessors: '{n} Betende',
   toChain: 'Zur Gebetswache',
-  prayCta: 'Beten!',
-  prayChoiceTitle: 'Wie möchtest du beten?',
-  optLogin: 'Anmelden',
-  optLoginDesc: 'Mit deinem Account weitermachen.',
-  optBrowse: 'Gebetsprojekte anzeigen',
-  optBrowseDesc: 'Offene Gebetswachen finden und eine Stunde übernehmen — ohne Account.',
-  optCreate: 'Gebetsprojekt erstellen',
-  optCreateDesc: 'Eine neue Gebetswache starten und andere einladen.',
 
   // Dashboard
   yourProjects: 'Deine Gebetswachen',
   openChains: 'Offene Gebetswachen',
-  filterAllLanguages: 'Alle Sprachen',
-  filterNoMatches: 'Keine Wachen in dieser Sprache.',
   legalImprint: 'Impressum',
   legalPrivacy: 'Datenschutz',
   consentLogin: 'Mit der Anmeldung stimmst du der',
@@ -164,7 +154,7 @@ const de = {
   undo: 'Rückgängig',
   // Gast-Buchung
   name: 'Name',
-  emailForReminder: 'E-Mail (für deine Erinnerung)',
+  emailForReminder: 'E-Mail für die Erinnerung',
   takeThisHour: 'Diese Stunde übernehmen',
   guestBookedTitle: 'Danke — die Stunde gehört dir.',
   addToCalendar: 'In Kalender eintragen',
@@ -366,6 +356,22 @@ const de = {
   faqPrivateQ: 'Kann eine Wache privat bleiben?',
   faqPrivateA:
     'Ja. Private Wachen tauchen in keiner Liste und in keiner Suchmaschine auf, sie sind nur über den Einladungslink erreichbar. Öffentliche Wachen stehen in der Übersicht und können von jedem gefunden werden.',
+
+  // UX-Runde 2026-10-13
+  heroCtaTake: 'Eine Stunde übernehmen',
+  heroCtaStart: 'Gebetswache starten',
+  nextFreeCta: 'Freie Stunde übernehmen',
+  nextFreeCtaDays: 'Freien Tag übernehmen',
+  nextFreeHint: 'Nächste freie Stunde: {time}',
+  nextFreeHintDays: 'Nächster freier Tag: {time}',
+  watchEndedTitle: 'Diese Gebetswache ist beendet.',
+  watchEndedBody: '{held} von {total} Stunden wurden gehalten. Danke an alle, die mitgebetet haben.',
+  watchEndedBodyDays: '{held} von {total} Tagen wurden gehalten. Danke an alle, die mitgebetet haben.',
+  themeLabel: 'Darstellung',
+  statusEnded: 'Beendet',
+  dashActiveHeading: 'Laufend und geplant',
+  dashEndedHeading: 'Abgeschlossen ({n})',
+  endedOnDate: 'beendet am {date}',
 } as const;
 
 // English — vollständig (W3.3). `Record<…>` erzwingt: neuer de-Key ⇒ en-Pflicht.
@@ -408,19 +414,9 @@ const en: Record<keyof typeof de, string> = {
   silentChainHint: 'Private — visible only as a light.',
   nIntercessors: '{n} intercessors',
   toChain: 'Open prayer watch',
-  prayCta: 'Pray!',
-  prayChoiceTitle: 'How do you want to pray?',
-  optLogin: 'Sign in',
-  optLoginDesc: 'Continue with your account.',
-  optBrowse: 'Browse prayer watches',
-  optBrowseDesc: 'Find open prayer watches and take an hour — no account needed.',
-  optCreate: 'Create a prayer watch',
-  optCreateDesc: 'Start a new prayer watch and invite others.',
 
   yourProjects: 'Your prayer watches',
   openChains: 'Open prayer watches',
-  filterAllLanguages: 'All languages',
-  filterNoMatches: 'No watches in this language.',
   legalImprint: 'Legal notice',
   legalPrivacy: 'Privacy',
   consentLogin: 'By signing in you agree to the',
@@ -522,7 +518,7 @@ const en: Record<keyof typeof de, string> = {
   undo: 'Undo',
 
   name: 'Name',
-  emailForReminder: 'Email (for your reminder)',
+  emailForReminder: 'Email for your reminder',
   takeThisHour: 'Take this hour',
   guestBookedTitle: 'Thank you — this hour is yours.',
   addToCalendar: 'Add to calendar',
@@ -711,6 +707,21 @@ const en: Record<keyof typeof de, string> = {
   faqPrivateQ: 'Can a watch stay private?',
   faqPrivateA:
     'Yes. Private watches appear in no listing and in no search engine; they can only be reached through the invitation link. Public watches are in the overview and can be found by anyone.',
+
+  heroCtaTake: 'Take an hour',
+  heroCtaStart: 'Start a prayer watch',
+  nextFreeCta: 'Take a free hour',
+  nextFreeCtaDays: 'Take a free day',
+  nextFreeHint: 'Next free hour: {time}',
+  nextFreeHintDays: 'Next free day: {time}',
+  watchEndedTitle: 'This prayer watch has ended.',
+  watchEndedBody: '{held} of {total} hours were held. Thank you to everyone who prayed.',
+  watchEndedBodyDays: '{held} of {total} days were held. Thank you to everyone who prayed.',
+  themeLabel: 'Appearance',
+  statusEnded: 'Ended',
+  dashActiveHeading: 'Running and upcoming',
+  dashEndedHeading: 'Ended ({n})',
+  endedOnDate: 'ended {date}',
 };
 
 // Español — vollständig (i18n-Erweiterung W4). Leitbegriffe: „vigilia de oración"
@@ -754,19 +765,9 @@ const es: Record<keyof typeof de, string> = {
   silentChainHint: 'Privada — visible solo como una luz.',
   nIntercessors: '{n} intercesores',
   toChain: 'Ir a la vigilia de oración',
-  prayCta: '¡Orar!',
-  prayChoiceTitle: '¿Cómo quieres orar?',
-  optLogin: 'Iniciar sesión',
-  optLoginDesc: 'Continuar con tu cuenta.',
-  optBrowse: 'Ver vigilias de oración',
-  optBrowseDesc: 'Encuentra vigilias abiertas y toma una hora — sin necesidad de cuenta.',
-  optCreate: 'Crear una vigilia de oración',
-  optCreateDesc: 'Inicia una nueva vigilia de oración e invita a otros.',
 
   yourProjects: 'Tus vigilias de oración',
   openChains: 'Vigilias de oración abiertas',
-  filterAllLanguages: 'Todos los idiomas',
-  filterNoMatches: 'No hay vigilias en este idioma.',
   legalImprint: 'Aviso legal',
   legalPrivacy: 'Privacidad',
   consentLogin: 'Al iniciar sesión aceptas la',
@@ -868,7 +869,7 @@ const es: Record<keyof typeof de, string> = {
   undo: 'Deshacer',
 
   name: 'Nombre',
-  emailForReminder: 'Correo (para tu recordatorio)',
+  emailForReminder: 'Correo para tu recordatorio',
   takeThisHour: 'Tomar esta hora',
   guestBookedTitle: 'Gracias — esta hora es tuya.',
   addToCalendar: 'Añadir al calendario',
@@ -1058,6 +1059,21 @@ const es: Record<keyof typeof de, string> = {
   faqPrivateQ: '¿Puede una vigilia permanecer privada?',
   faqPrivateA:
     'Sí. Las vigilias privadas no aparecen en ninguna lista ni en ningún buscador; solo se accede a ellas mediante el enlace de invitación. Las públicas están en la vista general y cualquiera puede encontrarlas.',
+
+  heroCtaTake: 'Tomar una hora',
+  heroCtaStart: 'Iniciar una vigilia de oración',
+  nextFreeCta: 'Tomar una hora libre',
+  nextFreeCtaDays: 'Tomar un día libre',
+  nextFreeHint: 'Próxima hora libre: {time}',
+  nextFreeHintDays: 'Próximo día libre: {time}',
+  watchEndedTitle: 'Esta vigilia de oración ha terminado.',
+  watchEndedBody: 'Se cubrieron {held} de {total} horas. Gracias a todos los que oraron.',
+  watchEndedBodyDays: 'Se cubrieron {held} de {total} días. Gracias a todos los que oraron.',
+  themeLabel: 'Apariencia',
+  statusEnded: 'Terminada',
+  dashActiveHeading: 'En curso y próximas',
+  dashEndedHeading: 'Terminadas ({n})',
+  endedOnDate: 'terminó el {date}',
 };
 
 // עברית — vollständig (i18n-Erweiterung W4, RTL). Leitbegriffe: „משמרת תפילה"
@@ -1101,19 +1117,9 @@ const he: Record<keyof typeof de, string> = {
   silentChainHint: 'פרטית — נראית רק כאור.',
   nIntercessors: '{n} מתפללים',
   toChain: 'אל משמרת התפילה',
-  prayCta: 'התפללו!',
-  prayChoiceTitle: 'איך תרצו להתפלל?',
-  optLogin: 'התחברות',
-  optLoginDesc: 'המשיכו עם החשבון שלכם.',
-  optBrowse: 'הצגת משמרות תפילה',
-  optBrowseDesc: 'מצאו משמרות תפילה פתוחות וקחו שעה — ללא צורך בחשבון.',
-  optCreate: 'יצירת משמרת תפילה',
-  optCreateDesc: 'התחילו משמרת תפילה חדשה והזמינו אחרים.',
 
   yourProjects: 'משמרות התפילה שלך',
   openChains: 'משמרות תפילה פתוחות',
-  filterAllLanguages: 'כל השפות',
-  filterNoMatches: 'אין משמרות בשפה זו.',
   legalImprint: 'פרטי החברה',
   legalPrivacy: 'פרטיות',
   consentLogin: 'בהתחברות אתם מסכימים ל',
@@ -1215,7 +1221,7 @@ const he: Record<keyof typeof de, string> = {
   undo: 'ביטול פעולה',
 
   name: 'שם',
-  emailForReminder: 'דוא"ל (לתזכורת שלך)',
+  emailForReminder: 'דוא"ל לתזכורת',
   takeThisHour: 'לקיחת השעה הזו',
   guestBookedTitle: 'תודה — השעה הזו שלך.',
   addToCalendar: 'הוספה ליומן',
@@ -1405,6 +1411,21 @@ const he: Record<keyof typeof de, string> = {
   faqPrivateQ: 'האם משמרת יכולה להישאר פרטית?',
   faqPrivateA:
     'כן. משמרות פרטיות אינן מופיעות בשום רשימה ובשום מנוע חיפוש; אפשר להגיע אליהן רק דרך קישור ההזמנה. משמרות ציבוריות מופיעות בסקירה וכל אחד יכול למצוא אותן.',
+
+  heroCtaTake: 'לקחת שעה',
+  heroCtaStart: 'להתחיל משמרת תפילה',
+  nextFreeCta: 'לקחת שעה פנויה',
+  nextFreeCtaDays: 'לקחת יום פנוי',
+  nextFreeHint: 'השעה הפנויה הבאה: {time}',
+  nextFreeHintDays: 'היום הפנוי הבא: {time}',
+  watchEndedTitle: 'משמרת התפילה הזו הסתיימה.',
+  watchEndedBody: '{held} מתוך {total} שעות נשמרו. תודה לכל מי שהתפלל.',
+  watchEndedBodyDays: '{held} מתוך {total} ימים נשמרו. תודה לכל מי שהתפלל.',
+  themeLabel: 'מראה',
+  statusEnded: 'הסתיימה',
+  dashActiveHeading: 'פעילות ומתוכננות',
+  dashEndedHeading: 'הסתיימו ({n})',
+  endedOnDate: 'הסתיימה ב-{date}',
 };
 
 // العربية — vollständig (i18n-Erweiterung W4, RTL, MSA/فصحى). Leitbegriffe: „سهرة صلاة"
@@ -1448,19 +1469,9 @@ const ar: Record<keyof typeof de, string> = {
   silentChainHint: 'خاصة — تظهر كنور فقط.',
   nIntercessors: '{n} من المصلّين',
   toChain: 'الذهاب إلى سهرة الصلاة',
-  prayCta: 'صلّوا!',
-  prayChoiceTitle: 'كيف تودّون الصلاة؟',
-  optLogin: 'تسجيل الدخول',
-  optLoginDesc: 'المتابعة بحسابك.',
-  optBrowse: 'تصفّح سهرات الصلاة',
-  optBrowseDesc: 'ابحث عن سهرات صلاة مفتوحة واحجز ساعة — دون الحاجة إلى حساب.',
-  optCreate: 'إنشاء سهرة صلاة',
-  optCreateDesc: 'ابدأ سهرة صلاة جديدة وادعُ آخرين.',
 
   yourProjects: 'سهرات الصلاة الخاصة بك',
   openChains: 'سهرات الصلاة المفتوحة',
-  filterAllLanguages: 'كل اللغات',
-  filterNoMatches: 'لا توجد سهرات بهذه اللغة.',
   legalImprint: 'بيانات قانونية',
   legalPrivacy: 'الخصوصية',
   consentLogin: 'بتسجيل الدخول، فإنك توافق على',
@@ -1562,7 +1573,7 @@ const ar: Record<keyof typeof de, string> = {
   undo: 'تراجع',
 
   name: 'الاسم',
-  emailForReminder: 'البريد الإلكتروني (للتذكير)',
+  emailForReminder: 'البريد الإلكتروني للتذكير',
   takeThisHour: 'حجز هذه الساعة',
   guestBookedTitle: 'شكرًا — هذه الساعة أصبحت لك.',
   addToCalendar: 'إضافة إلى التقويم',
@@ -1752,6 +1763,21 @@ const ar: Record<keyof typeof de, string> = {
   faqPrivateQ: 'هل يمكن أن تبقى السهرة خاصة؟',
   faqPrivateA:
     'نعم. السهرات الخاصة لا تظهر في أي قائمة ولا في أي محرك بحث؛ ولا يمكن الوصول إليها إلا عبر رابط الدعوة. أما السهرات العامة فتظهر في النظرة العامة ويمكن لأي أحد أن يجدها.',
+
+  heroCtaTake: 'احجز ساعة',
+  heroCtaStart: 'ابدأ سهرة صلاة',
+  nextFreeCta: 'احجز ساعة متاحة',
+  nextFreeCtaDays: 'احجز يومًا متاحًا',
+  nextFreeHint: 'الساعة المتاحة التالية: {time}',
+  nextFreeHintDays: 'اليوم المتاح التالي: {time}',
+  watchEndedTitle: 'انتهت سهرة الصلاة هذه.',
+  watchEndedBody: 'تمّت تغطية {held} من {total} ساعة. شكرًا لكل من صلّى.',
+  watchEndedBodyDays: 'تمّت تغطية {held} من {total} يوم. شكرًا لكل من صلّى.',
+  themeLabel: 'المظهر',
+  statusEnded: 'انتهت',
+  dashActiveHeading: 'جارية وقادمة',
+  dashEndedHeading: 'منتهية ({n})',
+  endedOnDate: 'انتهت في {date}',
 };
 
 type TranslationKey = keyof typeof de;

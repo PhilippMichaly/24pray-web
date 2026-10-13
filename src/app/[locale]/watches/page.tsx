@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AppShell } from '@/components/patterns/AppShell';
 import { notFound } from 'next/navigation';
 import { getFixedT, intlLocaleFor, parseLocale, type Locale } from '@/lib/i18n';
 import { alternatesFor, projectPath, sectionPath } from '@/lib/routes';
-import { fetchPublicProjects } from '@/lib/api-server';
+import { fetchPublicProjects, onlyOpenWatches } from '@/lib/api-server';
 import { watchListJsonLd } from '@/lib/seo';
 import { JsonLd } from '@/components/patterns/JsonLd';
 import type { ProjectWithStats } from '@/types';
@@ -51,17 +52,27 @@ export default async function WatchesPage({ params }: { params: { locale: string
   const locale = parseLocale(params.locale);
   if (!locale) notFound();
   const t = getFixedT(locale);
-  const projects = await fetchPublicProjects();
+  const projects = onlyOpenWatches(await fetchPublicProjects());
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10">
+    <AppShell>
+      <div className="mx-auto w-full max-w-2xl">
       <JsonLd data={watchListJsonLd(locale, projects)} />
 
       <h1 className="font-display text-2xl font-semibold text-ink">{t('watchesHeading')}</h1>
       <p className="mt-2 text-sm leading-relaxed text-ink-muted">{t('watchesIntro')}</p>
 
       {projects.length === 0 ? (
-        <p className="mt-8 text-sm text-ink-muted">{t('watchesEmpty')}</p>
+        <div className="mt-8 rounded-md border border-dashed border-line px-5 py-6 text-center">
+          <p className="text-sm text-ink-muted">{t('watchesEmpty')}</p>
+          {/* Leerer Katalog ist kein Ende: der nächste Schritt ist, selbst eine zu starten. */}
+          <Link
+            href="/projects/new"
+            className="mt-4 inline-block rounded-full bg-accent px-6 py-2.5 font-display text-sm font-semibold text-accent-ink shadow-3"
+          >
+            {t('heroCtaStart')}
+          </Link>
+        </div>
       ) : (
         <ul className="mt-8 space-y-3">
           {projects.map((p) => (
@@ -96,6 +107,7 @@ export default async function WatchesPage({ params }: { params: { locale: string
           ← 24pray
         </Link>
       </p>
-    </main>
+      </div>
+    </AppShell>
   );
 }

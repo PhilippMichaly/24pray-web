@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { SUPPORTED_LOCALES } from '@/lib/i18n';
 import { absoluteUrl, alternatesFor, guidePath, landingPath, projectPath, sectionPath } from '@/lib/routes';
 import { GUIDE_LOCALES, GUIDES, type GuideLocale } from '@/content/guides';
-import { fetchPublicProjects } from '@/lib/api-server';
+import { fetchPublicProjects, onlyOpenWatches } from '@/lib/api-server';
 
 /** Stündlich neu erzeugen: neue Wachen sollen zeitnah auffindbar sein, ohne dass jeder
  *  Crawler-Besuch die API trifft. */
@@ -29,7 +29,7 @@ function guideEntry(pathFor: (l: GuideLocale) => string, lastModified?: Date) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const projects = await fetchPublicProjects();
+  const projects = onlyOpenWatches(await fetchPublicProjects());
   const listed = projects.slice(0, MAX_PROJECTS);
   if (projects.length > listed.length) {
     console.warn(`[sitemap] ${projects.length - listed.length} Wachen ausgelassen (URL-Limit erreicht)`);

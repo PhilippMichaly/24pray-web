@@ -57,3 +57,13 @@ describe('fetchPublicProjects', () => {
     expect(await fetchPublicProjects()).toEqual([]);
   });
 });
+
+describe('onlyOpenWatches', () => {
+  it('wirft beendete Wachen raus und sortiert nach Ende', async () => {
+    const { onlyOpenWatches } = await import('./api-server');
+    const now = Date.parse('2026-10-13T12:00:00Z');
+    const p = (id: string, end: string) => ({ id, endDate: end }) as unknown as import('@/types').ProjectWithStats;
+    const out = onlyOpenWatches([p('alt', '2026-07-15T13:00:00Z'), p('spaet', '2026-12-01T00:00:00Z'), p('bald', '2026-10-14T00:00:00Z'), p('genau', '2026-10-13T12:00:00Z')], now);
+    expect(out.map((x) => x.id)).toEqual(['bald', 'spaet']);
+  });
+});

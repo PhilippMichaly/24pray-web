@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDayHeader, formatWeekday, formatDateShort } from '@/lib/time';
-import { isGapStart, dayCollapseState, leadingPastCount } from './logic';
+import { isGapStart, dayCollapseState, leadingPastCount, foldPastDays, firstFreeDayKey } from './logic';
 import { SlotRow } from './SlotRow';
 import { DaySection } from './DaySection';
 import { t, tUnit } from '@/lib/i18n';
@@ -20,6 +20,8 @@ export interface SlotListProps {
    * je Block, siehe groupByWeek) statt Kalendertagen — jede Zeile ist bereits ein ganzer Tag.
    */
   dayMode?: boolean;
+  /** Stunde, zu der gerade gesprungen wird — ihr Tag wird aufgeklappt, sonst gäbe es kein Ziel. */
+  focusStartTime?: string | null;
 }
 
 /** Nicht-interaktive, gedämpfte Zeile für gefaltete vergangene Stunden/Tage (P2). */
@@ -49,7 +51,12 @@ export function SlotList({
   gapStartTime = null,
   gapCount = 0,
   dayMode = false,
+  focusStartTime = null,
 }: SlotListProps) {
+  // Erster Tag mit freier Stunde bleibt offen: „Übernehmen" soll ohne Aufklappen sichtbar sein.
+  const firstFree = firstFreeDayKey(days);
+  const containsFocus = (slots: SlotViewModel[]) => !!focusStartTime && slots.some((s) => s.startTime === focusStartTime);
+
   const renderRow = (slot: SlotViewModel) => (
     <>
       {isGapStart(slot, gapStartTime) && <GapRangeHeader key={`gap-${slot.key}`} count={gapCount} dayMode={dayMode} />}
@@ -69,17 +76,17 @@ export function SlotList({
     const showWeekHeaders = days.length > 1;
     return (
       <div className="space-y-5">
-        {days.map((week) => {
-          const collapse = dayCollapseState(week.slots);
-          const containsGapStart = week.slots.some((s) => isGapStart(s, gapStartTime));
-
-          if (showWeekHeaders && collapse === 'all-past') {
+        {(showWeekHeaders ? foldPastDays(days) : days.map((d) => ({ kind: 'day' as const, key: d.key, day: d }))).map((entry) => {
+          if (entry.kind === 'past') {
             return (
-              <ul key={week.key}>
-                <PastFoldRow count={week.slots.length} dayMode />
+              <ul key={entry.key}>
+                <PastFoldRow count={entry.count} dayMode />
               </ul>
             );
           }
+          const week = entry.day;
+          const collapse = dayCollapseState(week.slots);
+          const containsGapStart = week.slots.some((s) => isGapStart(s, gapStartTime));
 
           const booked = week.slots.filter((s) => s.status === 'BOOKED').length;
           const weekOf = t('weekOfLabel', { date: formatDateShort(week.slots[0].startTime, projectTz) });
@@ -92,7 +99,8 @@ export function SlotList({
                 key={week.key}
                 dateLabel={weekOf}
                 dayProgress={{ booked, total: week.slots.length }}
-                defaultCollapsed
+                defaultCollapsed={week.key !== firstFree}
+                forceOpen={containsFocus(week.slots)}
                 headerOverride={header}
               >
                 {week.slots.map(renderRow)}
@@ -114,7 +122,7 @@ export function SlotList({
           }
 
           return (
-            <DaySection key={week.key} dateLabel={weekOf} dayProgress={{ booked, total: week.slots.length }}>
+            <DaySection key={week.key} dateLabel={weekOf} dayProgress={{ booked, total: week.slots.length }} forceOpen={containsFocus(week.slots)}>
               {leadingPast > 0 && <PastFoldRow key={`past-${week.key}`} count={leadingPast} dayMode />}
               {rest.map(renderRow)}
             </DaySection>
@@ -126,17 +134,17 @@ export function SlotList({
 
   return (
     <div className="space-y-5">
-      {days.map((day) => {
-        const collapse = dayCollapseState(day.slots);
-
-        // Komplett vergangener Tag → eine Ghost-Zeile statt der ganzen Sektion.
-        if (collapse === 'all-past') {
+      {foldPastDays(days).map((entry) => {
+        // Komplett vergangene Tage → EINE Ghost-Zeile für den ganzen zusammenhängenden Block.
+        if (entry.kind === 'past') {
           return (
-            <ul key={day.key}>
-              <PastFoldRow count={day.slots.length} dayMode={false} />
+            <ul key={entry.key}>
+              <PastFoldRow count={entry.count} dayMode={false} />
             </ul>
           );
         }
+        const day = entry.day;
+        const collapse = dayCollapseState(day.slots);
 
         const booked = day.slots.filter((s) => s.status === 'BOOKED').length;
         const containsGapStart = day.slots.some((s) => isGapStart(s, gapStartTime));
@@ -150,7 +158,8 @@ export function SlotList({
               key={day.key}
               dateLabel={formatDayHeader(day.slots[0].startTime, projectTz)}
               dayProgress={{ booked, total: day.slots.length }}
-              defaultCollapsed
+              defaultCollapsed={day.key !== firstFree}
+              forceOpen={containsFocus(day.slots)}
               headerOverride={header}
             >
               {day.slots.map(renderRow)}
@@ -166,6 +175,7 @@ export function SlotList({
             key={day.key}
             dateLabel={formatDayHeader(day.slots[0].startTime, projectTz)}
             dayProgress={{ booked, total: day.slots.length }}
+            forceOpen={containsFocus(day.slots)}
           >
             {leadingPast > 0 && <PastFoldRow key={`past-${day.key}`} count={leadingPast} dayMode={false} />}
             {rest.map(renderRow)}

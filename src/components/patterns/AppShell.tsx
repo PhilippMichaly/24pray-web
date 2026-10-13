@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/lib/auth';
 import { t } from '@/lib/i18n';
 
-function UserMenu() {
+export function UserMenu() {
   const { user, loading } = useAuth();
   const router = useRouter();
   if (loading) return <div className="h-9 w-9" />;
@@ -65,7 +65,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
           <div className="flex items-center gap-1.5">
             <LocaleToggle />
-            <ThemeToggle />
             <UserMenu />
           </div>
         </div>
@@ -74,6 +73,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-border">
         <div className="mx-auto max-w-3xl px-4 py-6 text-center text-xs text-ink-muted">
           24pray · {t('tagline')}
+          <span className="mx-2">·</span>
+          <ThemeToggle withLabel />
           <span className="mx-2">·</span>
           <FeedbackDialog />
           <span className="mx-2">·</span>

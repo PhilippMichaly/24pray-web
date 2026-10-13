@@ -173,17 +173,8 @@ export function GuestBookingForm({
   }
 
   return (
+    // Keine eigene Zeitzeile hier: das Sheet zeigt die Stunde schon im Kopf (stand vorher doppelt).
     <form onSubmit={submit} className="space-y-4">
-      <div className="rounded-md bg-surface-sunken px-3 py-2 text-sm tnum text-ink">
-        {dayMode ? (
-          formatDayHeader(slot.startTime, projectTz)
-        ) : (
-          <>
-            {times.project} {t('oclock')}
-            {times.differs && <span className="text-ink-muted"> · {t('atYou')} {times.local}</span>}
-          </>
-        )}
-      </div>
       <div>
         <Label htmlFor="guestName">{t('name')}</Label>
         <Input
@@ -209,13 +200,21 @@ export function GuestBookingForm({
         />
         <FieldError>{errors.email}</FieldError>
       </div>
-      <div>
-        <Label htmlFor="guestCity">
-          {t('fieldLocation')} <span className="text-ink-muted">({t('optional')})</span>
-        </Label>
-        <CityInput id="guestCity" initialName={getMyCity()?.name ?? ''} onSelect={setCity} />
-        {!city && <p className="mt-1 text-xs text-ink-muted">{t('beterLocationHint')}</p>}
-      </div>
+      {/* Ort ist Kür, nicht Pflicht: eingeklappt, damit das Formular bei Name (+ E-Mail) endet.
+          Wer sich schon einmal einen Ort gemerkt hat, sieht ihn offen. */}
+      <details open={!!city} className="group rounded-md border border-border px-3 py-2">
+        <summary className="cursor-pointer list-none text-sm text-ink-muted hover:text-ink">
+          <span className="me-1 inline-block transition-transform group-open:rotate-90" aria-hidden>›</span>
+          {t('fieldLocation')} ({t('optional')})
+        </summary>
+        <div className="mt-2">
+          <Label htmlFor="guestCity" className="sr-only">
+            {t('fieldLocation')}
+          </Label>
+          <CityInput id="guestCity" initialName={getMyCity()?.name ?? ''} onSelect={setCity} />
+          <p className="mt-1 text-xs text-ink-muted">{t('beterLocationHint')}</p>
+        </div>
+      </details>
       {/* Art.-9-Einwilligung + Namens-Sichtbarkeit (Gast-Buchung) */}
       <p className="text-xs leading-relaxed text-ink-muted">
         {t('consentGuest')}{' '}

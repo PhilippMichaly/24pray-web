@@ -183,3 +183,61 @@ describe('SlotList — Tages-Modus (dayMode, P3): Wochen-Zwischenüberschriften 
     expect(screen.queryByText(/^Woche vom/)).toBeNull();
   });
 });
+
+describe('SlotList — UX-Runde 2026-10-13', () => {
+  afterEach(() => cleanup());
+  const free = (d: string, h: number) =>
+    m(`2026-07-${d}T${String(h).padStart(2, '0')}:00:00.000Z`, `2026-07-${d}T${String(h + 1).padStart(2, '0')}:00:00.000Z`, 'FREE');
+  const past = (d: string, h: number) =>
+    m(`2026-07-${d}T${String(h).padStart(2, '0')}:00:00.000Z`, `2026-07-${d}T${String(h + 1).padStart(2, '0')}:00:00.000Z`, 'PAST');
+
+  it('zusammenhängende vergangene Tage erscheinen als EINE Zeile', () => {
+    render(
+      <SlotList
+        days={[
+          { key: 'a', slots: [past('01', 1), past('01', 2)] },
+          { key: 'b', slots: [past('02', 1), past('02', 2), past('02', 3)] },
+          { key: 'c', slots: [free('03', 1)] },
+        ]}
+        projectTz="UTC"
+        onBook={() => {}}
+        onOpenSheet={() => {}}
+      />,
+    );
+    expect(screen.getAllByText(/vorüber/)).toHaveLength(1);
+    expect(screen.getByText(/5 Stunden vorüber/)).toBeTruthy();
+  });
+
+  it('der erste freie Tag ist aufgeklappt, spätere freie Tage bleiben zu', () => {
+    const { container } = render(
+      <SlotList
+        days={[
+          { key: 'c', slots: [free('03', 1), free('03', 2)] },
+          { key: 'd', slots: [free('04', 1), free('04', 2)] },
+        ]}
+        projectTz="UTC"
+        onBook={() => {}}
+        onOpenSheet={() => {}}
+      />,
+    );
+    const toggles = container.querySelectorAll('button[aria-expanded]');
+    expect(toggles[0].getAttribute('aria-expanded')).toBe('true');
+    expect(toggles[1].getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('focusStartTime klappt den Tag mit dieser Stunde auf', () => {
+    const { container } = render(
+      <SlotList
+        days={[
+          { key: 'c', slots: [free('03', 1)] },
+          { key: 'd', slots: [free('04', 5)] },
+        ]}
+        projectTz="UTC"
+        onBook={() => {}}
+        onOpenSheet={() => {}}
+        focusStartTime="2026-07-04T05:00:00.000Z"
+      />,
+    );
+    expect(container.querySelector('li[id="s-2026-07-04T05:00:00.000Z"]')).toBeTruthy();
+  });
+});

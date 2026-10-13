@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { LogIn, HeartHandshake, PlusCircle, X, MapPin, type LucideIcon } from 'lucide-react';
+import { X, MapPin } from 'lucide-react';
 import { GitHubMark } from '@/components/patterns/GitHubMark';
 import { api } from '@/lib/api';
 import { useFunnelPing } from '@/lib/funnel';
-import { Sheet } from '@/components/ui/Sheet';
 import { Brand } from '@/components/patterns/Brand';
-import { ThemeToggle } from '@/components/patterns/ThemeToggle';
+import { UserMenu } from '@/components/patterns/AppShell';
 import { LocaleToggle } from '@/components/patterns/LocaleToggle';
 import { Globe, type ChainPoint } from '@/components/patterns/Globe';
 import { FeedbackDialog, GITHUB_REPO_URL } from '@/components/patterns/FeedbackDialog';
@@ -25,39 +23,10 @@ interface PublicStats {
   points?: ChainPoint[];
 }
 
-function PrayOption({
-  icon: Icon,
-  label,
-  desc,
-  onClick,
-}: {
-  icon: LucideIcon;
-  label: string;
-  desc: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex w-full items-center gap-4 rounded-md border bg-surface px-4 py-4 text-start transition-colors hover:border-accent hover:bg-accent-soft/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-    >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
-        <Icon size={22} aria-hidden />
-      </span>
-      <span className="min-w-0">
-        <span className="block font-semibold text-ink">{label}</span>
-        <span className="block text-sm text-ink-muted">{desc}</span>
-      </span>
-    </button>
-  );
-}
-
 export default function LandingClient() {
   useFunnelPing('landing');
-  const router = useRouter();
   const { locale } = useLocale();
   const [stats, setStats] = useState<PublicStats | null>(null);
-  const [choiceOpen, setChoiceOpen] = useState(false);
   const [focusPoint, setFocusPoint] = useState<ChainPoint | null>(null);
 
   useEffect(() => {
@@ -76,15 +45,17 @@ export default function LandingClient() {
     <div data-theme="dark" className="relative flex min-h-screen flex-col items-center overflow-hidden bg-bg px-4 text-ink">
       <header className="z-10 flex w-full max-w-5xl items-center justify-between py-4">
         <Brand size="sm" />
+        {/* Kein Theme-Schalter hier: das Weltall ist immer dunkel, er hätte keine sichtbare Wirkung. */}
         <div className="flex items-center gap-1.5">
           <LocaleToggle />
-          <ThemeToggle />
+          <UserMenu />
         </div>
       </header>
 
-      {/* Nur die Erde, groß — und ein Button. */}
+      {/* Die Erde und zwei klare Wege. Die Globus-Höhe ist an die Fensterhöhe gekoppelt, damit
+          Überschrift und Knöpfe auch am Desktop (1440×900) ohne Scrollen sichtbar bleiben. */}
       <main className="z-10 flex w-full flex-1 flex-col items-center justify-center">
-        <div className="relative w-full max-w-[min(78vh,700px)]">
+        <div className="relative w-full max-w-[min(52vh,600px)]">
           <Globe
             activeChains={stats?.activeChains ?? 5}
             points={stats?.points}
@@ -136,12 +107,22 @@ export default function LandingClient() {
           {t('heroTitle')}
         </h1>
 
-        <button
-          onClick={() => setChoiceOpen(true)}
-          className="mt-6 rounded-full bg-accent px-14 py-4 font-display text-2xl font-semibold text-accent-ink shadow-3 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-bg"
-        >
-          {t('prayCta')}
-        </button>
+        {/* Zwei direkte Wege statt Auswahl-Sheet (UX-Runde 2026-10-13): Mitbeten ist der häufigste
+            Weg und braucht kein Konto — deshalb der Hauptknopf; Anmelden sitzt in der Kopfzeile. */}
+        <div className="mt-6 flex w-full max-w-md flex-col items-stretch gap-3 sm:max-w-2xl sm:flex-row sm:justify-center">
+          <Link
+            href={sectionPath('watches', locale)}
+            className="whitespace-nowrap rounded-full bg-accent px-8 py-3.5 text-center font-display text-lg font-semibold text-accent-ink shadow-3 transition-transform hover:scale-[1.03] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-bg"
+          >
+            {t('heroCtaTake')}
+          </Link>
+          <Link
+            href="/projects/new"
+            className="whitespace-nowrap rounded-full border border-gold/40 px-8 py-3.5 text-center font-display text-lg font-semibold text-ink transition-colors hover:border-gold hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-bg"
+          >
+            {t('heroCtaStart')}
+          </Link>
+        </div>
 
         {/* Zahlen-Zeile bewusst AUSGEBLENDET (User-Entscheidung 2026-07-09): solange real
             noch nicht gebetet wurde, ist jede Zahl — auch die alte „N Stunden gehalten" —
@@ -166,29 +147,6 @@ export default function LandingClient() {
         <Link href="/datenschutz" className="underline underline-offset-2 hover:text-ink">{t('legalPrivacy')}</Link>
       </footer>
 
-      <Sheet open={choiceOpen} onOpenChange={setChoiceOpen} title={t('prayChoiceTitle')}>
-        <div className="space-y-2.5">
-          {/* Zielorientierte Reihenfolge: erst beten (ohne Hürde), dann starten, dann anmelden */}
-          <PrayOption
-            icon={HeartHandshake}
-            label={t('optBrowse')}
-            desc={t('optBrowseDesc')}
-            onClick={() => router.push(sectionPath('watches', locale))}
-          />
-          <PrayOption
-            icon={PlusCircle}
-            label={t('optCreate')}
-            desc={t('optCreateDesc')}
-            onClick={() => router.push('/projects/new')}
-          />
-          <PrayOption
-            icon={LogIn}
-            label={t('optLogin')}
-            desc={t('optLoginDesc')}
-            onClick={() => router.push('/auth/login')}
-          />
-        </div>
-      </Sheet>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AppShell } from '@/components/patterns/AppShell';
 import { notFound } from 'next/navigation';
 import { intlLocaleFor, parseLocale } from '@/lib/i18n';
 import { alternatesFor, guidePath, sectionPath } from '@/lib/routes';
@@ -54,7 +55,8 @@ export default function GuidePage({ params }: Params) {
   );
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10">
+    <AppShell>
+      <div className="mx-auto w-full max-w-2xl">
       <JsonLd data={guideArticleJsonLd(locale, guide)} />
       <JsonLd
         data={breadcrumbJsonLd([
@@ -126,6 +128,7 @@ export default function GuidePage({ params }: Params) {
           </ul>
         </nav>
       )}
-    </main>
+      </div>
+    </AppShell>
   );
 }

@@ -35,6 +35,9 @@ const bookedModel: SlotViewModel = {
   state: 'BOOKED',
 };
 
+// Uhr mitten in der Wache — sonst gälte die Juli-Wache heute als beendet.
+const DURING = Date.parse('2026-07-03T00:00:00.000Z');
+
 describe('ProjectCard — erzählt das Anliegen (P3)', () => {
   afterEach(() => cleanup());
 
@@ -49,9 +52,9 @@ describe('ProjectCard — erzählt das Anliegen (P3)', () => {
   });
 
   it('Status-Badge fehlt bei ACTIVE (Standard sagt nichts), erscheint bei PAUSED (Abweichung)', () => {
-    const { rerender } = render(<ProjectCard project={base} models={[]} />);
+    const { rerender } = render(<ProjectCard project={base} models={[]} now={DURING} />);
     expect(screen.queryByText('Aktiv')).toBeNull();
-    rerender(<ProjectCard project={{ ...base, status: 'PAUSED' }} models={[]} />);
+    rerender(<ProjectCard project={{ ...base, status: 'PAUSED' }} models={[]} now={DURING} />);
     expect(screen.getByText('Pausiert')).toBeTruthy();
   });
 
@@ -63,9 +66,15 @@ describe('ProjectCard — erzählt das Anliegen (P3)', () => {
   });
 
   it('Meta-Zeile zeigt Ort (wenn vorhanden) und das Enddatum kurz', () => {
-    render(<ProjectCard project={{ ...base, locationName: 'Berlin' }} models={[]} />);
+    render(<ProjectCard project={{ ...base, locationName: 'Berlin' }} models={[]} now={DURING} />);
     expect(screen.getByText(/Berlin/)).toBeTruthy();
     expect(screen.getByText(/bis/)).toBeTruthy();
+  });
+
+  it('beendete Wache: Badge „Beendet" und Enddatum mit Jahr, wenn es nicht das laufende ist', () => {
+    render(<ProjectCard project={base} models={[]} now={Date.parse('2027-02-01T00:00:00.000Z')} />);
+    expect(screen.getByText('Beendet')).toBeTruthy();
+    expect(screen.getByText(/beendet am 8\. Juli 2026/)).toBeTruthy();
   });
 
   it('Meta-Zeile ohne Ort zeigt nur das Enddatum, ohne führenden Trenner', () => {

@@ -11,6 +11,9 @@ import {
   isDayMode,
   groupByWeek,
   displayUnits,
+  nextFreeSlot,
+  foldPastDays,
+  firstFreeDayKey,
 } from './logic';
 import type { SlotView } from '@/types';
 import type { DerivationContext, SlotViewModel } from './types';
@@ -343,5 +346,41 @@ describe('computeLargestGap — Tages-Modus-Label (Datum statt Uhrzeit)', () => 
     const gap = computeLargestGap(slots, now, 'UTC', true);
     expect(gap.keys.size).toBe(2);
     expect(gap.label).toContain('–');
+  });
+});
+
+describe('UX-Runde 2026-10-13: nächste freie Stunde, Vergangenheits-Faltung, erster freier Tag', () => {
+  const vm = (key: string, state: SlotViewModel['state']): SlotViewModel => ({
+    key, slotId: null, startTime: key, endTime: key, isMine: false, userName: null,
+    status: state === 'BOOKED' || state === 'MINE' ? 'BOOKED' : 'FREE', isNight: false, isLargestGap: false, state,
+  });
+
+  it('nextFreeSlot liefert die erste freie Stunde (auch die laufende), nie vergangene oder belegte', () => {
+    const models = [vm('a', 'PAST'), vm('b', 'BOOKED'), vm('c', 'NOW_FREE'), vm('d', 'FREE')];
+    expect(nextFreeSlot(models)?.key).toBe('c');
+    expect(nextFreeSlot([vm('a', 'PAST'), vm('b', 'FREE_LARGEST_GAP')])?.key).toBe('b');
+    expect(nextFreeSlot([vm('a', 'PAST'), vm('b', 'MINE')])).toBeNull();
+  });
+
+  it('foldPastDays fasst aufeinanderfolgende vergangene Tage zu EINER Zeile zusammen', () => {
+    const past = (k: string) => ({ key: k, slots: [vm(`${k}1`, 'PAST'), vm(`${k}2`, 'PAST')] });
+    const open = { key: 'x', slots: [vm('x1', 'FREE')] };
+    const out = foldPastDays([past('a'), past('b'), open, past('c')]);
+    expect(out).toEqual([
+      { kind: 'past', key: 'past-a', count: 4 },
+      { kind: 'day', key: 'x', day: open },
+      { kind: 'past', key: 'past-c', count: 2 },
+    ]);
+  });
+
+  it('firstFreeDayKey ist der erste Tag mit mindestens einer freien Stunde', () => {
+    const days = [
+      { key: 'a', slots: [vm('a1', 'PAST')] },
+      { key: 'b', slots: [vm('b1', 'BOOKED')] },
+      { key: 'c', slots: [vm('c1', 'FREE')] },
+      { key: 'd', slots: [vm('d1', 'FREE')] },
+    ];
+    expect(firstFreeDayKey(days)).toBe('c');
+    expect(firstFreeDayKey(days.slice(0, 2))).toBeNull();
   });
 });

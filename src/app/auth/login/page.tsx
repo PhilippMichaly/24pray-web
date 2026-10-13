@@ -101,7 +101,10 @@ export default function LoginPage() {
   return (
     <CenterShell>
       <div className="w-full max-w-[380px]">
-        <Brand size="sm" className="mb-6" />
+        {/* Ohne Link war die Login-Seite eine Sackgasse — es gab keinen Weg zurück zur Startseite. */}
+        <Link href="/" className="mb-6 inline-block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+          <Brand size="sm" />
+        </Link>
         <Card elevation={2}>
           <h1 className="font-display text-2xl font-semibold text-ink">{t('login')}</h1>
           <p className="mt-1 text-sm text-ink-muted">{t('loginSubtitle')}</p>

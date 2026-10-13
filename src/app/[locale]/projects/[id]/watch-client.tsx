@@ -2,7 +2,10 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock, HeartHandshake } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { formatDayHeader, formatDualTz, formatWeekday } from '@/lib/time';
+import { nextFreeSlot } from '@/components/slots/logic';
 import { api } from '@/lib/api';
 import { useFunnelPing } from '@/lib/funnel';
 import type { ProjectWithStats } from '@/types';
@@ -31,7 +34,7 @@ import { SlotSheet, type SlotSheetMode } from '@/components/slots/SlotSheet';
 import { RequestsFeed } from '@/components/slots/RequestsFeed';
 import { StatsPanel } from '@/components/slots/StatsPanel';
 import type { SlotViewModel } from '@/components/slots/types';
-import { t } from '@/lib/i18n';
+import { t, tUnit } from '@/lib/i18n';
 import { useLocale } from '@/lib/locale-context';
 import { sectionPath } from '@/lib/routes';
 
@@ -59,16 +62,21 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
     open: false,
   });
 
+  // Der Server rendert ohne Cookie und liefert deshalb nie den inviteToken. Für den Organisator
+  // hängen daran ALLE Werkzeuge (Anliegen, Zeitplan, Einladen, Löschen) — ohne dieses Nachladen
+  // sah er seine eigene öffentliche Wache wie ein Gast.
+  const isOwnerView = !!currentUserId && initialProject?.organizerId === currentUserId;
+
   useEffect(() => {
-    // Nachladen nur, wenn der Server nichts liefern konnte (PRIVATE/Invite/Timeout) oder ein
-    // Invite-Token im Spiel ist — dann sieht der eingeladene Client mehr als der Server darf.
-    if (initialProject && !invite) return;
+    // Nachladen nur, wenn der Server nichts liefern konnte (PRIVATE/Invite/Timeout), ein
+    // Invite-Token im Spiel ist oder der Organisator schaut — dann sieht der Client mehr als der Server darf.
+    if (initialProject && !invite && !isOwnerView) return;
     const q = invite ? `?invite=${encodeURIComponent(invite)}` : '';
     api
       .get<ProjectWithStats>(`/projects/${id}${q}`)
       .then(setProject)
       .catch((e) => setLoadError((e as Error).message));
-  }, [id, invite, initialProject]);
+  }, [id, invite, initialProject, isOwnerView]);
 
   const grid = useSlotGrid(project, currentUserId, invite);
 
@@ -81,6 +89,18 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
       { duration: 900, easing: 'ease-out' },
     );
   }, []);
+
+  // Sprung zu einer Stunde: erst ihren Tag aufklappen (SlotList), dann scrollen. `n` erzwingt
+  // einen neuen Sprung, auch wenn dieselbe Stunde zweimal angetippt wird.
+  const [focus, setFocus] = useState<{ startTime: string; n: number } | null>(null);
+  const focusSlot = useCallback((startTime: string) => {
+    setFocus((f) => ({ startTime, n: (f?.n ?? 0) + 1 }));
+  }, []);
+  useEffect(() => {
+    if (!focus) return;
+    const id = window.setTimeout(() => scrollToSlot(focus.startTime), 60);
+    return () => window.clearTimeout(id);
+  }, [focus, scrollToSlot]);
 
   const onBook = useCallback(
     (slot: SlotViewModel) => {
@@ -102,6 +122,17 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
     if (!project?.inviteToken || typeof window === 'undefined') return null;
     return `${window.location.origin}/join/${project.inviteToken}`;
   }, [project?.inviteToken]);
+
+  const nextFree = useMemo(() => nextFreeSlot(grid.models), [grid.models]);
+  const ended = !!project && grid.models.length > 0 && Date.parse(project.endDate) <= grid.now;
+
+  const onTakeNextFree = useCallback(() => {
+    if (!nextFree) return;
+    focusSlot(nextFree.startTime);
+    // Gäste landen direkt im Buchungsformular. Eingeloggt bucht „Übernehmen" ohne Rückfrage —
+    // dort nur hinführen, damit niemand versehentlich eine Stunde bucht, die er nicht wollte.
+    if (!currentUserId) setSheet({ slot: nextFree, mode: 'guest-book', open: true });
+  }, [nextFree, focusSlot, currentUserId]);
 
   const myNextSlot = useMemo(
     () => grid.models.find((m) => m.isMine && Date.parse(m.endTime) > grid.now),
@@ -152,18 +183,45 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
             </section>
           )}
 
-          <div className="mb-5">
-            <ChainProgress
-              booked={grid.booked}
-              total={grid.total}
-              largestGap={grid.gap.label ? { label: grid.gap.label, startTime: grid.gap.startTime! } : null}
-              onGapClick={scrollToSlot}
-              dayMode={grid.dayMode}
-            />
-            <div className="mt-3">
-              <TimezoneHint projectTimezone={project.timezone} />
+          {ended && (
+            <section className="mb-5 rounded-md border border-border bg-surface-sunken px-4 py-3">
+              <h2 className="font-display text-base font-semibold text-ink">{t('watchEndedTitle')}</h2>
+              <p className="mt-1 text-sm text-ink-muted tnum">
+                {tUnit(grid.dayMode, 'watchEndedBody', 'watchEndedBodyDays', { held: grid.booked, total: grid.total })}
+              </p>
+            </section>
+          )}
+
+          {/* Beendet: Der Abschluss-Kasten nennt die Zahl schon — der Fortschritt stünde doppelt da. */}
+          {!ended && (
+            <div className="mb-5">
+              <ChainProgress
+                booked={grid.booked}
+                total={grid.total}
+                largestGap={grid.gap.label ? { label: grid.gap.label, startTime: grid.gap.startTime! } : null}
+                onGapClick={focusSlot}
+                dayMode={grid.dayMode}
+              />
+              {/* Die Hauptaktion eines Gastes — vorher nur über einen zugeklappten Tag erreichbar. */}
+              {nextFree && (
+                <div className="mt-4">
+                  <Button icon={HeartHandshake} className="w-full sm:w-auto" onClick={onTakeNextFree}>
+                    {tUnit(grid.dayMode, 'nextFreeCta', 'nextFreeCtaDays')}
+                  </Button>
+                  <p className="mt-1.5 text-xs text-ink-muted tnum">
+                    {tUnit(grid.dayMode, 'nextFreeHint', 'nextFreeHintDays', {
+                      time: grid.dayMode
+                        ? formatDayHeader(nextFree.startTime, grid.tz)
+                        : `${formatWeekday(nextFree.startTime, grid.tz)} ${formatDualTz(nextFree.startTime, nextFree.endTime, grid.tz).project} ${t('oclock')}`,
+                    })}
+                  </p>
+                </div>
+              )}
+              <div className="mt-3">
+                <TimezoneHint projectTimezone={project.timezone} />
+              </div>
             </div>
-          </div>
+          )}
 
           {myNextSlot && (
             <div className="mb-5">
@@ -210,7 +268,7 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
                     <ChainBand
                       days={grid.days}
                       projectTz={grid.tz}
-                      onCellActivate={scrollToSlot}
+                      onCellActivate={focusSlot}
                       interactiveTooltip
                       dayMode={grid.dayMode}
                     />
@@ -223,6 +281,7 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
                     gapStartTime={grid.gap.startTime}
                     gapCount={grid.gap.keys.size}
                     dayMode={grid.dayMode}
+                    focusStartTime={focus?.startTime ?? null}
                   />
                 </>
               )}

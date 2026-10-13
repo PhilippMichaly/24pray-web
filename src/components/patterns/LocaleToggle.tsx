@@ -26,9 +26,11 @@ export function LocaleToggle() {
           type="button"
           aria-label="Sprache"
           title={NATIVE_NAME[locale]}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-sunken hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          className="inline-flex h-9 items-center justify-center gap-1 rounded-md px-2 text-ink-muted transition-colors hover:bg-surface-sunken hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
-          <Globe size={18} />
+          <Globe size={18} aria-hidden />
+          {/* Das Kürzel macht das Symbol erst verständlich: ein Globus allein liest sich nicht als „Sprache". */}
+          <span className="text-xs font-semibold uppercase tracking-wide">{locale}</span>
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

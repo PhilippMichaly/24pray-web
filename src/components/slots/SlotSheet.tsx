@@ -13,7 +13,7 @@ import { bookSlot, recurSlot, getReminderPref, putReminderPref } from '@/lib/api
 import { Label } from '@/components/ui/Label';
 import { CityInput } from '@/components/patterns/CityInput';
 import { getMyCity, setMyCity } from '@/lib/mylocation';
-import { formatDualTz, formatDayHeader } from '@/lib/time';
+import { formatDualTz, formatDayHeader, formatWeekday } from '@/lib/time';
 import { t, tUnit } from '@/lib/i18n';
 import { isDayMode } from './logic';
 import type { ProjectWithStats } from '@/types';
@@ -195,7 +195,8 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
     <div className="flex items-center gap-2 text-sm tnum text-ink">
       {slot.isNight && <Moon size={14} className="text-night" aria-hidden />}
       <span>
-        <span dir="ltr">{times.project}</span> {t('oclock')}
+        {/* Wochentag dazu: über „Freie Stunde übernehmen" kommt man ohne Blick auf die Liste hierher. */}
+        {formatWeekday(slot.startTime, project.timezone)} <span dir="ltr">{times.project}</span> {t('oclock')}
         {times.differs && (
           <span className="text-ink-muted">
             {' '}

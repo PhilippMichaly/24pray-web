@@ -132,6 +132,9 @@ Mail-Links (`/join`, `/auth/login`) unverändert erreichbar.
   geschrieben (GET-only-Regel), die drei Pfade sind nur durch Tests gedeckt. Erstes echtes
   Ereignis (Wache anlegen / Buchung / erster Login eines neuen Kontos) beobachten; falls keine
   Mail kommt: `journalctl -u 24pray-api | grep "admin notice"` zeigt Versandfehler
+- UX-Runde 2026-10-13 (lokal committet, NICHT deployed): 15 neue i18n-Keys (heroCtaTake…endedOnDate)
+  für he/ar durch Muttersprachler prüfen. Ortsnamen kommen englisch aus dem Geocoder („Munich" in
+  deutscher Oberfläche) — eigener Punkt, nicht in dieser Runde gelöst
 - Ratgeberseiten (src/content/guides.ts, live seit 2026-10-12) gibt es nur auf de/en/es. he/ar
   erst nach Muttersprachler-Review ergänzen: GuideLocale + GUIDE_LOCALES erweitern, Texte rein
 - Search Console ist seit 2026-10-12 eingerichtet (Domain-Property, Sitemap eingereicht,

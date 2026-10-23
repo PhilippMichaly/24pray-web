@@ -54,6 +54,7 @@ describe('Login-Link wird erst nach Klick eingelöst', () => {
     search = '';
     render(<VerifyPage />);
     expect(screen.getByText(/Link ist unvollständig/)).toBeTruthy();
+    expect(screen.getByText(/6-stelligen Code/)).toBeTruthy();
     expect(screen.queryByText(/abgelaufen/)).toBeNull();
     expect(screen.getByRole('link', { name: /neuen Link/i })).toBeTruthy();
     expect(post).not.toHaveBeenCalled();

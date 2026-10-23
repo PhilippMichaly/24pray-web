@@ -30,6 +30,7 @@ describe('InviteCard — Link erneuern', () => {
     fireEvent.click(rotateBtn());
     expect(rotateInvite).not.toHaveBeenCalled();
     expect(screen.getByText(/alte Link funktioniert danach nicht mehr|old link will stop working/i)).toBeTruthy();
+    expect(screen.getByText(/Gäste ohne Konto brauchen den neuen Link/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /Jetzt erneuern|Renew now/i }));
 

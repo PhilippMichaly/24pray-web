@@ -28,6 +28,8 @@ describe('Rechtliches (Impressum/Datenschutz, DSGVO-Hinweise)', () => {
     expect(screen.getByRole('heading', { name: 'Datenschutzerklärung' })).toBeTruthy();
     expect(screen.getAllByText(/Art\. 9 DSGVO/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/technisch notwendig/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/nicht an der Wache teilnehmen/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/nicht angemeldete Besucher/)).toBeNull();
   });
 
   it('Login zeigt den Einwilligungshinweis mit Link zur Datenschutzerklärung', () => {

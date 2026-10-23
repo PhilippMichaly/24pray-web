@@ -1,16 +1,38 @@
 'use client';
 
-import { Copy, Link2 } from 'lucide-react';
+import { useState } from 'react';
+import { Copy, Link2, RefreshCw } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/toast-store';
+import { rotateInvite } from '@/lib/api';
 import { t } from '@/lib/i18n';
 
 export interface InviteCardProps {
+  projectId: string;
   inviteUrl: string;
+  /** Neuer Token nach erfolgreichem Erneuern — der Eltern-State hält ihn, damit auch Teilen & Co. konsistent bleiben. */
+  onRotated: (inviteToken: string) => void;
 }
 
-export function InviteCard({ inviteUrl }: InviteCardProps) {
+export function InviteCard({ projectId, inviteUrl, onRotated }: InviteCardProps) {
+  const [confirming, setConfirming] = useState(false);
+  const [rotating, setRotating] = useState(false);
+
+  async function rotate() {
+    setRotating(true);
+    try {
+      const { inviteToken } = await rotateInvite(projectId);
+      onRotated(inviteToken);
+      setConfirming(false);
+      toast({ message: t('inviteRotatedToast'), variant: 'positive' });
+    } catch (e) {
+      toast({ message: (e as Error).message, variant: 'danger' });
+    } finally {
+      setRotating(false);
+    }
+  }
+
   async function copy() {
     try {
       await navigator.clipboard.writeText(inviteUrl);
@@ -38,6 +60,23 @@ export function InviteCard({ inviteUrl }: InviteCardProps) {
           {t('copyLinkBtn')}
         </Button>
       </div>
+      {confirming ? (
+        <div className="mt-3 space-y-3">
+          <p className="text-xs text-ink-muted">{t('inviteRotateConfirm')}</p>
+          <div className="flex gap-2">
+            <Button size="sm" loading={rotating} onClick={rotate}>
+              {t('inviteRotateDo')}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setConfirming(false)}>
+              {t('cancel')}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button size="sm" variant="ghost" icon={RefreshCw} className="mt-2" onClick={() => setConfirming(true)}>
+          {t('inviteRotate')}
+        </Button>
+      )}
     </Card>
   );
 }

@@ -245,7 +245,11 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
               <ConcernCard project={project} onUpdated={setProject} />
               <ScheduleCard project={project} onUpdated={setProject} />
               <GroupLinksCard project={project} onUpdated={setProject} />
-              <InviteCard inviteUrl={inviteUrl} />
+              <InviteCard
+                projectId={project.id}
+                inviteUrl={inviteUrl}
+                onRotated={(inviteToken) => setProject((p) => (p ? { ...p, inviteToken } : p))}
+              />
             </div>
           )}
 

@@ -149,6 +149,11 @@ export function deleteProject(projectId: string) {
   return api.delete<void>(`/projects/${projectId}`);
 }
 
+/** Einladungslink erneuern (nur Organisator): alter Token wird ungültig, Mitglieder behalten Zugang. */
+export function rotateInvite(projectId: string) {
+  return api.post<{ inviteToken: string }>(`/projects/${projectId}/invite/rotate`);
+}
+
 export function getReminderPref() {
   return api.get<{ minutesBefore: number; channel: string }>('/me/reminder');
 }

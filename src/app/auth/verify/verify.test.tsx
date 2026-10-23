@@ -50,10 +50,12 @@ describe('Login-Link wird erst nach Klick eingelöst', () => {
     await waitFor(() => expect(post).toHaveBeenCalledWith('/auth/verify', { token: 'abc123' }));
   });
 
-  it('ohne Token: Fehlerzustand, kein POST', () => {
+  it('ohne Token: Unvollständig-Meldung statt Abgelaufen-Meldung, kein POST', () => {
     search = '';
     render(<VerifyPage />);
-    expect(screen.getByText("Link ungültig")).toBeTruthy();
+    expect(screen.getByText(/Link ist unvollständig/)).toBeTruthy();
+    expect(screen.queryByText(/abgelaufen/)).toBeNull();
+    expect(screen.getByRole('link', { name: /neuen Link/i })).toBeTruthy();
     expect(post).not.toHaveBeenCalled();
   });
 

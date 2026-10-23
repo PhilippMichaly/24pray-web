@@ -27,8 +27,8 @@ function VerifyInner() {
   const { user, loading: authLoading } = useAuth();
   // Token einmalig übernehmen: danach verschwindet er aus der URL (und aus useSearchParams).
   const [token] = useState(() => searchParams.get('token'));
-  const [status, setStatus] = useState<'ready' | 'submitting' | 'success' | 'error'>(
-    token ? 'ready' : 'error',
+  const [status, setStatus] = useState<'ready' | 'submitting' | 'success' | 'error' | 'missing'>(
+    token ? 'ready' : 'missing',
   );
 
   useEffect(() => {
@@ -58,6 +58,17 @@ function VerifyInner() {
           <p className="mb-4 text-sm text-ink-muted">{t('verifyAlreadySignedIn', { email: user.email })}</p>
         )}
         <Button onClick={redeem}>{t('verifyConfirm')}</Button>
+      </Card>
+    );
+  }
+
+  if (status === 'missing') {
+    return (
+      <Card elevation={2} className="w-full max-w-[380px] text-center">
+        <p className="text-ink">{t('linkIncomplete')}</p>
+        <Button asChild variant="secondary" className="mt-5">
+          <Link href="/auth/login">{t('requestNewLink')}</Link>
+        </Button>
       </Card>
     );
   }

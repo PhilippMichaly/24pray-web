@@ -11,12 +11,13 @@ class ApiClient {
     method: string,
     path: string,
     body?: unknown,
+    extraHeaders?: Record<string, string>,
   ): Promise<T> {
     // Content-Type NUR mit Body senden: Fastify beantwortet application/json
     // ohne Body mit 400 — das brach Logout und „Jede Woche" (body-lose POSTs).
     const res = await fetch(`${this.baseUrl}${path}`, {
       method,
-      headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
+      headers: { ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...extraHeaders },
       credentials: 'include', // für httpOnly Cookies
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
@@ -48,8 +49,8 @@ class ApiClient {
     return this.request<T>('PUT', path, body);
   }
 
-  delete<T>(path: string, body?: unknown) {
-    return this.request<T>('DELETE', path, body);
+  delete<T>(path: string, body?: unknown, headers?: Record<string, string>) {
+    return this.request<T>('DELETE', path, body, headers);
   }
 }
 
@@ -84,10 +85,13 @@ export function bookSlot(
   });
 }
 
-/** Storno. Gast reicht seinen guestToken als Query mit (§6.3). */
+/** Storno. Gast reicht seinen guestToken im Header X-Guest-Token mit (nicht in der URL, W4). */
 export function cancelSlot(slotId: string, guestToken?: string) {
-  const q = guestToken ? `?guestToken=${encodeURIComponent(guestToken)}` : '';
-  return api.delete<void>(`/slots/${slotId}${q}`);
+  return api.delete<void>(
+    `/slots/${encodeURIComponent(slotId)}`,
+    undefined,
+    guestToken ? { 'X-Guest-Token': guestToken } : undefined,
+  );
 }
 
 // ── Welle 3 ────────────────────────────────────

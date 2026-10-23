@@ -73,7 +73,7 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
     if (initialProject && !invite && !isOwnerView) return;
     const q = invite ? `?invite=${encodeURIComponent(invite)}` : '';
     api
-      .get<ProjectWithStats>(`/projects/${id}${q}`)
+      .get<ProjectWithStats>(`/projects/${encodeURIComponent(id)}${q}`)
       .then(setProject)
       .catch((e) => setLoadError((e as Error).message));
   }, [id, invite, initialProject, isOwnerView]);

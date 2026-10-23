@@ -24,7 +24,7 @@ export default function JoinPage() {
 
   useEffect(() => {
     api
-      .get<ProjectWithStats>(`/join/${token}`)
+      .get<ProjectWithStats>(`/join/${encodeURIComponent(token)}`)
       .then(setProject)
       .catch(() => setError(true));
   }, [token]);

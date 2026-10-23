@@ -160,6 +160,9 @@ Mail-Links (`/join`, `/auth/login`) unverändert erreichbar.
   Änderungsdatum bräuchte es ein `@updatedAt`-Feld + Migration im api-Repo (SEO-Paket)
 - Benachrichtigungs-Matrix: offene Zellen aus docs/NOTIFICATIONS.md (api-Repo) bewusst entscheiden
   (Push bei Verschiebung/Löschung, Owner-Push bei Buchung, Storno-Info — siehe Matrix)
+- API-Altpfade entfernen (api-Repo): die Query-Varianten `?guestToken=` in `DELETE /slots/:id` und
+  `?token=` in `GET /stats/funnel` frühestens 2 Wochen nach dem Web-Deploy von Task 15 (Security-Hardening)
+  entfernen. Ab dann gelten nur noch die Header `X-Guest-Token` bzw. `Authorization: Bearer`
 
 ## Beim User (nicht baubar)
 

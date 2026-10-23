@@ -117,7 +117,8 @@ export function buildIcs(slot: {
   projectTz?: string; // für die Ganztages-Datumsgrenze — Default UTC
 }): string {
   const uid = `${icsStamp(slot.startTime)}-${Math.abs(hashStr(slot.title))}@24pray`;
-  const esc = (s: string) => s.replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
+  const esc = (s: string) =>
+    s.replace(/\r\n?/g, '\n').replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
   const tz = slot.projectTz ?? 'UTC';
   const dtstart = slot.allDay
     ? `DTSTART;VALUE=DATE:${dayKey(slot.startTime, tz).replace(/-/g, '')}`

@@ -97,3 +97,12 @@ describe('formatShortWeekdayDate', () => {
     expect(label).not.toMatch(/\d{2}–\d{2}/); // kein Stunden-Bereich
   });
 });
+
+describe('buildIcs — Zeilenumbrüche im Titel (ICS-Injection)', () => {
+  it('ein CR/CRLF im Titel erzeugt keine eigene ICS-Zeile und kein rohes \\r', () => {
+    const ics = buildIcs({ startTime: startUtc, endTime: endUtc, title: 'A\r\nURL:https://evil\rB' });
+    const lines = ics.split('\r\n');
+    expect(lines.some((l) => l.startsWith('URL:https://evil'))).toBe(false);
+    expect(ics).not.toMatch(/\r(?!\n)/);
+  });
+});

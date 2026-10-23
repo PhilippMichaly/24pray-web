@@ -1,10 +1,11 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useAuth } from '@/hooks/use-auth';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
@@ -23,18 +24,22 @@ function VerifyLoading() {
 function VerifyInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const ran = useRef(false); // Guard gegen StrictMode-Doppel-Effect (Spec §6.4 FE-Teil)
+  const { user, loading: authLoading } = useAuth();
+  // Token einmalig übernehmen: danach verschwindet er aus der URL (und aus useSearchParams).
+  const [token] = useState(() => searchParams.get('token'));
+  const [status, setStatus] = useState<'ready' | 'submitting' | 'success' | 'error'>(
+    token ? 'ready' : 'error',
+  );
 
   useEffect(() => {
-    if (ran.current) return;
-    ran.current = true;
-
-    const token = searchParams.get('token');
-    if (!token) {
-      setStatus('error');
-      return;
+    if (window.location.search) {
+      window.history.replaceState(null, '', window.location.pathname);
     }
+  }, []);
+
+  function redeem() {
+    if (!token || status !== 'ready') return;
+    setStatus('submitting');
     api
       .post('/auth/verify', { token })
       .then(() => {
@@ -42,9 +47,20 @@ function VerifyInner() {
         setTimeout(() => router.push('/dashboard'), 1200);
       })
       .catch(() => setStatus('error'));
-  }, [searchParams, router]);
+  }
 
-  if (status === 'loading') return <VerifyLoading />;
+  if (status === 'submitting') return <VerifyLoading />;
+
+  if (status === 'ready') {
+    return (
+      <Card elevation={2} className="w-full max-w-[380px] text-center">
+        {!authLoading && user && (
+          <p className="mb-4 text-sm text-ink-muted">{t('verifyAlreadySignedIn', { email: user.email })}</p>
+        )}
+        <Button onClick={redeem}>{t('verifyConfirm')}</Button>
+      </Card>
+    );
+  }
 
   if (status === 'success') {
     return (

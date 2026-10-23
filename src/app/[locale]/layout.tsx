@@ -12,13 +12,14 @@ import { parseLocale } from '@/lib/i18n';
  * Die Sprache fürs Rendering kommt NICHT von hier, sondern über den `x-locale`-Header der
  * Middleware ins Root-Layout (das sitzt über diesem Segment und setzt `<html lang>`/`dir`).
  */
-export default function LocaleLayout({
+export default async function LocaleLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  if (!parseLocale(params.locale)) notFound();
+  const { locale } = await params;
+  if (!parseLocale(locale)) notFound();
   return <>{children}</>;
 }

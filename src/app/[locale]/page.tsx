@@ -8,7 +8,8 @@ import { JsonLd } from '@/components/patterns/JsonLd';
 import { GUIDE_UI, isGuideLocale } from '@/content/guides';
 import LandingClient from './landing-client';
 
-export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+export async function generateMetadata(props: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const locale = parseLocale(params.locale);
   if (!locale) return {};
   const t = getFixedT(locale);
@@ -34,7 +35,8 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
  * Drag. Alles ab hier ist bewusst statischer Server-Text: es ist der einzige Inhalt der
  * Startseite, den eine Suchmaschine lesen und bewerten kann.
  */
-export default function LandingPage({ params }: { params: { locale: string } }) {
+export default async function LandingPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
   const locale = parseLocale(params.locale);
   if (!locale) notFound();
   const t = getFixedT(locale);

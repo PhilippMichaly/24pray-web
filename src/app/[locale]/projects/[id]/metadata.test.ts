@@ -38,7 +38,7 @@ describe('generateMetadata — Wachenseite', () => {
 
   it('PUBLIC: Titel + gekürzte Beschreibung aus der Wache', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify(publicProject), { status: 200 }));
-    const meta = await (await load())({ params: { locale: 'de', id: 'p-pub' } });
+    const meta = await (await load())({ params: Promise.resolve({ locale: 'de', id: 'p-pub' }) });
 
     expect(meta.title).toBe('Nachtgebet für die Stadt — 24pray');
     expect(typeof meta.description).toBe('string');
@@ -54,7 +54,7 @@ describe('generateMetadata — Wachenseite', () => {
 
   it('PUBLIC: Canonical zeigt auf die eigene Sprache, hreflang deckt alle fünf ab', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify(publicProject), { status: 200 }));
-    const meta = await (await load())({ params: { locale: 'es', id: 'p-pub' } });
+    const meta = await (await load())({ params: Promise.resolve({ locale: 'es', id: 'p-pub' }) });
 
     expect(String(meta.alternates?.canonical)).toContain('/es/projects/p-pub');
     const languages = meta.alternates?.languages as Record<string, string>;
@@ -68,7 +68,7 @@ describe('generateMetadata — Wachenseite', () => {
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify(publicProjectNoDescription), { status: 200 }),
     );
-    const meta = await (await load())({ params: { locale: 'en', id: 'p-pub-nodesc' } });
+    const meta = await (await load())({ params: Promise.resolve({ locale: 'en', id: 'p-pub-nodesc' }) });
     expect(meta.description).toContain('hours held');
   });
 
@@ -76,7 +76,7 @@ describe('generateMetadata — Wachenseite', () => {
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify(publicProjectNoDescription), { status: 200 }),
     );
-    const meta = await (await load())({ params: { locale: 'de', id: 'p-pub-nodesc' } });
+    const meta = await (await load())({ params: Promise.resolve({ locale: 'de', id: 'p-pub-nodesc' }) });
 
     expect(meta.description).toContain('3');
     expect(meta.description).toContain('24');
@@ -86,7 +86,7 @@ describe('generateMetadata — Wachenseite', () => {
   it('Tages-Wache ohne Beschreibung: Fallback sagt "Tagen" statt "Stunden"', async () => {
     const dayProject = { ...publicProjectNoDescription, id: 'p-pub-day', slotDurationMinutes: 1440 };
     fetchMock.mockResolvedValue(new Response(JSON.stringify(dayProject), { status: 200 }));
-    const meta = await (await load())({ params: { locale: 'de', id: 'p-pub-day' } });
+    const meta = await (await load())({ params: Promise.resolve({ locale: 'de', id: 'p-pub-day' }) });
 
     expect(meta.description).toContain('Tagen');
     expect(meta.description).not.toContain('Stunden');
@@ -95,7 +95,7 @@ describe('generateMetadata — Wachenseite', () => {
   it('PRIVATE-Wache: generische Defaults UND noindex — nichts davon in den Index', async () => {
     const priv = { ...publicProject, id: 'p-priv', visibility: 'PRIVATE' };
     fetchMock.mockResolvedValue(new Response(JSON.stringify(priv), { status: 200 }));
-    const meta = await (await load())({ params: { locale: 'de', id: 'p-priv' } });
+    const meta = await (await load())({ params: Promise.resolve({ locale: 'de', id: 'p-priv' }) });
 
     expect(JSON.stringify(meta)).not.toContain('Nachtgebet');
     expect((meta.robots as { index?: boolean }).index).toBe(false);
@@ -107,12 +107,12 @@ describe('generateMetadata — Wachenseite', () => {
       new Response('{}', { status: 404 }),
     ]) {
       fetchMock.mockResolvedValue(response);
-      const meta = await (await load())({ params: { locale: 'de', id: 'x' } });
+      const meta = await (await load())({ params: Promise.resolve({ locale: 'de', id: 'x' }) });
       expect(meta.description).not.toContain('Nachtgebet');
       expect((meta.robots as { index?: boolean }).index).toBe(false);
     }
     fetchMock.mockRejectedValue(new Error('fetch failed'));
-    const meta = await (await load())({ params: { locale: 'de', id: 'p-err' } });
+    const meta = await (await load())({ params: Promise.resolve({ locale: 'de', id: 'p-err' }) });
     expect((meta.robots as { index?: boolean }).index).toBe(false);
   });
 
@@ -120,7 +120,7 @@ describe('generateMetadata — Wachenseite', () => {
     const prev = process.env.API_URL_INTERNAL;
     process.env.API_URL_INTERNAL = 'http://internal-api:4000';
     fetchMock.mockResolvedValue(new Response(JSON.stringify(publicProject), { status: 200 }));
-    await (await load())({ params: { locale: 'de', id: 'p-pub' } });
+    await (await load())({ params: Promise.resolve({ locale: 'de', id: 'p-pub' }) });
     const [url] = fetchMock.mock.calls[0];
     expect(String(url)).toBe('http://internal-api:4000/projects/p-pub');
     process.env.API_URL_INTERNAL = prev;

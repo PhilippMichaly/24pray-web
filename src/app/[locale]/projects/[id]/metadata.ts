@@ -18,11 +18,10 @@ function truncate(text: string, max = DESCRIPTION_MAX_LEN): string {
  * darf weder in Meta-Tags noch in den Index geraten. Sie sind nur über den Einladungslink
  * erreichbar — genau so steht es auch in der FAQ auf der Landing.
  */
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string; id: string };
+export async function generateMetadata(props: {
+  params: Promise<{ locale: string; id: string }>;
 }): Promise<Metadata> {
+  const params = await props.params;
   const locale = parseLocale(params.locale) ?? ('de' as Locale);
   const t = getFixedT(locale);
   const project = await fetchPublicProject(params.id);

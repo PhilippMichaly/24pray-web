@@ -19,7 +19,8 @@ export { generateMetadata } from './metadata';
  * PRIVATE Wachen liefert `fetchPublicProject` bewusst nicht aus. Dann ist `initialProject`
  * null und der Client lädt wie bisher selbst nach (inklusive `?invite=`).
  */
-export default async function WatchPage({ params }: { params: { locale: string; id: string } }) {
+export default async function WatchPage(props: { params: Promise<{ locale: string; id: string }> }) {
+  const params = await props.params;
   const locale = parseLocale(params.locale);
   if (!locale) notFound();
 

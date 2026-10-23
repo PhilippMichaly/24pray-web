@@ -57,7 +57,7 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -65,7 +65,7 @@ export default function RootLayout({
   // Die Middleware legt die aufgelöste Sprache an den Request. Sie hier zu lesen ist der
   // Grund, warum `lang`/`dir` schon im ersten HTML stimmen — vorher korrigierte das erst
   // ein Effekt nach der Hydration, was Crawler nie sahen und RTL kurz flackern ließ.
-  const h = headers();
+  const h = await headers();
   const locale = parseLocale(h.get(LOCALE_HEADER)) ?? DEFAULT_LOCALE;
   const prefixed = h.get(PREFIXED_HEADER) === '1';
 

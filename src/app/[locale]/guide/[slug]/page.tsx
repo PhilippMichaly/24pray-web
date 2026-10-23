@@ -8,16 +8,18 @@ import { breadcrumbJsonLd, guideArticleJsonLd } from '@/lib/seo';
 import { JsonLd } from '@/components/patterns/JsonLd';
 import { findGuide, GUIDE_LOCALES, GUIDE_UI, GUIDES, isGuideLocale, type GuideLocale } from '@/content/guides';
 
-type Params = { params: { locale: string; slug: string } };
+type RouteParams = { locale: string; slug: string };
+type Params = { params: Promise<RouteParams> };
 
-function resolve(params: Params['params']) {
+function resolve(params: RouteParams) {
   const locale = parseLocale(params.locale);
   if (!locale || !isGuideLocale(locale)) return null;
   const guide = findGuide(locale, params.slug);
   return guide ? { locale, guide } : null;
 }
 
-export function generateMetadata({ params }: Params): Metadata {
+export async function generateMetadata(props: Params): Promise<Metadata> {
+  const params = await props.params;
   const found = resolve(params);
   if (!found) return {};
   const { locale, guide } = found;
@@ -43,7 +45,8 @@ export function generateMetadata({ params }: Params): Metadata {
  * Ein Ratgeber-Artikel. Die Texte liegen in src/content/guides.ts; die Seite ist rein
  * serverseitig, damit der komplette Artikel im ersten HTML steht.
  */
-export default function GuidePage({ params }: Params) {
+export default async function GuidePage(props: Params) {
+  const params = await props.params;
   const found = resolve(params);
   if (!found) notFound();
   const { locale, guide } = found;

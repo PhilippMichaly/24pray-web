@@ -11,7 +11,8 @@ import type { ProjectWithStats } from '@/types';
 
 const watchesPathFor = (l: Locale) => sectionPath('watches', l);
 
-export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+export async function generateMetadata(props: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const locale = parseLocale(params.locale);
   if (!locale) return {};
   const t = getFixedT(locale);
@@ -48,7 +49,8 @@ function formatRange(project: ProjectWithStats, locale: Locale): string {
  * privates „deine Wachen", und der URL-Name taugt für die Suche nicht. Diese Seite ist rein
  * serverseitig, ohne Interaktion — jede Zeile steht als echter Link im HTML.
  */
-export default async function WatchesPage({ params }: { params: { locale: string } }) {
+export default async function WatchesPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
   const locale = parseLocale(params.locale);
   if (!locale) notFound();
   const t = getFixedT(locale);

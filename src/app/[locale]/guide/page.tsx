@@ -8,7 +8,8 @@ import { GUIDE_LOCALES, GUIDE_UI, GUIDES, isGuideLocale, type GuideLocale } from
 
 const indexPathFor = (l: GuideLocale) => sectionPath('guide', l);
 
-export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
+export async function generateMetadata(props: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const locale = parseLocale(params.locale);
   if (!locale || !isGuideLocale(locale)) return {};
   const ui = GUIDE_UI[locale];
@@ -29,7 +30,8 @@ export function generateMetadata({ params }: { params: { locale: string } }): Me
 }
 
 /** Übersicht der Ratgeber. Rein serverseitig — jeder Artikel steht als echter Link im HTML. */
-export default function GuidesPage({ params }: { params: { locale: string } }) {
+export default async function GuidesPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
   const locale = parseLocale(params.locale);
   if (!locale || !isGuideLocale(locale)) notFound();
   const ui = GUIDE_UI[locale];

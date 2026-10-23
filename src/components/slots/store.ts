@@ -104,7 +104,7 @@ export function useSlotGrid(
       patchSlot(key, { status: 'BOOKED', isMine: true, userName: myName });
       setPending(key, true);
       try {
-        const created = await bookSlot(project.id, { startTime: key, ...myCityPayload() });
+        const created = await bookSlot(project.id, { startTime: key, invite, ...myCityPayload() });
         patchSlot(key, { slotId: created.id });
         setPending(key, false);
         // W3.1 Ketten-Glow: das neue Glied leuchtet kurz gold auf.
@@ -141,7 +141,7 @@ export function useSlotGrid(
         }
       }
     },
-    [project, slots, patchSlot, setPending, setConflict, reload, cancelBooked],
+    [project, invite, slots, patchSlot, setPending, setConflict, reload, cancelBooked],
   );
 
   return {

@@ -13,6 +13,7 @@ vi.mock('@/lib/api', () => ({
 }));
 
 import { SlotSheet } from './SlotSheet';
+import { bookSlot } from '@/lib/api';
 import type { SlotViewModel } from './types';
 import type { ProjectWithStats } from '@/types';
 
@@ -162,6 +163,22 @@ describe('SlotSheet guest-book-Modus — invite-Wiring (Review Backlog-4 F1)', (
     await waitFor(() => expect(screen.getByText(/gehört dir/i)).toBeTruthy());
     const wa = screen.getByRole('link', { name: /whatsapp/i }) as HTMLAnchorElement;
     expect(decodeURIComponent(wa.href)).toContain('?invite=tok1');
+  });
+
+  it('PRIVATE-Projekt + invite-Prop: bookSlot bekommt den Invite mit', async () => {
+    vi.mocked(bookSlot).mockClear();
+    renderSheet({
+      project: { ...project, visibility: 'PRIVATE' } as ProjectWithStats,
+      slot: freeSlot,
+      mode: 'guest-book',
+      invite: 'tok1',
+    });
+
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Maria' } });
+    fireEvent.click(screen.getByRole('button', { name: /Stunde|übernehmen/i }));
+
+    await waitFor(() => expect(bookSlot).toHaveBeenCalled());
+    expect(vi.mocked(bookSlot).mock.calls[0][1]).toMatchObject({ invite: 'tok1' });
   });
 
   it('PUBLIC-Projekt: WhatsApp-Link im Erfolgs-Screen enthält kein ?invite=', async () => {

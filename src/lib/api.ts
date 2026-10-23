@@ -74,6 +74,7 @@ export function bookSlot(
     guestEmail?: string;
     locationLat?: number; // Beter-Standort (W3.5), nur Koordinaten
     locationLon?: number;
+    invite?: string; // Einladungstoken: Pflicht für Buchungen in PRIVATE-Wachen (sonst 404)
   },
 ) {
   return api.post<PrayerSlot>(`/projects/${projectId}/slots`, {

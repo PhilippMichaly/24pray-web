@@ -171,6 +171,8 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
   if (!slot) return null;
   const dayMode = isDayMode(project.slotDurationMinutes);
   const times = formatDualTz(slot.startTime, slot.endTime, project.timezone);
+  // PRIVATE-Wache: Invite aus der Seiten-URL, Organisator-Fallback inviteToken. Geht in Buchung und Share-Link.
+  const bookingInvite = project.visibility === 'PRIVATE' ? (invite ?? (project.inviteToken || undefined)) : undefined;
 
   // Gast-Storno: Token liegt seit der Buchung im localStorage (F2).
   let storedGuestToken: string | null = null;
@@ -268,7 +270,7 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
             projectTitle={project.title}
             projectTz={project.timezone}
             projectId={project.id}
-            invite={project.visibility === 'PRIVATE' ? (invite ?? (project.inviteToken || undefined)) : undefined}
+            invite={bookingInvite}
             dayMode={dayMode}
             onSubmit={async (data) => {
               const created = await bookSlot(project.id, {
@@ -277,6 +279,7 @@ export function SlotSheet({ open, onOpenChange, slot, project, mode, isOrganizer
                 guestEmail: data.guestEmail,
                 locationLat: data.locationLat,
                 locationLon: data.locationLon,
+                invite: bookingInvite,
               });
               const guestToken = created.guestToken ?? '';
               if (guestToken) {

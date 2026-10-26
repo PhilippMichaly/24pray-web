@@ -15,10 +15,11 @@ import { Label, FieldError } from '@/components/ui/Label';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FolderHeart } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { browserTz, formatDayHeader } from '@/lib/time';
+import { browserTz, formatDayHeader, toDateTimeLocalValue } from '@/lib/time';
 import { CityInput } from '@/components/patterns/CityInput';
 import type { GeoCity } from '@/lib/api';
 import { t, getLocale } from '@/lib/i18n';
+import { validateCustomEnd, type CustomEndValidation } from './custom-end';
 
 type SplitUnit = 'hour' | 'day';
 
@@ -55,14 +56,36 @@ export default function NewProjectPage() {
   const [selectedCity, setSelectedCity] = useState<GeoCity | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Eigener Endzeitpunkt (Phase 01): customMode = fünfter Raster-Button aktiv (D-01);
+  // customEnd bleibt nach Preset-Wechsel gespeichert, wird aber im Preset-Modus nicht gesendet (D-05).
+  const [customMode, setCustomMode] = useState(false);
+  const [customEnd, setCustomEnd] = useState('');
+  const [customEndError, setCustomEndError] = useState<string | null>(null);
 
   const tz = browserTz();
   const durations = unit === 'day' ? DAY_DURATIONS : HOUR_DURATIONS;
   const slotDurationMinutes = unit === 'day' ? 1440 : 60;
   const endIso = useMemo(() => {
     if (!startDate) return null;
+    if (customMode) return customEnd ? new Date(customEnd).toISOString() : null;
     return new Date(new Date(startDate).getTime() + hours * 3600_000).toISOString();
-  }, [startDate, hours]);
+  }, [startDate, hours, customMode, customEnd]);
+
+  // Lokalisierte Fehlertexte der vier Validierungsfälle (D-11); 'missing' wird vor dem Aufruf behandelt.
+  function customEndMessage(result: CustomEndValidation): string {
+    switch (result.key) {
+      case 'notAfterStart':
+        return t('errEndAfterStart');
+      case 'tooLong':
+        return t('errEndTooLong');
+      case 'notAligned':
+        return t('errEndNotAligned', {
+          example: formatDayHeader(new Date(result.exampleMs!).toISOString(), tz),
+        });
+      default:
+        return t('errEndMissing');
+    }
+  }
 
   function selectUnit(next: SplitUnit) {
     setUnit(next);
@@ -75,6 +98,19 @@ export default function NewProjectPage() {
     setError(null);
     if (!startDate) return setError(t('errDatesRequired'));
     const start = new Date(startDate);
+    if (customMode) {
+      // D-14: ungültiges Custom-Ende blockiert den POST; Feldfehler bleiben am Endfeld.
+      if (!customEnd) {
+        setCustomEndError(t('errEndMissing'));
+        return;
+      }
+      const result = validateCustomEnd(start.getTime(), new Date(customEnd).getTime(), slotDurationMinutes * 60_000);
+      if (result) {
+        setCustomEndError(customEndMessage(result));
+        return;
+      }
+      setCustomEndError(null);
+    }
     setSubmitting(true);
     try {
       const city = selectedCity;
@@ -82,7 +118,9 @@ export default function NewProjectPage() {
         title: title.trim(),
         description: description.trim() || undefined,
         startDate: start.toISOString(),
-        endDate: new Date(start.getTime() + hours * 3600_000).toISOString(),
+        endDate: customMode
+          ? new Date(customEnd).toISOString()
+          : new Date(start.getTime() + hours * 3600_000).toISOString(),
         timezone: tz,
         language: getLocale(), // Wachen-Sprache = UI-Sprache beim Anlegen (Backlog 5), wie tz still erfasst
         slotDurationMinutes,
@@ -196,10 +234,13 @@ export default function NewProjectPage() {
                   <button
                     key={d.hours}
                     type="button"
-                    onClick={() => setHours(d.hours)}
+                    onClick={() => {
+                      setHours(d.hours);
+                      setCustomMode(false); // D-05: Preset-Klick verlässt den Custom-Modus sofort
+                    }}
                     className={cn(
                       'rounded-md border px-3 py-2 text-sm transition-colors',
-                      hours === d.hours
+                      !customMode && hours === d.hours
                         ? 'border-accent bg-accent-soft text-accent-strong'
                         : 'bg-surface text-ink-muted hover:bg-surface-sunken',
                     )}
@@ -207,7 +248,47 @@ export default function NewProjectPage() {
                     {t(d.key as never)}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomMode(true);
+                    // D-08: einmalige Vorbefüllung mit dem Ende des zuletzt aktiven Presets.
+                    if (startDate && !customEnd) {
+                      setCustomEnd(
+                        toDateTimeLocalValue(new Date(new Date(startDate).getTime() + hours * 3600_000)),
+                      );
+                    }
+                  }}
+                  className={cn(
+                    'rounded-md border px-3 py-2 text-sm transition-colors',
+                    customMode
+                      ? 'border-accent bg-accent-soft text-accent-strong'
+                      : 'bg-surface text-ink-muted hover:bg-surface-sunken',
+                  )}
+                >
+                  {t('durationCustom')}
+                </button>
               </div>
+              {customMode && (
+                <div className="mt-3">
+                  <Label htmlFor="customEnd">{t('fieldEnd')}</Label>
+                  {startDate ? (
+                    <>
+                      <Input
+                        id="customEnd"
+                        type="datetime-local"
+                        value={customEnd}
+                        onChange={(e) => setCustomEnd(e.target.value)}
+                        disabled={!startDate}
+                        invalid={!!customEndError}
+                      />
+                      <FieldError>{customEndError}</FieldError>
+                    </>
+                  ) : (
+                    <p className="mt-1 text-xs text-ink-muted">{t('customEndStartFirst')}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

@@ -229,6 +229,13 @@ const de = {
   stepBack: 'Zurück',
   summaryLine: '{hours} Stunden ab {start}',
 
+  // Eigener Endzeitpunkt (Phase 01 „Freie Zeiträume", D-01/D-07/D-11/D-13)
+  durationCustom: 'Eigener Endzeitpunkt',
+  customEndStartFirst: 'Zuerst einen Start wählen — danach ist das Endfeld frei.',
+  errEndMissing: 'Bitte ein Ende angeben.',
+  errEndTooLong: 'Eine Gebetswache darf höchstens 366 Tage dauern.',
+  errEndNotAligned: 'Das Ende passt nicht zum gewählten Raster. Nächstmögliches Ende: {example}',
+
   // Profil (Punkt 2 + 5)
   profileTitle: 'Dein Profil',
   profileNameLabel: 'Anzeigename',
@@ -597,6 +604,13 @@ const en: Record<keyof typeof de, string> = {
   stepBack: 'Back',
   summaryLine: '{hours} hours from {start}',
 
+  // Custom end (Phase 01 „Open time ranges", D-01/D-07/D-11/D-13)
+  durationCustom: 'Custom end',
+  customEndStartFirst: 'Choose a start first — the end field will then be enabled.',
+  errEndMissing: 'Please enter an end.',
+  errEndTooLong: 'A prayer watch may last at most 366 days.',
+  errEndNotAligned: 'The end does not fit the chosen slot grid. Next possible end: {example}',
+
   profileTitle: 'Your profile',
   profileNameLabel: 'Display name',
   profileNameHint: 'Your name is visible to others in your prayer watches.',
@@ -955,6 +969,13 @@ const es: Record<keyof typeof de, string> = {
   stepNext: 'Siguiente',
   stepBack: 'Atrás',
   summaryLine: '{hours} horas desde {start}',
+
+  // Fin personalizado (Fase 01 „Periodos libres", D-01/D-07/D-11/D-13)
+  durationCustom: 'Fin personalizado',
+  customEndStartFirst: 'Primero elige un inicio; después podrás indicar el fin.',
+  errEndMissing: 'Indica el fin.',
+  errEndTooLong: 'Una vigilia de oración puede durar como máximo 366 días.',
+  errEndNotAligned: 'El fin no encaja en la retícula elegida. Siguiente fin posible: {example}',
 
   profileTitle: 'Tu perfil',
   profileNameLabel: 'Nombre visible',
@@ -1315,6 +1336,13 @@ const he: Record<keyof typeof de, string> = {
   stepBack: 'חזרה',
   summaryLine: '{hours} שעות החל מ-{start}',
 
+  // סיום מותאם אישית (שלב 01 „טווחי זמן פתוחים", D-01/D-07/D-11/D-13)
+  durationCustom: 'סיום מותאם אישית',
+  customEndStartFirst: 'תחילה בחרו התחלה — ואז שדה הסיום ייפתח.',
+  errEndMissing: 'נא לציין סיום.',
+  errEndTooLong: 'משמרת תפילה יכולה להימשך לכל היותר 366 ימים.',
+  errEndNotAligned: 'הסיום לא מתאים לרשת הסלוטים שנבחרה. הסיום הבא האפשרי: {example}',
+
   profileTitle: 'הפרופיל שלך',
   profileNameLabel: 'שם תצוגה',
   profileNameHint: 'שמך גלוי לאחרים במשמרות התפילה שלך.',
@@ -1673,6 +1701,13 @@ const ar: Record<keyof typeof de, string> = {
   stepNext: 'التالي',
   stepBack: 'رجوع',
   summaryLine: '{hours} ساعة ابتداءً من {start}',
+
+  // نهاية مخصصة (المرحلة 01 „فترات زمنية مفتوحة", D-01/D-07/D-11/D-13)
+  durationCustom: 'نهاية مخصصة',
+  customEndStartFirst: 'اختر البداية أولاً — عندها يتفعّل حقل النهاية.',
+  errEndMissing: 'يرجى تحديد النهاية.',
+  errEndTooLong: 'يمكن أن تستمر سهرة الصلاة 366 يومًا كحد أقصى.',
+  errEndNotAligned: 'النهاية لا تتوافق مع الشبكة المختارة. النهاية الممكنة التالية: {example}',
 
   profileTitle: 'ملفك الشخصي',
   profileNameLabel: 'اسم العرض',

@@ -92,3 +92,57 @@ describe('Neue Kette anlegen — wb-Owner-Benachrichtigung (Punkt 10)', () => {
     expect((payload as { slotDurationMinutes: number }).slotDurationMinutes).toBe(1440);
   });
 });
+
+describe('Eigener Endzeitpunkt — Custom-Modus (Phase 01)', () => {
+  beforeEach(() => cleanup());
+  afterEach(() => vi.clearAllMocks());
+
+  async function goToStep2() {
+    render(<NewProjectPage />);
+    fireEvent.change(screen.getByLabelText(/^Titel/i), { target: { value: 'wb-Nachtgebet' } });
+    fireEvent.click(screen.getByRole('button', { name: /Weiter/i }));
+    await waitFor(() => expect(screen.getByLabelText(/Start/i)).toBeTruthy());
+  }
+
+  it('Custom-Button zeigt das Endfeld mit dem 48-h-Preset-Ende vorbelegt (D-08)', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    await goToStep2();
+
+    fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T00:00' } });
+    fireEvent.click(screen.getByRole('button', { name: /Eigener Endzeitpunkt/i }));
+
+    const endInput = screen.getByLabelText(/^Ende/i) as HTMLInputElement;
+    expect(endInput.value).toBe('2099-01-03T00:00');
+  });
+
+  it('Custom-Ende landet exakt als endDate im Payload (D-09)', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    await goToStep2();
+
+    fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T00:00' } });
+    fireEvent.click(screen.getByRole('button', { name: /Eigener Endzeitpunkt/i }));
+    fireEvent.change(screen.getByLabelText(/^Ende/i), { target: { value: '2099-01-03T00:00' } });
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
+
+    await waitFor(() => expect(post).toHaveBeenCalledTimes(1));
+    const [, payload] = post.mock.calls[0];
+    expect((payload as { endDate: string }).endDate).toBe(new Date('2099-01-03T00:00').toISOString());
+    expect((payload as { slotDurationMinutes: number }).slotDurationMinutes).toBe(60);
+    expect(push).toHaveBeenCalledWith('/projects/p1');
+  });
+
+  it('Preset-Klick verlässt den Custom-Modus; gespeichertes Custom-Ende wird nicht gesendet (D-05)', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    await goToStep2();
+
+    fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T00:00' } });
+    fireEvent.click(screen.getByRole('button', { name: /Eigener Endzeitpunkt/i }));
+    fireEvent.change(screen.getByLabelText(/^Ende/i), { target: { value: '2099-01-05T00:00' } });
+    fireEvent.click(screen.getByRole('button', { name: '24 Stunden' }));
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
+
+    await waitFor(() => expect(post).toHaveBeenCalledTimes(1));
+    const [, payload] = post.mock.calls[0];
+    expect((payload as { endDate: string }).endDate).toBe(new Date('2099-01-02T00:00').toISOString());
+  });
+});

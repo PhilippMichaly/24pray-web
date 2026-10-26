@@ -8,6 +8,7 @@ import {
   dayKey,
   formatDateShort,
   formatShortWeekdayDate,
+  toDateTimeLocalValue,
 } from './time';
 
 // 2026-07-06T02:00:00Z … in Europe/Berlin (UTC+2 im Sommer) = 04:00–05:00 lokal
@@ -85,6 +86,18 @@ describe('buildIcs', () => {
 describe('formatDateShort', () => {
   it('Datum ohne Wochentag in Projekt-TZ', () => {
     expect(formatDateShort(startUtc, 'Europe/Berlin')).toBe('6. Juli');
+  });
+});
+
+describe('toDateTimeLocalValue', () => {
+  it('liefert lokale Komponenten als YYYY-MM-DDTHH:mm (Rundreise zum Startfeld)', () => {
+    // Lokalzeit-Konstruktion: Erwartung hängt nicht von der Rechner-Zeitzone ab.
+    const d = new Date(2099, 0, 3, 4, 5); // 3. Januar 2099, 04:05 Ortszeit
+    expect(toDateTimeLocalValue(d)).toBe('2099-01-03T04:05');
+  });
+  it('pad2: einstellige Monate/Tage/Stunden/Minuten werden mit Null aufgefüllt', () => {
+    const d = new Date(2099, 0, 1, 0, 0);
+    expect(toDateTimeLocalValue(d)).toBe('2099-01-01T00:00');
   });
 });
 

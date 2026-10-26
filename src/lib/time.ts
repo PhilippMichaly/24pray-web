@@ -63,6 +63,11 @@ export function formatDateShort(dateISO: string, projectTz: string): string {
   );
 }
 
+/** `datetime-local`-Wert (YYYY-MM-DDTHH:mm) in Browser-Lokalzeit — Rundreise-Pendant zum Startfeld (D-08). */
+export function toDateTimeLocalValue(d: Date): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
 /** „Mo 14.7." — Kurzform Wochentag+Datum, für Tages-Modus-Zeilen/-Zellen (Tages-Wachen). */
 export function formatShortWeekdayDate(dateISO: string, projectTz: string): string {
   return new Intl.DateTimeFormat(intlLocale(), {

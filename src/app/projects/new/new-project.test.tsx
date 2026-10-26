@@ -146,3 +146,120 @@ describe('Eigener Endzeitpunkt — Custom-Modus (Phase 01)', () => {
     expect((payload as { endDate: string }).endDate).toBe(new Date('2099-01-02T00:00').toISOString());
   });
 });
+
+describe('Eigener Endzeitpunkt — Validierungs-UX (Phase 01)', () => {
+  beforeEach(() => cleanup());
+  afterEach(() => vi.clearAllMocks());
+
+  async function goToStep2() {
+    render(<NewProjectPage />);
+    fireEvent.change(screen.getByLabelText(/^Titel/i), { target: { value: 'wb-Nachtgebet' } });
+    fireEvent.click(screen.getByRole('button', { name: /Weiter/i }));
+    await waitFor(() => expect(screen.getByLabelText(/Start/i)).toBeTruthy());
+  }
+
+  async function startCustomMode(start = '2099-01-01T00:00') {
+    await goToStep2();
+    fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: start } });
+    fireEvent.click(screen.getByRole('button', { name: /Eigener Endzeitpunkt/i }));
+    return screen.getByLabelText(/^Ende/i) as HTMLInputElement;
+  }
+
+  it('Tippen ohne Blur zeigt keinen Fehler; Blur zeigt lokalisierten Fehler und aria-invalid (D-10)', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    const endInput = await startCustomMode();
+
+    fireEvent.change(endInput, { target: { value: '2099-01-03T00:30' } }); // 48,5 h — nicht ausgerichtet
+    expect(screen.queryByRole('alert')).toBeNull();
+
+    fireEvent.blur(endInput);
+    expect(screen.getByRole('alert')).toBeTruthy();
+    expect(endInput.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('Submit mit ungültigem Ende ruft post nicht auf (D-14)', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    const endInput = await startCustomMode();
+
+    fireEvent.change(endInput, { target: { value: '2099-01-03T00:30' } });
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
+
+    await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it('Ende vor dem Start wird mit errEndAfterStart-Fehlertext abgelehnt', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    const endInput = await startCustomMode();
+
+    fireEvent.change(endInput, { target: { value: '2098-12-31T23:00' } });
+    fireEvent.blur(endInput);
+
+    expect(screen.getByRole('alert').textContent).toBe('Das Ende muss nach dem Start liegen.');
+  });
+
+  it('Nicht ausgerichtetes Ende: Fehler nennt konkretes Beispiel (D-13), Eingabe bleibt unverändert', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    const endInput = await startCustomMode();
+
+    fireEvent.change(endInput, { target: { value: '2099-01-03T00:30' } });
+    fireEvent.blur(endInput);
+
+    const alert = screen.getByRole('alert');
+    // Nächstmögliches Ende: Start + 49 h = 3.1.2099, 01:00 Uhr (Browser-Lokalzeit)
+    expect(alert.textContent).toContain('2099');
+    expect(alert.textContent).toMatch(/3\./);
+    expect(alert.textContent).toMatch(/01:00/);
+    expect(endInput.value).toBe('2099-01-03T00:30');
+  });
+
+  it('Startänderung lässt den Feldwert unverändert und setzt den Fehler neu (D-04)', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    const endInput = await startCustomMode();
+
+    fireEvent.change(endInput, { target: { value: '2099-01-03T00:30' } });
+    fireEvent.blur(endInput);
+    expect(screen.getByRole('alert')).toBeTruthy();
+
+    // Start um 30 Minuten verschieben → Spanne exakt 48 h = ausgerichtet
+    fireEvent.change(screen.getByLabelText(/Start/i), { target: { value: '2099-01-01T00:30' } });
+    expect(endInput.value).toBe('2099-01-03T00:30'); // Feldwert bleibt stehen
+    expect(screen.queryByRole('alert')).toBeNull(); // Fehler zurückgesetzt
+  });
+
+  it('Wechsel Stunden→Tage im Custom-Modus: Feldwert bleibt, 1440-Ausrichtung wird geprüft (D-03)', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    const endInput = await startCustomMode();
+
+    fireEvent.change(endInput, { target: { value: '2099-01-03T12:00' } }); // 60 h
+    fireEvent.blur(endInput);
+    expect(screen.queryByRole('alert')).toBeNull(); // für 60-Minuten-Slots ausgerichtet
+
+    fireEvent.click(screen.getByRole('button', { name: /Tage/i }));
+    expect(endInput.value).toBe('2099-01-03T12:00'); // absoluter Endpunkt bleibt erhalten
+    expect(screen.getByRole('alert')).toBeTruthy(); // 60 h kein Vielfaches von 1440 min
+  });
+
+  it('Custom-Modus zeigt keine veraltete Preset-Stundenzahl in der Summenzeile', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    const endInput = await startCustomMode();
+
+    fireEvent.change(endInput, { target: { value: '2099-01-03T00:00' } });
+    expect(screen.queryByText(/Stunden ab/)).toBeNull();
+    expect(screen.queryByText(/Tage ab/)).toBeNull();
+  });
+
+  it('API-Fehler erscheinen nur in der allgemeinen Fehlerzeile, das Endfeld bleibt unberührt (Pitfall 6)', async () => {
+    // Vorherige Tests ohne Submit hinterlassen queueOnce-Werte — für den Reject sauber zurücksetzen.
+    post.mockReset();
+    post.mockRejectedValueOnce(new Error('Serverfehler 500'));
+    const endInput = await startCustomMode();
+
+    fireEvent.change(endInput, { target: { value: '2099-01-03T00:00' } }); // valides Ende
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
+
+    await waitFor(() => expect(screen.getByText('Serverfehler 500')).toBeTruthy());
+    expect(endInput.getAttribute('aria-invalid')).toBeNull();
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+  });
+});

@@ -15,7 +15,7 @@ import { Label, FieldError } from '@/components/ui/Label';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FolderHeart } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { browserTz, formatDayHeader, toDateTimeLocalValue } from '@/lib/time';
+import { browserTz, formatDayHeader, formatDateTimeShort, toDateTimeLocalValue } from '@/lib/time';
 import { CityInput } from '@/components/patterns/CityInput';
 import type { GeoCity } from '@/lib/api';
 import { t, getLocale } from '@/lib/i18n';
@@ -79,18 +79,30 @@ export default function NewProjectPage() {
       case 'tooLong':
         return t('errEndTooLong');
       case 'notAligned':
+        // D-13: konkretes nächstmögliches Ende (Datum + Uhrzeit, Browser-Lokalzeit — RESEARCH-A3).
         return t('errEndNotAligned', {
-          example: formatDayHeader(new Date(result.exampleMs!).toISOString(), tz),
+          example: formatDateTimeShort(new Date(result.exampleMs!).toISOString(), tz),
         });
       default:
         return t('errEndMissing');
     }
   }
 
+  // Revalidiert ein vorhandenes Custom-Ende (D-03/D-04/D-10) — setzt oder löscht den Feldfehler.
+  function revalidateCustomEnd(start: string, end: string, slotMinutes: number): string | null {
+    const result = validateCustomEnd(new Date(start).getTime(), new Date(end).getTime(), slotMinutes * 60_000);
+    return result ? customEndMessage(result) : null;
+  }
+
   function selectUnit(next: SplitUnit) {
     setUnit(next);
     // Presets wechseln komplett (24h/48h/... vs. 1/2/4 Wochen/40 Tage) — erstes Preset der neuen Liste greifen.
     setHours((next === 'day' ? DAY_DURATIONS : HOUR_DURATIONS)[0].hours);
+    // D-03: im Custom-Modus bleibt der absolute Endpunkt erhalten und wird für die neue Slot-Granularität neu geprüft.
+    if (customMode) {
+      const slotMinutes = next === 'day' ? 1440 : 60;
+      setCustomEndError(startDate && customEnd ? revalidateCustomEnd(startDate, customEnd, slotMinutes) : null);
+    }
   }
 
   async function onSubmit(e: FormEvent) {
@@ -104,12 +116,9 @@ export default function NewProjectPage() {
         setCustomEndError(t('errEndMissing'));
         return;
       }
-      const result = validateCustomEnd(start.getTime(), new Date(customEnd).getTime(), slotDurationMinutes * 60_000);
-      if (result) {
-        setCustomEndError(customEndMessage(result));
-        return;
-      }
-      setCustomEndError(null);
+      const message = revalidateCustomEnd(startDate, customEnd, slotDurationMinutes);
+      setCustomEndError(message);
+      if (message) return;
     }
     setSubmitting(true);
     try {
@@ -189,7 +198,18 @@ export default function NewProjectPage() {
           <form onSubmit={onSubmit} className="space-y-6">
             <div>
               <Label htmlFor="startDate">{t('fieldStart')}</Label>
-              <Input id="startDate" type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+              <Input
+                id="startDate"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setStartDate(next);
+                  // D-04: ein vorhandenes Custom-Ende bleibt unverändert stehen und wird neu validiert.
+                  if (customMode) setCustomEndError(next && customEnd ? revalidateCustomEnd(next, customEnd, slotDurationMinutes) : null);
+                }}
+                required
+              />
               {unit === 'day' && (
                 <p className="mt-1 text-xs text-ink-muted">
                   {t('dayRunsHint', { start: startDate ? startDate.slice(11, 16) : '00:00' })}
@@ -279,6 +299,14 @@ export default function NewProjectPage() {
                         type="datetime-local"
                         value={customEnd}
                         onChange={(e) => setCustomEnd(e.target.value)}
+                        onBlur={() => {
+                          // D-10: Validierung erst beim Verlassen des Felds — nie während der laufenden Eingabe.
+                          if (startDate) {
+                            setCustomEndError(
+                              customEnd ? revalidateCustomEnd(startDate, customEnd, slotDurationMinutes) : null,
+                            );
+                          }
+                        }}
                         disabled={!startDate}
                         invalid={!!customEndError}
                       />
@@ -375,7 +403,8 @@ export default function NewProjectPage() {
               </div>
             </div>
 
-            {startDate && endIso && (
+            {/* Pitfall 3: im Custom-Modus keine veraltete Preset-Dauer — Zeile komplett ausgeblendet. */}
+            {startDate && endIso && !customMode && (
               <div className="rounded-md bg-surface-sunken px-3 py-2 text-sm text-ink-muted tnum">
                 {unit === 'day'
                   ? t('summaryLineDays', {

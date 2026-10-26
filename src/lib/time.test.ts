@@ -9,6 +9,7 @@ import {
   formatDateShort,
   formatShortWeekdayDate,
   toDateTimeLocalValue,
+  formatDateTimeShort,
 } from './time';
 
 // 2026-07-06T02:00:00Z … in Europe/Berlin (UTC+2 im Sommer) = 04:00–05:00 lokal
@@ -98,6 +99,13 @@ describe('toDateTimeLocalValue', () => {
   it('pad2: einstellige Monate/Tage/Stunden/Minuten werden mit Null aufgefüllt', () => {
     const d = new Date(2099, 0, 1, 0, 0);
     expect(toDateTimeLocalValue(d)).toBe('2099-01-01T00:00');
+  });
+});
+
+describe('formatDateTimeShort', () => {
+  it('liefert Tag, Monat, Jahr und Uhrzeit in Projekt-TZ (UTC vs. Europe/Berlin)', () => {
+    expect(formatDateTimeShort(startUtc, 'UTC')).toBe('6.7.2026, 02:00');
+    expect(formatDateTimeShort(startUtc, 'Europe/Berlin')).toBe('6.7.2026, 04:00');
   });
 });
 

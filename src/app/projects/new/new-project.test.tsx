@@ -262,4 +262,30 @@ describe('Eigener Endzeitpunkt — Validierungs-UX (Phase 01)', () => {
     expect(endInput.getAttribute('aria-invalid')).toBeNull();
     expect(screen.getAllByRole('alert')).toHaveLength(1);
   });
+
+  it('Leeres Endfeld im Custom-Modus blockiert den Submit mit errEndMissing unter dem Feld', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    const endInput = await startCustomMode();
+
+    fireEvent.change(endInput, { target: { value: '' } }); // Vorbefüllung leeren
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
+
+    await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
+    expect(screen.getByRole('alert').textContent).toBe('Bitte ein Ende angeben.');
+    expect(post).not.toHaveBeenCalled();
+  });
+
+  it('Tages-Modus: auf 1440-Minuten-Slots ausgerichtetes Custom-Ende → Payload slotDurationMinutes:1440', async () => {
+    post.mockResolvedValueOnce({ id: 'p1' });
+    const endInput = await startCustomMode();
+
+    fireEvent.click(screen.getByRole('button', { name: /Tage/i }));
+    fireEvent.change(endInput, { target: { value: '2099-01-15T00:00' } }); // exakt start + 336 h = 14 Tage
+    fireEvent.click(screen.getByRole('button', { name: /Gebetswache erstellen/i }));
+
+    await waitFor(() => expect(post).toHaveBeenCalledTimes(1));
+    const [, payload] = post.mock.calls[0];
+    expect((payload as { slotDurationMinutes: number }).slotDurationMinutes).toBe(1440);
+    expect((payload as { endDate: string }).endDate).toBe(new Date('2099-01-15T00:00').toISOString());
+  });
 });

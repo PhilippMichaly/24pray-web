@@ -25,9 +25,18 @@ describe('validateCustomEnd — tooLong', () => {
   });
 });
 
-describe('validateCustomEnd — 366-Tage-Grenze (API-Parität)', () => {
-  it('exakt 366 Tage sind erlaubt', () => {
+describe('validateCustomEnd — 366-Tage-Grenze (API-Parität, Pitfall 2)', () => {
+  it('exakt 366 Tage sind für beide Slotgrößen erlaubt', () => {
     expect(validateCustomEnd(startMs, startMs + 366 * DAY, HOUR)).toBeNull();
+    expect(validateCustomEnd(startMs, startMs + 366 * DAY, 24 * HOUR)).toBeNull();
+  });
+  it('366 Tage + 1 Minute werden abgelehnt', () => {
+    expect(validateCustomEnd(startMs, startMs + 366 * DAY + MIN, HOUR)).toEqual({ key: 'tooLong' });
+    expect(validateCustomEnd(startMs, startMs + 366 * DAY + MIN, 24 * HOUR)).toEqual({ key: 'tooLong' });
+  });
+  it('Grenze gilt exakt wie die API: 366 Tage sind erlaubt, die API lehnt nur strikt größer ab', () => {
+    // 366 * 86_400_000 ms — identischer Vergleichsoperand wie in 24pray-api assertProjectSpan
+    expect(validateCustomEnd(startMs, startMs + 366 * 86_400_000, HOUR)).toBeNull();
   });
 });
 

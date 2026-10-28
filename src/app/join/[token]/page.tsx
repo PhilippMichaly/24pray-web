@@ -57,7 +57,9 @@ export default function JoinPage() {
             </Badge>
             <h1 className="mt-3 font-display text-2xl font-semibold text-ink">{project.title}</h1>
             <p className="mt-2 text-sm text-ink-muted">
-              {t('invitedToLead', { name: project.organizerName })}
+              {tUnit(isDayMode(project.slotDurationMinutes), 'invitedToLead', 'invitedToLeadDay', {
+                name: project.organizerName,
+              })}
             </p>
 
             <div className="mx-auto mt-5 max-w-[300px]">
@@ -71,7 +73,7 @@ export default function JoinPage() {
             </div>
 
             <Button asChild size="lg" className="mt-6 w-full">
-              <Link href={projectHref}>{t('toProjectTakeSlot')}</Link>
+              <Link href={projectHref}>{tUnit(isDayMode(project.slotDurationMinutes), 'toProjectTakeSlot', 'toProjectTakeSlotDay')}</Link>
             </Button>
             <p className="mt-3 text-xs text-ink-muted">
               {t('noAccountNeeded')} ·{' '}

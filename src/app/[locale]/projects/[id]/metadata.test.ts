@@ -69,10 +69,10 @@ describe('generateMetadata — Wachenseite', () => {
       new Response(JSON.stringify(publicProjectNoDescription), { status: 200 }),
     );
     const meta = await (await load())({ params: Promise.resolve({ locale: 'en', id: 'p-pub-nodesc' }) });
-    expect(meta.description).toContain('hours held');
+    expect(meta.description).toContain('hours taken');
   });
 
-  it('ohne Beschreibung: Fallback nennt gehaltene Stunden', async () => {
+  it('ohne Beschreibung: Fallback nennt übernommene Stunden', async () => {
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify(publicProjectNoDescription), { status: 200 }),
     );

@@ -41,3 +41,41 @@ describe('Invite-Rotation und Verify-Hinweis in allen Locales', () => {
     );
   });
 });
+
+// Bug 2026-10-28: „6 von 42 Tagen gehalten" auf der Einladung, obwohl alle Termine noch
+// in der Zukunft lagen. Der Fortschritt zählt Zusagen (BOOKED+COMPLETED), nicht vergangene
+// Gebetszeit — daher „übernommen" (Vokabular von „Stunde übernehmen"), nicht „gehalten".
+describe('Fortschritt zählt Zusagen, nicht vergangene Gebetszeit', () => {
+  const PROGRESS_KEYS = ['slotsBookedOf', 'slotsBookedOfRest', 'heldOfDays', 'slotsBookedOfRestDays'] as const;
+
+  it('de: „übernommen" statt „gehalten"', () => {
+    expect(translate('de', 'slotsBookedOf', { booked: 6, total: 42 })).toBe('6 von 42 Stunden übernommen');
+    expect(translate('de', 'heldOfDays', { booked: 6, total: 42 })).toBe('6 von 42 Tagen übernommen');
+    expect(translate('de', 'slotsBookedOfRest', { total: 42 })).toBe('von 42 Stunden übernommen');
+    expect(translate('de', 'slotsBookedOfRestDays', { total: 42 })).toBe('von 42 Tagen übernommen');
+  });
+
+  it('keine Locale formuliert den Fortschritt in Vergangenheit („gehalten"/„held"/„הוחזקו")', () => {
+    for (const l of SUPPORTED_LOCALES) {
+      for (const k of PROGRESS_KEYS) {
+        expect(translate(l, k, { booked: 1, total: 2 }), `${l}.${k}`).not.toMatch(/gehalten|held|הוחזקו/);
+      }
+    }
+  });
+});
+
+describe('Einladung im Tages-Modus spricht von Tagen', () => {
+  it('de: Lead und CTA haben eine Tages-Variante', () => {
+    expect(tUnit(true, 'invitedToLead', 'invitedToLeadDay', { name: 'sarah' })).toBe(
+      'sarah lädt dich ein, einen Tag zu übernehmen.',
+    );
+    expect(tUnit(true, 'toProjectTakeSlot', 'toProjectTakeSlotDay')).toBe('Zur Gebetswache & Tag übernehmen');
+  });
+
+  it('alle Locales: Tages-Varianten existieren und unterscheiden sich vom Stunden-Text', () => {
+    for (const l of SUPPORTED_LOCALES) {
+      expect(translate(l, 'invitedToLeadDay', { name: 'x' }), l).not.toBe(translate(l, 'invitedToLead', { name: 'x' }));
+      expect(translate(l, 'toProjectTakeSlotDay'), l).not.toBe(translate(l, 'toProjectTakeSlot'));
+    }
+  });
+});

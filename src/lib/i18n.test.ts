@@ -79,3 +79,59 @@ describe('Einladung im Tages-Modus spricht von Tagen', () => {
     }
   });
 });
+
+// Phase 2 (02-03 Task 2, D-08): alle neuen Texte der Karte „Ende der Wache“ in fünf Sprachen.
+describe('Ende ändern (Phase 2) — neue Texte', () => {
+  const NEW_KEYS = [
+    'endCardTitle',
+    'endCardCurrentEnd',
+    'endCardCta',
+    'endNewEndLabel',
+    'endEditHint',
+    'endEditHintDays',
+    'endEditEarliest',
+    'errEndCutsBooking',
+    'errEndCutsBookingDays',
+    'endConfirmButton',
+    'endSaved',
+  ] as const;
+
+  it('errEndCutsBooking[Days] behalten {earliest} in jeder Locale', () => {
+    for (const l of SUPPORTED_LOCALES) {
+      expect(translate(l, 'errEndCutsBooking', { earliest: 'XX' }), `${l}.errEndCutsBooking`).toContain('XX');
+      expect(translate(l, 'errEndCutsBookingDays', { earliest: 'XX' }), `${l}.errEndCutsBookingDays`).toContain('XX');
+    }
+  });
+
+  it('endCardCurrentEnd, endEditEarliest, endSaved behalten {date} in jeder Locale', () => {
+    for (const l of SUPPORTED_LOCALES) {
+      for (const k of ['endCardCurrentEnd', 'endEditEarliest', 'endSaved'] as const) {
+        expect(translate(l, k, { date: 'XX' }), `${l}.${k}`).toContain('XX');
+      }
+    }
+  });
+
+  it('endCardTitle hat in jeder Locale höchstens 20 Zeichen (E3, bricht neben dem CTA um)', () => {
+    for (const l of SUPPORTED_LOCALES) {
+      expect(translate(l, 'endCardTitle').length, `${l}.endCardTitle`).toBeLessThanOrEqual(20);
+    }
+  });
+
+  it('alle 11 Texte existieren in jeder Locale (kein Fallback auf den Key)', () => {
+    for (const l of SUPPORTED_LOCALES) {
+      for (const k of NEW_KEYS) {
+        const v = translate(l, k, { date: 'XX', earliest: 'XX' });
+        expect(v, `${l}.${k}`).not.toBe(k);
+        expect(v.length, `${l}.${k}`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('kein neuer Text spricht von „gehalten“/„held“/„הוחזקו“ (Vokabular „übernommen“)', () => {
+    for (const l of SUPPORTED_LOCALES) {
+      for (const k of NEW_KEYS) {
+        expect(translate(l, k, { date: 'XX', earliest: 'XX' }), `${l}.${k}`).not.toMatch(/gehalten|held|הוחזקו/);
+      }
+    }
+  });
+});

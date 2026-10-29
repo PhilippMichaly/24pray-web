@@ -10,6 +10,7 @@ import {
   formatShortWeekdayDate,
   toDateTimeLocalValue,
   formatDateTimeShort,
+  isolate,
 } from './time';
 
 // 2026-07-06T02:00:00Z … in Europe/Berlin (UTC+2 im Sommer) = 04:00–05:00 lokal
@@ -125,5 +126,11 @@ describe('buildIcs — Zeilenumbrüche im Titel (ICS-Injection)', () => {
     const lines = ics.split('\r\n');
     expect(lines.some((l) => l.startsWith('URL:https://evil'))).toBe(false);
     expect(ics).not.toMatch(/\r(?!\n)/);
+  });
+});
+
+describe('isolate', () => {
+  it('schließt den Text in FSI (U+2068) und PDI (U+2069) ein', () => {
+    expect(isolate('x')).toBe('\u2068x\u2069');
   });
 });

@@ -467,3 +467,76 @@ describe('EndDateCard — Frühestmögliches Ende und Client-Buchungsschutz (EDI
     expect(alert()?.textContent).not.toContain('abschneiden');
   });
 });
+
+// Phase 2 / 02-03 Task 2: Bidi-Isolation aller interpolierten Datumswerte (D-08, T-02-12).
+describe('EndDateCard — Datumswerte in FSI/PDI isoliert (D-08)', () => {
+  beforeEach(() => cleanup());
+  afterEach(() => vi.clearAllMocks());
+
+  const FSI = '\u2068';
+  const PDI = '\u2069';
+  const iso = (dateIso: string) => `${FSI}${formatDateTimeShort(dateIso, browserTz())}${PDI}`;
+  const HOUR = 3_600_000;
+  const startMs = Date.parse(base.startDate);
+  const X = Date.parse('2099-01-11T05:00');
+  const alert = () => screen.queryByRole('alert');
+  const openEdit = (bookedUntilMs: number | null = null) => {
+    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} bookedUntilMs={bookedUntilMs} />);
+    fireEvent.click(ctaBtn());
+  };
+
+  it('Meta-Zeile „Aktuelles Ende“', () => {
+    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} bookedUntilMs={null} />);
+    expect(screen.getByText(/Aktuelles Ende/).textContent).toContain(iso(base.endDate));
+  });
+
+  it('Hinweis „Frühestmögliches Ende“', () => {
+    openEdit(X);
+    expect(document.getElementById('project-new-end-hint')!.textContent).toContain(iso(new Date(X).toISOString()));
+  });
+
+  it('errEndCutsBooking aus der Client-Prüfung', () => {
+    openEdit(X);
+    fireEvent.change(field(), { target: { value: toDateTimeLocalValue(new Date(X - HOUR)) } });
+    fireEvent.blur(field());
+    expect(alert()?.textContent).toContain(iso(new Date(X).toISOString()));
+  });
+
+  it('errEndCutsBooking aus 409 END_CUTS_BOOKING', async () => {
+    const earliestEnd = new Date('2099-01-13T10:00').toISOString();
+    updateProjectEnd.mockRejectedValueOnce(new ApiError('x', 409, 'END_CUTS_BOOKING', { earliestEnd }));
+    openEdit();
+    fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
+    fireEvent.click(saveBtn());
+    await waitFor(() => expect(alert()?.textContent).toContain(iso(earliestEnd)));
+  });
+
+  it('errEndNotAligned aus der Client-Prüfung', () => {
+    openEdit();
+    fireEvent.change(field(), { target: { value: toDateTimeLocalValue(new Date(startMs + 90 * 60_000)) } });
+    fireEvent.blur(field());
+    expect(alert()?.textContent).toContain(iso(new Date(startMs + 2 * HOUR).toISOString()));
+  });
+
+  it('errEndNotAligned aus 400 END_NOT_ALIGNED', async () => {
+    const exampleEnd = new Date('2099-01-12T11:00').toISOString();
+    updateProjectEnd.mockRejectedValueOnce(new ApiError('x', 400, 'END_NOT_ALIGNED', { exampleEnd }));
+    openEdit();
+    fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
+    fireEvent.click(saveBtn());
+    await waitFor(() => expect(alert()?.textContent).toContain(iso(exampleEnd)));
+  });
+
+  it('Positive-Toast „Ende geändert“', async () => {
+    const updated = { ...base, endDate: new Date('2099-01-12T10:00').toISOString() };
+    updateProjectEnd.mockResolvedValueOnce(updated);
+    openEdit();
+    fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
+    fireEvent.click(saveBtn());
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith(
+        expect.objectContaining({ variant: 'positive', message: expect.stringContaining(iso(updated.endDate)) }),
+      ),
+    );
+  });
+});

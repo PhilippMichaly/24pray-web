@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { FieldError, Label } from '@/components/ui/Label';
 import { toast } from '@/components/ui/toast-store';
 import { t, tUnit } from '@/lib/i18n';
-import { browserTz, formatDateTimeShort, toDateTimeLocalValue } from '@/lib/time';
+import { browserTz, formatDateTimeShort, isolate, toDateTimeLocalValue } from '@/lib/time';
 import { validateCustomEnd } from '@/lib/end-validation';
 import { isApiError } from '@/lib/api-error';
 
@@ -94,7 +94,7 @@ export function EndDateCard({
       case 'notAligned':
         // D-13/PD-01: konkretes nächstmögliches Ende als Hinweis — der Wert selbst wird nie ersetzt (D-06).
         return t('errEndNotAligned', {
-          example: formatDateTimeShort(new Date(result.exampleMs!).toISOString(), browserTz()),
+          example: isolate(formatDateTimeShort(new Date(result.exampleMs!).toISOString(), browserTz())),
         });
       default:
         return t('errEndMissing');
@@ -110,7 +110,7 @@ export function EndDateCard({
     if (bookedUntilMs == null) return null;
     if (new Date(v).getTime() + residue >= bookedUntilMs) return null;
     return tUnit(dayMode, 'errEndCutsBooking', 'errEndCutsBookingDays', {
-      earliest: formatDateTimeShort(new Date(bookedUntilMs).toISOString(), browserTz()),
+      earliest: isolate(formatDateTimeShort(new Date(bookedUntilMs).toISOString(), browserTz())),
     });
   }
 
@@ -125,14 +125,14 @@ export function EndDateCard({
         const earliest = validIso(e.data?.earliestEnd);
         return earliest
           ? tUnit(dayMode, 'errEndCutsBooking', 'errEndCutsBookingDays', {
-              earliest: formatDateTimeShort(earliest, browserTz()),
+              earliest: isolate(formatDateTimeShort(earliest, browserTz())),
             })
           : null;
       }
       case END_NOT_ALIGNED: {
         const example = validIso(e.data?.exampleEnd);
         return example
-          ? t('errEndNotAligned', { example: formatDateTimeShort(example, browserTz()) })
+          ? t('errEndNotAligned', { example: isolate(formatDateTimeShort(example, browserTz())) })
           : null;
       }
       case END_NOT_AFTER_START:
@@ -177,7 +177,7 @@ export function EndDateCard({
       setEditing(false);
       setFocusTarget('cta');
       toast({
-        message: t('endSaved', { date: formatDateTimeShort(updated.endDate, browserTz()) }),
+        message: t('endSaved', { date: isolate(formatDateTimeShort(updated.endDate, browserTz())) }),
         variant: 'positive',
       });
     } catch (e) {
@@ -206,7 +206,7 @@ export function EndDateCard({
             <p className="text-sm font-medium text-ink">{t('endCardTitle')}</p>
             {/* PD-03: umbrechen statt abschneiden — das Datum muss bei 390px vollständig sichtbar sein. */}
             <p className="break-words text-xs text-ink-muted">
-              {t('endCardCurrentEnd', { date: formatDateTimeShort(project.endDate, browserTz()) })}
+              {t('endCardCurrentEnd', { date: isolate(formatDateTimeShort(project.endDate, browserTz())) })}
             </p>
           </div>
         </div>
@@ -242,7 +242,7 @@ export function EndDateCard({
         {bookedUntilMs != null && (
           <p className="text-sm text-ink-muted tnum">
             {t('endEditEarliest', {
-              date: formatDateTimeShort(new Date(bookedUntilMs).toISOString(), browserTz()),
+              date: isolate(formatDateTimeShort(new Date(bookedUntilMs).toISOString(), browserTz())),
             })}
           </p>
         )}

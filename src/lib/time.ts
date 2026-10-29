@@ -96,6 +96,16 @@ export function isNightHour(startISO: string, projectTz: string): boolean {
   return h >= 22 || h < 6;
 }
 
+/**
+ * Bidi-Isolation für interpolierte Werte (D-08): schließt `s` in FSI (U+2068) … PDI (U+2069) ein,
+ * damit ein Datum in he/ar-Sätzen nicht mit Satzzeichen/Ziffern der Umgebung umgeordnet wird.
+ * FSI statt LRI: die Richtung wird aus dem Inhalt bestimmt — sollten Datumswerte künftig he/ar-
+ * Monatsnamen enthalten, kippen sie so nicht fälschlich in LTR.
+ */
+export function isolate(s: string): string {
+  return `\u2068${s}\u2069`;
+}
+
 /** Zeitzone des Browsers. */
 export function browserTz(): string {
   try {

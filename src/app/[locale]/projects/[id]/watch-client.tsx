@@ -19,6 +19,7 @@ import { ShareButton } from '@/components/patterns/ShareButton';
 import { GroupLinksCard } from '@/components/patterns/GroupLinksCard';
 import { ConcernCard } from '@/components/patterns/ConcernCard';
 import { ScheduleCard } from '@/components/patterns/ScheduleCard';
+import { EndDateCard } from '@/components/patterns/EndDateCard';
 import { ProjectDangerZone } from '@/components/patterns/ProjectDangerZone';
 import { NextSlotCard } from '@/components/patterns/NextSlotCard';
 import { Tabs, TabPanel } from '@/components/ui/Tabs';
@@ -244,6 +245,7 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
               <LocationCard project={project} onUpdated={setProject} />
               <ConcernCard project={project} onUpdated={setProject} />
               <ScheduleCard project={project} onUpdated={setProject} />
+              <EndDateCard project={project} onUpdated={setProject} dayMode={grid.dayMode} />
               <GroupLinksCard project={project} onUpdated={setProject} />
               <InviteCard
                 projectId={project.id}

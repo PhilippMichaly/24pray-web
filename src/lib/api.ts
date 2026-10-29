@@ -148,6 +148,11 @@ export function shiftProject(projectId: string, newStartDate: string) {
   return api.post<ProjectWithStats>(`/projects/${projectId}/shift`, { newStartDate });
 }
 
+/** Ende ändern — Server schützt übernommene Slots (409), keine Mails. */
+export function updateProjectEnd(projectId: string, endDate: string) {
+  return api.patch<ProjectWithStats>(`/projects/${projectId}`, { endDate });
+}
+
 /** Wache endgültig löschen (Cascade + Abschieds-Mail siehe API). */
 export function deleteProject(projectId: string) {
   return api.delete<void>(`/projects/${projectId}`);

@@ -32,14 +32,14 @@ describe('EndDateCard — Ende der Wache ändern (EDIT-01)', () => {
   afterEach(() => vi.clearAllMocks());
 
   it('(a) Anzeige zeigt Titel, CTA und das aktuelle Ende', () => {
-    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} />);
+    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} bookedUntilMs={null} />);
     expect(screen.getByText('Ende der Wache')).toBeTruthy();
     expect(ctaBtn()).toBeTruthy();
     expect(screen.getByText(new RegExp(formatDateTimeShort(base.endDate, browserTz())))).toBeTruthy();
   });
 
   it('(b) „Ende ändern“ öffnet Edit mit Fokus und vorbelegtem Ende; Speichern ist deaktiviert', () => {
-    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} />);
+    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} bookedUntilMs={null} />);
     fireEvent.click(ctaBtn());
     expect(document.activeElement).toBe(field());
     expect(field().value).toBe(toDateTimeLocalValue(new Date(base.endDate)));
@@ -51,7 +51,7 @@ describe('EndDateCard — Ende der Wache ändern (EDIT-01)', () => {
     const onUpdated = vi.fn();
     const updated = { ...base, endDate: new Date('2099-01-12T10:00').toISOString() };
     updateProjectEnd.mockResolvedValueOnce(updated);
-    render(<EndDateCard project={base} onUpdated={onUpdated} dayMode={false} />);
+    render(<EndDateCard project={base} onUpdated={onUpdated} dayMode={false} bookedUntilMs={null} />);
 
     fireEvent.click(ctaBtn());
     fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
@@ -70,7 +70,7 @@ describe('EndDateCard — Ende der Wache ändern (EDIT-01)', () => {
 
   it('(d) während der Request läuft, sind Speichern und Abbrechen deaktiviert', async () => {
     updateProjectEnd.mockReturnValueOnce(new Promise(() => {}));
-    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} />);
+    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} bookedUntilMs={null} />);
     fireEvent.click(ctaBtn());
     fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
     fireEvent.click(saveBtn());
@@ -84,7 +84,7 @@ describe('EndDateCard — Ende der Wache ändern (EDIT-01)', () => {
   it('(e) Netzfehler → Danger-Toast mit Meldung, Edit-Modus und Wert bleiben', async () => {
     updateProjectEnd.mockRejectedValueOnce(new Error('Netz weg'));
     const onUpdated = vi.fn();
-    render(<EndDateCard project={base} onUpdated={onUpdated} dayMode={false} />);
+    render(<EndDateCard project={base} onUpdated={onUpdated} dayMode={false} bookedUntilMs={null} />);
     fireEvent.click(ctaBtn());
     fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
     fireEvent.click(saveBtn());
@@ -98,7 +98,7 @@ describe('EndDateCard — Ende der Wache ändern (EDIT-01)', () => {
   });
 
   it('(f) Abbrechen verwirft die Änderung; erneutes Öffnen zeigt wieder das aktuelle Ende', () => {
-    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} />);
+    render(<EndDateCard project={base} onUpdated={vi.fn()} dayMode={false} bookedUntilMs={null} />);
     fireEvent.click(ctaBtn());
     fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
     fireEvent.click(cancelBtn());
@@ -117,7 +117,7 @@ describe('EndDateCard — Ende der Wache ändern (EDIT-01)', () => {
       endDate: new Date(new Date('2099-01-11T10:00').getTime() + 23_000).toISOString(),
     } as ProjectWithStats;
     updateProjectEnd.mockResolvedValueOnce(withResidue);
-    render(<EndDateCard project={withResidue} onUpdated={vi.fn()} dayMode={false} />);
+    render(<EndDateCard project={withResidue} onUpdated={vi.fn()} dayMode={false} bookedUntilMs={null} />);
     fireEvent.click(ctaBtn());
     fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
     fireEvent.click(saveBtn());
@@ -138,7 +138,7 @@ describe('EndDateCard — Client-Validierung (EDIT-03)', () => {
   const startMs = Date.parse(base.startDate);
   const alert = () => screen.queryByRole('alert');
   const openEdit = (p: ProjectWithStats = base, dayMode = false) => {
-    render(<EndDateCard project={p} onUpdated={vi.fn()} dayMode={dayMode} />);
+    render(<EndDateCard project={p} onUpdated={vi.fn()} dayMode={dayMode} bookedUntilMs={null} />);
     fireEvent.click(ctaBtn());
   };
 
@@ -273,6 +273,7 @@ describe('EndDateCard — Server-Fehler-Mapping (EDIT-02, EDIT-03)', () => {
         onUpdated={onUpdated}
         dayMode={opts.dayMode ?? false}
         onConflict={opts.onConflict}
+        bookedUntilMs={null}
       />,
     );
     fireEvent.click(ctaBtn());
@@ -368,5 +369,101 @@ describe('EndDateCard — Server-Fehler-Mapping (EDIT-02, EDIT-03)', () => {
     submit();
     await waitFor(() => expect(toast).toHaveBeenCalledWith({ message: 'Raster', variant: 'danger' }));
     expect(alert()).toBeNull();
+  });
+});
+
+// Phase 2 / 02-03 Task 1: Frühestmögliches Ende vorab und Client-Buchungsschutz (EDIT-02, D-01, U-3, I-4, I-12).
+describe('EndDateCard — Frühestmögliches Ende und Client-Buchungsschutz (EDIT-02)', () => {
+  beforeEach(() => cleanup());
+  afterEach(() => vi.clearAllMocks());
+
+  const HOUR = 3_600_000;
+  const X = Date.parse('2099-01-11T05:00'); // spätestes Ende übernommener Slots
+  const earliestText = formatDateTimeShort(new Date(X).toISOString(), browserTz());
+  const alert = () => screen.queryByRole('alert');
+  const openEdit = (bookedUntilMs: number | null, opts: { dayMode?: boolean; p?: ProjectWithStats } = {}) => {
+    render(
+      <EndDateCard
+        project={opts.p ?? base}
+        onUpdated={vi.fn()}
+        dayMode={opts.dayMode ?? false}
+        bookedUntilMs={bookedUntilMs}
+      />,
+    );
+    fireEvent.click(ctaBtn());
+  };
+
+  it('bookedUntilMs = X → Hinweis „Frühestmögliches Ende“ mit formatiertem X', () => {
+    openEdit(X);
+    const hint = document.getElementById('project-new-end-hint')!;
+    expect(hint.textContent).toContain('Frühestmögliches Ende');
+    expect(hint.textContent).toContain(earliestText);
+  });
+
+  it('bookedUntilMs = null → kein Hinweis „Frühestmögliches Ende“, nur der Regel-Hinweis', () => {
+    openEdit(null);
+    const hint = document.getElementById('project-new-end-hint')!;
+    expect(hint.textContent).not.toContain('Frühestmögliches Ende');
+    expect(hint.textContent).toContain('ganzen Stunden');
+  });
+
+  it('getippt X − 1 h + Blur → Alert „übernommene Stunden abschneiden“ mit X', () => {
+    openEdit(X);
+    fireEvent.change(field(), { target: { value: toDateTimeLocalValue(new Date(X - HOUR)) } });
+    fireEvent.blur(field());
+    expect(alert()?.textContent).toContain('übernommene Stunden abschneiden');
+    expect(alert()?.textContent).toContain(earliestText);
+    expect(field().getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('getippt X − 1 h + Speichern → kein Request, Alert, Fokus im Feld, Wert bleibt', () => {
+    openEdit(X);
+    const typed = toDateTimeLocalValue(new Date(X - HOUR));
+    fireEvent.change(field(), { target: { value: typed } });
+    saveBtn().focus();
+    fireEvent.click(saveBtn());
+    expect(updateProjectEnd).not.toHaveBeenCalled();
+    expect(alert()?.textContent).toContain('übernommene Stunden abschneiden');
+    expect(document.activeElement).toBe(field());
+    expect(field().value).toBe(typed);
+  });
+
+  it('D-03: getippt genau X → kein Alert, Speichern ruft updateProjectEnd', async () => {
+    updateProjectEnd.mockResolvedValueOnce({ ...base, endDate: new Date(X).toISOString() });
+    openEdit(X);
+    fireEvent.change(field(), { target: { value: toDateTimeLocalValue(new Date(X)) } });
+    fireEvent.blur(field());
+    expect(alert()).toBeNull();
+    fireEvent.click(saveBtn());
+    await waitFor(() => expect(updateProjectEnd).toHaveBeenCalledTimes(1));
+    expect(updateProjectEnd.mock.calls[0][1]).toBe(new Date(X).toISOString());
+  });
+
+  it('Tages-Modus → „übernommene Tage abschneiden“', () => {
+    const p = { ...base, slotDurationMinutes: 1440, endDate: new Date('2099-01-14T10:00').toISOString() } as ProjectWithStats;
+    const Xd = Date.parse('2099-01-13T10:00');
+    openEdit(Xd, { dayMode: true, p });
+    fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
+    fireEvent.blur(field());
+    expect(alert()?.textContent).toContain('übernommene Tage abschneiden');
+    expect(alert()?.textContent).toContain(formatDateTimeShort(new Date(Xd).toISOString(), browserTz()));
+  });
+
+  it('I-12: bookedUntilMs = null + Verkürzung → kein Client-Block, Server entscheidet', async () => {
+    updateProjectEnd.mockResolvedValueOnce({ ...base, endDate: new Date('2099-01-10T12:00').toISOString() });
+    openEdit(null);
+    fireEvent.change(field(), { target: { value: '2099-01-10T12:00' } });
+    fireEvent.blur(field());
+    expect(alert()).toBeNull();
+    fireEvent.click(saveBtn());
+    await waitFor(() => expect(updateProjectEnd).toHaveBeenCalledTimes(1));
+  });
+
+  it('I-4: Regelverstoß hat Vorrang — nicht ausgerichtet und vor X → errEndNotAligned', () => {
+    openEdit(X);
+    fireEvent.change(field(), { target: { value: toDateTimeLocalValue(new Date(X - HOUR - 30 * 60_000)) } });
+    fireEvent.blur(field());
+    expect(alert()?.textContent).toContain('Das Ende passt nicht zum gewählten Raster.');
+    expect(alert()?.textContent).not.toContain('abschneiden');
   });
 });

@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { CalendarClock, HeartHandshake } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { formatDayHeader, formatDualTz, formatWeekday } from '@/lib/time';
-import { nextFreeSlot } from '@/components/slots/logic';
+import { bookedUntil, nextFreeSlot } from '@/components/slots/logic';
 import { api } from '@/lib/api';
 import { useFunnelPing } from '@/lib/funnel';
 import type { ProjectWithStats } from '@/types';
@@ -250,6 +250,7 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
                 onUpdated={setProject}
                 dayMode={grid.dayMode}
                 onConflict={() => void grid.reload()}
+                bookedUntilMs={grid.loaded ? bookedUntil(grid.models) : null}
               />
               <GroupLinksCard project={project} onUpdated={setProject} />
               <InviteCard

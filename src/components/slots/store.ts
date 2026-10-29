@@ -11,9 +11,14 @@ import { t } from '@/lib/i18n';
 
 interface SlotGridState {
   slots: SlotView[];
+  /**
+   * Projekt-ID, zu der `slots` geladen wurden (I-12, Pitfall 3). Der Store ist modulweit: nach einem
+   * Wachenwechsel kann er noch Slots der vorherigen Wache enthalten — die gelten nicht als geladen.
+   */
+  loadedFor: string | null;
   pendingKeys: Set<string>;
   conflictKey: string | null;
-  setSlots: (slots: SlotView[]) => void;
+  setSlots: (slots: SlotView[], loadedFor: string) => void;
   setPending: (key: string, on: boolean) => void;
   setConflict: (key: string | null) => void;
   patchSlot: (key: string, patch: Partial<SlotView>) => void;
@@ -22,9 +27,10 @@ interface SlotGridState {
 // Ein Store — Projekt-Detail rendert genau einen Grid gleichzeitig.
 export const useSlotGridStore = create<SlotGridState>((set) => ({
   slots: [],
+  loadedFor: null,
   pendingKeys: new Set(),
   conflictKey: null,
-  setSlots: (slots) => set({ slots, conflictKey: null }),
+  setSlots: (slots, loadedFor) => set({ slots, loadedFor, conflictKey: null }),
   setPending: (key, on) =>
     set((s) => {
       const next = new Set(s.pendingKeys);
@@ -45,7 +51,7 @@ export function useSlotGrid(
   currentUserId: string | null,
   invite?: string, // Einladungslink-Token für PRIVATE-Ketten (W3)
 ) {
-  const { slots, pendingKeys, conflictKey, setSlots, setPending, setConflict, patchSlot } =
+  const { slots, loadedFor, pendingKeys, conflictKey, setSlots, setPending, setConflict, patchSlot } =
     useSlotGridStore();
   const [now, setNow] = useState(() => Date.now());
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +65,7 @@ export function useSlotGrid(
   const reload = useCallback(async () => {
     if (!project) return;
     try {
-      setSlots(await getSlotGrid(project.id, invite));
+      setSlots(await getSlotGrid(project.id, invite), project.id);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -81,6 +87,8 @@ export function useSlotGrid(
     [dayMode, models, tz],
   );
   const booked = bookedCount(models);
+  // I-12: nur ein Raster der aktuellen Wache gilt als geladen — leer/fremd heißt nicht „keine Buchungen“.
+  const loaded = project != null && loadedFor === project.id;
 
   /** Storno (eingeloggt eigener Slot, via Undo, Gast mit Token oder Organisator — F2). */
   const cancelBooked = useCallback(
@@ -156,6 +164,7 @@ export function useSlotGrid(
     dayMode,
     currentUserId,
     reload,
+    loaded,
     bookOptimistic,
     cancelBooked,
   };

@@ -40,12 +40,18 @@ export function EndDateCard({
   onUpdated,
   dayMode,
   onConflict,
+  bookedUntilMs,
 }: {
   project: ProjectWithStats;
   onUpdated: (p: ProjectWithStats) => void;
   dayMode: boolean;
   /** I-8: nach 409 END_CUTS_BOOKING — der Aufrufer lädt das Raster neu. */
   onConflict?: () => void;
+  /**
+   * U-3/I-12: spätestes Ende übernommener Slots (ms) aus dem geladenen Raster der aktuellen Wache;
+   * null, solange das Raster nicht geladen ist oder keine Buchung existiert — dann prüft nur der Server.
+   */
+  bookedUntilMs: number | null;
 }) {
   const currentValue = toDateTimeLocalValue(new Date(project.endDate));
   const [editing, setEditing] = useState(false);
@@ -79,7 +85,7 @@ export function EndDateCard({
       new Date(v).getTime(),
       project.slotDurationMinutes * 60_000,
     );
-    if (!result) return null;
+    if (!result) return bookingError(v);
     switch (result.key) {
       case 'notAfterStart':
         return t('errEndAfterStart');
@@ -93,6 +99,19 @@ export function EndDateCard({
       default:
         return t('errEndMissing');
     }
+  }
+
+  /**
+   * I-4 Schritt 3 (nach den Regeln, erster Treffer gewinnt): Vorab-Buchungsschutz (D-01). Gleichheit
+   * mit dem spätesten übernommenen Ende ist erlaubt (D-03); verglichen wird inkl. Sekundenrest (PD-01),
+   * also mit genau dem Wert, der gesendet würde.
+   */
+  function bookingError(v: string): string | null {
+    if (bookedUntilMs == null) return null;
+    if (new Date(v).getTime() + residue >= bookedUntilMs) return null;
+    return tUnit(dayMode, 'errEndCutsBooking', 'errEndCutsBookingDays', {
+      earliest: formatDateTimeShort(new Date(bookedUntilMs).toISOString(), browserTz()),
+    });
   }
 
   /**
@@ -219,6 +238,14 @@ export function EndDateCard({
       </div>
       <div id="project-new-end-hint" className="space-y-1">
         <p className="text-sm text-ink-muted">{tUnit(dayMode, 'endEditHint', 'endEditHintDays')}</p>
+        {/* U-3/I-12: nur bei bekannten Buchungen der aktuellen Wache. */}
+        {bookedUntilMs != null && (
+          <p className="text-sm text-ink-muted tnum">
+            {t('endEditEarliest', {
+              date: formatDateTimeShort(new Date(bookedUntilMs).toISOString(), browserTz()),
+            })}
+          </p>
+        )}
       </div>
       <div className="flex flex-wrap gap-2">
         {/* I-2: unverändertes Ende → kein Request, kein Toast. */}

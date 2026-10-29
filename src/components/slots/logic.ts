@@ -167,6 +167,22 @@ export function bookedCount(models: SlotViewModel[]): number {
 }
 
 /**
+ * Spätestes Ende aller übernommenen Slots (ms) oder null, wenn keiner übernommen ist.
+ * U-3/I-4: Untergrenze für das Verkürzen — Spiegel der Server-Regel D-03 (blockiert nur, wenn ein
+ * übernommener Slot nach dem neuen Ende endet; ein Ende genau hier ist erlaubt).
+ * COMPLETED liefert die API im Raster als BOOKED, daher deckt BOOKED beide Status ab.
+ */
+export function bookedUntil(models: SlotViewModel[]): number | null {
+  let max: number | null = null;
+  for (const m of models) {
+    if (m.status !== 'BOOKED') continue;
+    const end = Date.parse(m.endTime);
+    if (max === null || end > max) max = end;
+  }
+  return max;
+}
+
+/**
  * Ist dieser Slot der allererste Slot der größten Lücke? Damit erscheint die
  * „Größte Lücke"-Kopfzeile genau EINMAL statt bei jedem einzelnen Gap-Slot (P1).
  */

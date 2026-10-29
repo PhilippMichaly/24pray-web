@@ -14,6 +14,7 @@ import {
   nextFreeSlot,
   foldPastDays,
   firstFreeDayKey,
+  bookedUntil,
 } from './logic';
 import type { SlotView } from '@/types';
 import type { DerivationContext, SlotViewModel } from './types';
@@ -382,5 +383,36 @@ describe('UX-Runde 2026-10-13: nächste freie Stunde, Vergangenheits-Faltung, er
     ];
     expect(firstFreeDayKey(days)).toBe('c');
     expect(firstFreeDayKey(days.slice(0, 2))).toBeNull();
+  });
+});
+
+describe('bookedUntil — spätestes Ende übernommener Slots (Phase 2)', () => {
+  const m = (start: string, end: string, status: 'FREE' | 'BOOKED'): SlotViewModel => ({
+    key: start, slotId: status === 'BOOKED' ? `id-${start}` : null, startTime: start, endTime: end,
+    isMine: false, userName: null, status, isNight: false, isLargestGap: false,
+    state: status === 'BOOKED' ? 'BOOKED' : 'FREE',
+  });
+
+  it('leeres Raster → null', () => {
+    expect(bookedUntil([])).toBeNull();
+  });
+
+  it('nur freie Slots → null', () => {
+    expect(
+      bookedUntil([
+        m('2026-07-06T00:00:00.000Z', '2026-07-06T01:00:00.000Z', 'FREE'),
+        m('2026-07-06T01:00:00.000Z', '2026-07-06T02:00:00.000Z', 'FREE'),
+      ]),
+    ).toBeNull();
+  });
+
+  it('mehrere übernommene Slots → größtes endTime (unabhängig von der Reihenfolge)', () => {
+    const models = [
+      m('2026-07-06T03:00:00.000Z', '2026-07-06T04:00:00.000Z', 'BOOKED'),
+      m('2026-07-06T05:00:00.000Z', '2026-07-06T06:00:00.000Z', 'FREE'),
+      m('2026-07-06T04:00:00.000Z', '2026-07-06T05:00:00.000Z', 'BOOKED'),
+      m('2026-07-06T00:00:00.000Z', '2026-07-06T01:00:00.000Z', 'BOOKED'),
+    ];
+    expect(bookedUntil(models)).toBe(Date.parse('2026-07-06T05:00:00.000Z'));
   });
 });

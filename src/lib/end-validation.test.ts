@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateCustomEnd } from './custom-end';
+import { validateCustomEnd } from './end-validation';
 
 // DST-freie Januar-Fixtures (Pitfall 1) — lokales Parsing wie im Formular.
 const startMs = new Date('2099-01-01T00:00').getTime();

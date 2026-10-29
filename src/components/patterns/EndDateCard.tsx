@@ -7,10 +7,11 @@ import type { ProjectWithStats } from '@/types';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
+import { FieldError, Label } from '@/components/ui/Label';
 import { toast } from '@/components/ui/toast-store';
 import { t, tUnit } from '@/lib/i18n';
 import { browserTz, formatDateTimeShort, toDateTimeLocalValue } from '@/lib/time';
+import { validateCustomEnd } from '@/lib/end-validation';
 
 /**
  * Ende der Wache verlängern oder verkürzen — nur Organisator.
@@ -33,6 +34,7 @@ export function EndDateCard({
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [value, setValue] = useState(currentValue);
+  const [error, setError] = useState<string | null>(null);
   // Fokusziel nach dem nächsten Render: Feld beim Öffnen (I-1), CTA nach Abbrechen/Erfolg (I-7, I-11).
   const [focusTarget, setFocusTarget] = useState<'input' | 'cta' | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -44,24 +46,65 @@ export function EndDateCard({
     if (focusTarget) setFocusTarget(null);
   }, [focusTarget, editing]);
 
+  // PD-01: Sekundenrest alter Startzeiten. Validiert wird gegen den minutengenauen Start, gesendet
+  // wird der getippte Wert plus Rest — so ist jedes minutengenau getippte Raster-Ende gültig.
+  const startMs = Date.parse(project.startDate);
+  const residue = startMs % 60_000;
+
+  /**
+   * I-4 (Client-Teil): gleiche Regeln und Texte wie das Erstellungsformular (D-07).
+   * Leerer String deckt auch die Teil-Eingabe ab — dafür liefert der Browser ''.
+   */
+  function validate(v: string): string | null {
+    if (!v) return t('errEndMissing');
+    const result = validateCustomEnd(
+      startMs - residue,
+      new Date(v).getTime(),
+      project.slotDurationMinutes * 60_000,
+    );
+    if (!result) return null;
+    switch (result.key) {
+      case 'notAfterStart':
+        return t('errEndAfterStart');
+      case 'tooLong':
+        return t('errEndTooLong');
+      case 'notAligned':
+        // D-13/PD-01: konkretes nächstmögliches Ende als Hinweis — der Wert selbst wird nie ersetzt (D-06).
+        return t('errEndNotAligned', {
+          example: formatDateTimeShort(new Date(result.exampleMs!).toISOString(), browserTz()),
+        });
+      default:
+        return t('errEndMissing');
+    }
+  }
+
   function open() {
     setValue(currentValue);
+    setError(null);
     setEditing(true);
     setFocusTarget('input');
   }
 
   function close() {
     setValue(currentValue);
+    setError(null);
     setEditing(false);
     setFocusTarget('cta');
   }
 
   async function save() {
+    // I-3/I-5: Prüfung beim Speichern — bei Verstoß kein Request, Fokus zurück ins Feld.
+    const clientError = validate(value);
+    if (clientError) {
+      setError(clientError);
+      setFocusTarget('input');
+      return;
+    }
+    setError(null);
     setSaving(true);
     try {
       // PD-01: Sekundenrest alter Startzeiten unsichtbar mitführen, damit die Spanne exakt auf dem
       // Raster bleibt. Der eingegebene Minutenwert bleibt unverändert — kein Runden (D-06).
-      const residue = Date.parse(project.startDate) % 60_000;
       const endIso = new Date(new Date(value).getTime() + residue).toISOString();
       const updated = await updateProjectEnd(project.id, endIso);
       onUpdated(updated);
@@ -109,10 +152,14 @@ export function EndDateCard({
           ref={inputRef}
           id="project-new-end"
           type="datetime-local"
-          aria-describedby="project-new-end-hint"
+          invalid={!!error}
+          aria-describedby={error ? 'project-new-end-hint project-new-end-error' : 'project-new-end-hint'}
           value={value}
+          // I-3: Tippen ändert nur den Wert; geprüft wird bei Blur und beim Speichern.
           onChange={(e) => setValue(e.target.value)}
+          onBlur={() => setError(validate(value))}
         />
+        <FieldError id="project-new-end-error">{error}</FieldError>
       </div>
       <div id="project-new-end-hint" className="space-y-1">
         <p className="text-sm text-ink-muted">{tUnit(dayMode, 'endEditHint', 'endEditHintDays')}</p>

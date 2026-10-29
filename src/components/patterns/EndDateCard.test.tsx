@@ -127,3 +127,131 @@ describe('EndDateCard — Ende der Wache ändern (EDIT-01)', () => {
     expect(new Date(sent).getSeconds()).toBe(23);
   });
 });
+
+// Phase 2 / 02-02 Task 1: Client-Regeln (I-3..I-5, I-11, D-06, D-07) — vor jedem Request.
+describe('EndDateCard — Client-Validierung (EDIT-03)', () => {
+  beforeEach(() => cleanup());
+  afterEach(() => vi.clearAllMocks());
+
+  const HOUR = 3_600_000;
+  const startMs = Date.parse(base.startDate);
+  const alert = () => screen.queryByRole('alert');
+  const openEdit = (p: ProjectWithStats = base, dayMode = false) => {
+    render(<EndDateCard project={p} onUpdated={vi.fn()} dayMode={dayMode} />);
+    fireEvent.click(ctaBtn());
+  };
+
+  it('leeres Feld + Blur → errEndMissing, aria-invalid, kein Request', () => {
+    openEdit();
+    fireEvent.change(field(), { target: { value: '' } });
+    fireEvent.blur(field());
+    expect(alert()?.textContent).toBe('Bitte ein Ende angeben.');
+    expect(field().getAttribute('aria-invalid')).toBe('true');
+    expect(updateProjectEnd).not.toHaveBeenCalled();
+  });
+
+  it('leeres Feld (auch Teil-Eingabe, Browser liefert "") + Speichern → kein Request, Alert, Fokus im Feld', () => {
+    openEdit();
+    fireEvent.change(field(), { target: { value: '' } });
+    saveBtn().focus();
+    fireEvent.click(saveBtn());
+    expect(updateProjectEnd).not.toHaveBeenCalled();
+    expect(alert()?.textContent).toBe('Bitte ein Ende angeben.');
+    expect(document.activeElement).toBe(field());
+    expect(document.activeElement?.id).toBe('project-new-end');
+  });
+
+  it('Ende vor Start + Blur → errEndAfterStart', () => {
+    openEdit();
+    fireEvent.change(field(), { target: { value: '2099-01-09T10:00' } });
+    fireEvent.blur(field());
+    expect(alert()?.textContent).toBe('Das Ende muss nach dem Start liegen.');
+  });
+
+  it('Start + 367 Tage + Blur → errEndTooLong', () => {
+    openEdit();
+    fireEvent.change(field(), { target: { value: toDateTimeLocalValue(new Date(startMs + 367 * 24 * HOUR)) } });
+    fireEvent.blur(field());
+    expect(alert()?.textContent).toBe('Eine Gebetswache darf höchstens 366 Tage dauern.');
+  });
+
+  it('Stunden-Wache, Start + 90 min → errEndNotAligned mit Start + 2 h; Wert bleibt unverändert (D-06)', () => {
+    openEdit();
+    const typed = toDateTimeLocalValue(new Date(startMs + 90 * 60_000));
+    fireEvent.change(field(), { target: { value: typed } });
+    fireEvent.blur(field());
+    const example = formatDateTimeShort(new Date(startMs + 2 * HOUR).toISOString(), browserTz());
+    expect(alert()?.textContent).toContain('Das Ende passt nicht zum gewählten Raster.');
+    expect(alert()?.textContent).toContain(example);
+    expect(field().value).toBe(typed);
+    expect(field().getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('Tages-Wache, Start + 36 h → Beispiel = Start + 48 h', () => {
+    openEdit({ ...base, slotDurationMinutes: 1440 } as ProjectWithStats, true);
+    fireEvent.change(field(), { target: { value: toDateTimeLocalValue(new Date(startMs + 36 * HOUR)) } });
+    fireEvent.blur(field());
+    const example = formatDateTimeShort(new Date(startMs + 48 * HOUR).toISOString(), browserTz());
+    expect(alert()?.textContent).toContain(example);
+  });
+
+  it('I-3: Tippen ohne Blur validiert nicht', () => {
+    openEdit();
+    fireEvent.change(field(), { target: { value: '' } });
+    fireEvent.change(field(), { target: { value: '2099-01-09T10:00' } });
+    expect(alert()).toBeNull();
+    expect(field().getAttribute('aria-invalid')).toBeNull();
+  });
+
+  it('Speichern mit Regelverstoß → kein Request, Fehler, Fokus im Feld, Wert bleibt (I-5)', () => {
+    openEdit();
+    const typed = toDateTimeLocalValue(new Date(startMs + 90 * 60_000));
+    fireEvent.change(field(), { target: { value: typed } });
+    saveBtn().focus();
+    fireEvent.click(saveBtn());
+    expect(updateProjectEnd).not.toHaveBeenCalled();
+    expect(alert()?.textContent).toContain('Nächstmögliches Ende');
+    expect(document.activeElement).toBe(field());
+    expect(field().value).toBe(typed);
+  });
+
+  it('PD-01: Start mit Sekundenrest — minutengenaues Raster-Ende ist gültig und wird mit Rest gesendet', async () => {
+    const withResidue = {
+      ...base,
+      startDate: new Date(new Date('2099-01-10T10:00').getTime() + 23_000).toISOString(),
+      endDate: new Date(new Date('2099-01-11T10:00').getTime() + 23_000).toISOString(),
+    } as ProjectWithStats;
+    updateProjectEnd.mockResolvedValueOnce(withResidue);
+    openEdit(withResidue);
+    fireEvent.change(field(), { target: { value: '2099-01-12T10:00' } });
+    fireEvent.blur(field());
+    expect(alert()).toBeNull();
+    fireEvent.click(saveBtn());
+    await waitFor(() => expect(updateProjectEnd).toHaveBeenCalledTimes(1));
+    expect(updateProjectEnd.mock.calls[0][1]).toBe(
+      new Date(new Date('2099-01-12T10:00').getTime() + 23_000).toISOString(),
+    );
+  });
+
+  it('aria-describedby: Hinweis immer, Fehler-ID nur bei Fehler; Alert trägt id project-new-end-error', () => {
+    openEdit();
+    expect(field().getAttribute('aria-describedby')).toBe('project-new-end-hint');
+    fireEvent.change(field(), { target: { value: '' } });
+    fireEvent.blur(field());
+    const ids = field().getAttribute('aria-describedby')!.split(/\s+/);
+    expect(ids).toEqual(expect.arrayContaining(['project-new-end-hint', 'project-new-end-error']));
+    expect(alert()?.id).toBe('project-new-end-error');
+  });
+
+  it('I-11: Abbrechen löscht den Fehler; erneutes Öffnen zeigt keinen Fehler', () => {
+    openEdit();
+    fireEvent.change(field(), { target: { value: '' } });
+    fireEvent.blur(field());
+    expect(alert()).not.toBeNull();
+    fireEvent.click(cancelBtn());
+    expect(alert()).toBeNull();
+    fireEvent.click(ctaBtn());
+    expect(alert()).toBeNull();
+    expect(field().getAttribute('aria-invalid')).toBeNull();
+  });
+});

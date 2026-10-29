@@ -19,7 +19,7 @@ import { browserTz, formatDayHeader, formatDateTimeShort, toDateTimeLocalValue }
 import { CityInput } from '@/components/patterns/CityInput';
 import type { GeoCity } from '@/lib/api';
 import { t, getLocale } from '@/lib/i18n';
-import { validateCustomEnd, type CustomEndValidation } from './custom-end';
+import { validateCustomEnd, type CustomEndValidation } from '@/lib/end-validation';
 
 type SplitUnit = 'hour' | 'day';
 

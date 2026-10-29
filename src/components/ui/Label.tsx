@@ -14,10 +14,11 @@ export function Label({ className, ...props }: LabelProps) {
   );
 }
 
-export function FieldError({ children }: { children?: React.ReactNode }) {
+/** `id` optional — damit ein Feld per `aria-describedby` auf die Meldung verweisen kann. */
+export function FieldError({ children, id }: { children?: React.ReactNode; id?: string }) {
   if (!children) return null;
   return (
-    <p role="alert" className="mt-1.5 text-sm text-danger">
+    <p id={id} role="alert" className="mt-1.5 text-sm text-danger">
       {children}
     </p>
   );

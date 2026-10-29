@@ -1,7 +1,10 @@
-// Clientseitige Validierung eines eigenen Endzeitpunkts (Phase 01 „Freie Zeiträume").
+// Clientseitige Validierung eines Endzeitpunkts — gemeinsame Quelle für Erstellen (Phase 01
+// „Freie Zeiträume", app/projects/new/page.tsx) und Bearbeiten (Phase 02, EndDateCard).
+// D-07: beide Formulare prüfen mit derselben Funktion, deshalb liegt sie in lib/ und nicht in
+// einer Route (Pattern-Komponenten importieren nie aus app/).
 // Ausschließlich Millisekunden-Arithmetik ab dem Start — keine Kalenderrechnung
 // (DST-freie Prüfung, identisch zur Preset-Arithmetik des Formulars, D-12).
-// Der Fall 'missing' (leerer String) wird vor dem Aufruf in page.tsx behandelt.
+// Der Fall 'missing' (leerer String) behandeln die Aufrufer vor dem Aufruf.
 
 /** Vier validierte Fehlerfälle (D-11), in fester Prüfreihenfolge. */
 export type CustomEndError = 'missing' | 'notAfterStart' | 'tooLong' | 'notAligned';

@@ -12,6 +12,20 @@ import { toast } from '@/components/ui/toast-store';
 import { t, tUnit } from '@/lib/i18n';
 import { browserTz, formatDateTimeShort, toDateTimeLocalValue } from '@/lib/time';
 import { validateCustomEnd } from '@/lib/end-validation';
+import { isApiError } from '@/lib/api-error';
+
+// PD-05: Fehlercodes des API-Vertrags aus 02-01 (PATCH /projects/:id mit endDate). Erkannt wird nur
+// über diese Codes, nie über den Meldungstext (I-8). Ein Umbenennen braucht eine koordinierte
+// Änderung in API und Web; D-05: die API wird vor dem Web deployt.
+const END_CUTS_BOOKING = 'END_CUTS_BOOKING';
+const END_NOT_ALIGNED = 'END_NOT_ALIGNED';
+const END_NOT_AFTER_START = 'END_NOT_AFTER_START';
+const SPAN_TOO_LONG = 'SPAN_TOO_LONG';
+
+/** ISO-String aus dem Fehler-Body nur übernehmen, wenn er zu einem gültigen Datum parst (T-02-07). */
+function validIso(v: unknown): string | null {
+  return typeof v === 'string' && !Number.isNaN(Date.parse(v)) ? v : null;
+}
 
 /**
  * Ende der Wache verlängern oder verkürzen — nur Organisator.
@@ -25,10 +39,13 @@ export function EndDateCard({
   project,
   onUpdated,
   dayMode,
+  onConflict,
 }: {
   project: ProjectWithStats;
   onUpdated: (p: ProjectWithStats) => void;
   dayMode: boolean;
+  /** I-8: nach 409 END_CUTS_BOOKING — der Aufrufer lädt das Raster neu. */
+  onConflict?: () => void;
 }) {
   const currentValue = toDateTimeLocalValue(new Date(project.endDate));
   const [editing, setEditing] = useState(false);
@@ -78,6 +95,36 @@ export function EndDateCard({
     }
   }
 
+  /**
+   * I-8/I-9: bekannte Server-Codes → derselbe lokalisierte Feldtext wie bei der Client-Prüfung.
+   * null → kein Feldfehler möglich (unbekannter Code, fehlende/ungültige Datumsfelder) → Toast (I-10).
+   */
+  function serverFieldError(e: unknown): string | null {
+    if (!isApiError(e)) return null;
+    switch (e.code) {
+      case END_CUTS_BOOKING: {
+        const earliest = validIso(e.data?.earliestEnd);
+        return earliest
+          ? tUnit(dayMode, 'errEndCutsBooking', 'errEndCutsBookingDays', {
+              earliest: formatDateTimeShort(earliest, browserTz()),
+            })
+          : null;
+      }
+      case END_NOT_ALIGNED: {
+        const example = validIso(e.data?.exampleEnd);
+        return example
+          ? t('errEndNotAligned', { example: formatDateTimeShort(example, browserTz()) })
+          : null;
+      }
+      case END_NOT_AFTER_START:
+        return t('errEndAfterStart');
+      case SPAN_TOO_LONG:
+        return t('errEndTooLong');
+      default:
+        return null;
+    }
+  }
+
   function open() {
     setValue(currentValue);
     setError(null);
@@ -115,8 +162,17 @@ export function EndDateCard({
         variant: 'positive',
       });
     } catch (e) {
-      // I-10: Edit-Modus und eingegebener Wert bleiben; feldgenaues Mapping bekannter Codes folgt in 02-02.
-      toast({ message: (e as Error).message, variant: 'danger' });
+      // Edit-Modus und eingegebener Wert bleiben in jedem Fall (D-06, I-10).
+      const fieldError = serverFieldError(e);
+      if (fieldError) {
+        // U-2: Feldfehler statt Toast, Fokus ins Feld.
+        setError(fieldError);
+        setFocusTarget('input');
+        // I-8: Raster neu laden, damit die Client-Vorprüfung (02-03) wieder stimmt.
+        if (isApiError(e) && e.code === END_CUTS_BOOKING) onConflict?.();
+      } else {
+        toast({ message: (e as Error).message, variant: 'danger' });
+      }
     } finally {
       setSaving(false);
     }

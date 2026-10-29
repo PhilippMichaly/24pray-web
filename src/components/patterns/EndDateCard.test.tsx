@@ -10,6 +10,7 @@ vi.mock('@/lib/api', () => ({ updateProjectEnd: (...a: unknown[]) => updateProje
 const toast = vi.fn();
 vi.mock('@/components/ui/toast-store', () => ({ toast: (...a: unknown[]) => toast(...a) }));
 
+import { ApiError } from '@/lib/api-error';
 import { EndDateCard } from './EndDateCard';
 
 // Pitfall 9: Fixture aus Lokalzeit-Strings und ohne Zeitumstellung dazwischen (Januar) — DST-frei.
@@ -253,5 +254,119 @@ describe('EndDateCard — Client-Validierung (EDIT-03)', () => {
     fireEvent.click(ctaBtn());
     expect(alert()).toBeNull();
     expect(field().getAttribute('aria-invalid')).toBeNull();
+  });
+});
+
+// Phase 2 / 02-02 Task 2: Server-Ablehnungen über den Code (I-8, I-9, I-10, U-2).
+describe('EndDateCard — Server-Fehler-Mapping (EDIT-02, EDIT-03)', () => {
+  beforeEach(() => cleanup());
+  afterEach(() => vi.clearAllMocks());
+
+  const typed = '2099-01-12T10:00';
+  const earliestEnd = new Date('2099-01-13T10:00').toISOString();
+  const alert = () => screen.queryByRole('alert');
+  const submit = (opts: { dayMode?: boolean; onConflict?: () => void; p?: ProjectWithStats } = {}) => {
+    const onUpdated = vi.fn();
+    render(
+      <EndDateCard
+        project={opts.p ?? base}
+        onUpdated={onUpdated}
+        dayMode={opts.dayMode ?? false}
+        onConflict={opts.onConflict}
+      />,
+    );
+    fireEvent.click(ctaBtn());
+    fireEvent.change(field(), { target: { value: typed } });
+    saveBtn().focus();
+    fireEvent.click(saveBtn());
+    return { onUpdated };
+  };
+
+  it('409 END_CUTS_BOOKING → Feldfehler mit earliestEnd, kein Toast, onConflict einmal, Wert/Fokus/Edit bleiben', async () => {
+    updateProjectEnd.mockRejectedValueOnce(new ApiError('Server-Text', 409, 'END_CUTS_BOOKING', { earliestEnd }));
+    const onConflict = vi.fn();
+    const { onUpdated } = submit({ onConflict });
+
+    await waitFor(() => expect(alert()).not.toBeNull());
+    expect(alert()?.textContent).toContain('übernommene Stunden abschneiden');
+    expect(alert()?.textContent).toContain(formatDateTimeShort(earliestEnd, browserTz()));
+    expect(toast).not.toHaveBeenCalled();
+    expect(onConflict).toHaveBeenCalledTimes(1);
+    expect(onUpdated).not.toHaveBeenCalled();
+    expect(field().value).toBe(typed);
+    expect(field().getAttribute('aria-invalid')).toBe('true');
+    await waitFor(() => expect(document.activeElement).toBe(field()));
+  });
+
+  it('409 END_CUTS_BOOKING im Tages-Modus → „übernommene Tage abschneiden“', async () => {
+    updateProjectEnd.mockRejectedValueOnce(new ApiError('Server-Text', 409, 'END_CUTS_BOOKING', { earliestEnd }));
+    submit({ dayMode: true, p: { ...base, slotDurationMinutes: 1440 } as ProjectWithStats });
+    await waitFor(() => expect(alert()?.textContent).toContain('übernommene Tage abschneiden'));
+  });
+
+  it('400 END_NOT_ALIGNED mit exampleEnd → errEndNotAligned mit formatiertem exampleEnd', async () => {
+    const exampleEnd = new Date('2099-01-12T11:00').toISOString();
+    updateProjectEnd.mockRejectedValueOnce(new ApiError('x', 400, 'END_NOT_ALIGNED', { exampleEnd }));
+    submit();
+    await waitFor(() => expect(alert()?.textContent).toContain('Das Ende passt nicht zum gewählten Raster.'));
+    expect(alert()?.textContent).toContain(formatDateTimeShort(exampleEnd, browserTz()));
+    expect(toast).not.toHaveBeenCalled();
+  });
+
+  it('400 END_NOT_AFTER_START → errEndAfterStart', async () => {
+    updateProjectEnd.mockRejectedValueOnce(new ApiError('x', 400, 'END_NOT_AFTER_START'));
+    submit();
+    await waitFor(() => expect(alert()?.textContent).toBe('Das Ende muss nach dem Start liegen.'));
+    expect(toast).not.toHaveBeenCalled();
+  });
+
+  it('400 SPAN_TOO_LONG → errEndTooLong', async () => {
+    updateProjectEnd.mockRejectedValueOnce(new ApiError('x', 400, 'SPAN_TOO_LONG'));
+    submit();
+    await waitFor(() => expect(alert()?.textContent).toBe('Eine Gebetswache darf höchstens 366 Tage dauern.'));
+  });
+
+  it('I-8: 409 mit passendem Meldungstext, aber fremdem Code → Danger-Toast, kein Alert', async () => {
+    const msg = 'Das neue Ende würde übernommene Zeitfenster abschneiden';
+    updateProjectEnd.mockRejectedValueOnce(new ApiError(msg, 409, 'OTHER', { earliestEnd }));
+    const onConflict = vi.fn();
+    submit({ onConflict });
+    await waitFor(() => expect(toast).toHaveBeenCalledWith({ message: msg, variant: 'danger' }));
+    expect(alert()).toBeNull();
+    expect(onConflict).not.toHaveBeenCalled();
+  });
+
+  it('403 ohne Code → Danger-Toast, kein Alert, Edit-Modus bleibt', async () => {
+    updateProjectEnd.mockRejectedValueOnce(new ApiError('Keine Berechtigung', 403));
+    submit();
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith({ message: 'Keine Berechtigung', variant: 'danger' }),
+    );
+    expect(alert()).toBeNull();
+    expect(field().value).toBe(typed);
+  });
+
+  it('einfacher Error → Danger-Toast, kein Alert', async () => {
+    updateProjectEnd.mockRejectedValueOnce(new Error('Netz weg'));
+    submit();
+    await waitFor(() => expect(toast).toHaveBeenCalledWith({ message: 'Netz weg', variant: 'danger' }));
+    expect(alert()).toBeNull();
+  });
+
+  it('409 END_CUTS_BOOKING ohne gültiges earliestEnd → Danger-Toast statt kaputtem Datum', async () => {
+    updateProjectEnd.mockRejectedValueOnce(
+      new ApiError('Server-Text', 409, 'END_CUTS_BOOKING', { earliestEnd: 'kein-datum' }),
+    );
+    const onConflict = vi.fn();
+    submit({ onConflict });
+    await waitFor(() => expect(toast).toHaveBeenCalledWith({ message: 'Server-Text', variant: 'danger' }));
+    expect(alert()).toBeNull();
+  });
+
+  it('END_NOT_ALIGNED ohne exampleEnd → Danger-Toast', async () => {
+    updateProjectEnd.mockRejectedValueOnce(new ApiError('Raster', 400, 'END_NOT_ALIGNED'));
+    submit();
+    await waitFor(() => expect(toast).toHaveBeenCalledWith({ message: 'Raster', variant: 'danger' }));
+    expect(alert()).toBeNull();
   });
 });

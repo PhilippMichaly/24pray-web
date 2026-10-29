@@ -1,3 +1,5 @@
+import { ApiError } from '@/lib/api-error';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 class ApiClient {
@@ -24,7 +26,12 @@ class ApiClient {
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({ message: 'Unbekannter Fehler' }));
-      throw new Error(error.message || `HTTP ${res.status}`);
+      // Phase 2 (I-8/I-9): Status, Code und Body mitgeben. Die message ist exakt die bisherige —
+      // Aufrufer, die nur (e as Error).message lesen, verhalten sich unverändert.
+      const data: Record<string, unknown> =
+        error && typeof error === 'object' && !Array.isArray(error) ? error : {};
+      const code = typeof data.code === 'string' ? data.code : undefined;
+      throw new ApiError((data.message as string) || `HTTP ${res.status}`, res.status, code, data);
     }
 
     // 204 No Content (logout, slot-cancel) and empty bodies have no JSON to parse.

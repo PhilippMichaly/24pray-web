@@ -245,7 +245,12 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
               <LocationCard project={project} onUpdated={setProject} />
               <ConcernCard project={project} onUpdated={setProject} />
               <ScheduleCard project={project} onUpdated={setProject} />
-              <EndDateCard project={project} onUpdated={setProject} dayMode={grid.dayMode} />
+              <EndDateCard
+                project={project}
+                onUpdated={setProject}
+                dayMode={grid.dayMode}
+                onConflict={() => void grid.reload()}
+              />
               <GroupLinksCard project={project} onUpdated={setProject} />
               <InviteCard
                 projectId={project.id}

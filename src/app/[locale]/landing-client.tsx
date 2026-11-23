@@ -9,7 +9,8 @@ import { useFunnelPing } from '@/lib/funnel';
 import { Brand } from '@/components/patterns/Brand';
 import { UserMenu } from '@/components/patterns/AppShell';
 import { LocaleToggle } from '@/components/patterns/LocaleToggle';
-import { Globe, type ChainPoint } from '@/components/patterns/Globe';
+import type { ChainPoint } from '@/components/patterns/Globe';
+import { GlobeGL } from '@/components/patterns/GlobeGL';
 import { FeedbackDialog, GITHUB_REPO_URL } from '@/components/patterns/FeedbackDialog';
 import { Button } from '@/components/ui/Button';
 import { t } from '@/lib/i18n';
@@ -56,7 +57,7 @@ export default function LandingClient() {
           Überschrift und Knöpfe auch am Desktop (1440×900) ohne Scrollen sichtbar bleiben. */}
       <main className="z-10 flex w-full flex-1 flex-col items-center justify-center">
         <div className="relative w-full max-w-[min(52vh,600px)]">
-          <Globe
+          <GlobeGL
             activeChains={stats?.activeChains ?? 5}
             points={stats?.points}
             focusPoint={focusPoint}

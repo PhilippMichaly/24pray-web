@@ -144,7 +144,7 @@ void main() {
   float ndl = dot(n, uSun);
   float dayAmt = smoothstep(-0.10, 0.20, ndl);
   float lit = max(ndl, 0.0);
-  vec3 sunCol = mix(vec3(1.0, 0.42, 0.16), vec3(1.0, 0.97, 0.92), smoothstep(0.0, 0.35, ndl));
+  vec3 sunCol = mix(vec3(1.0, 0.56, 0.30), vec3(1.0, 0.97, 0.92), smoothstep(0.0, 0.30, ndl));
 
   float water = smoothstep(0.0, 0.02, day.b - 1.5 * max(day.r, day.g));
   vec3 albedo = day + water * vec3(0.0, 0.014, 0.03);
@@ -276,6 +276,11 @@ void main() {
   vec3 bloom = (texture(uBloomA, vUv).rgb * 0.55 + texture(uBloomB, vUv).rgb * 0.75) * uBloomAmt;
   vec3 c = pow(aces((s.rgb + bloom) * 1.15), vec3(1.0 / 2.2));
   float a = clamp(max(s.a, max(bloom.r, max(bloom.g, bloom.b)) * 1.4), 0.0, 1.0);
+  // Weicher, abgerundeter Bildrand: gezoomt füllt die Kugel das Quadrat, ohne harte Kante
+  vec2 e = abs(vUv * 2.0 - 1.0);
+  float edge = smoothstep(1.0, 0.88, pow(pow(e.x, 6.0) + pow(e.y, 6.0), 1.0 / 6.0));
+  c *= edge;
+  a *= edge;
   o = vec4(min(c, vec3(a)), a);
 }`;
 

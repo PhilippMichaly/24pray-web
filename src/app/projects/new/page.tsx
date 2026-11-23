@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { browserTz, formatDayHeader, formatDateTimeShort, toDateTimeLocalValue } from '@/lib/time';
 import { CityInput } from '@/components/patterns/CityInput';
 import type { GeoCity } from '@/lib/api';
-import { t, getLocale } from '@/lib/i18n';
+import { t, tUnit, getLocale } from '@/lib/i18n';
 import { validateCustomEnd, type CustomEndValidation } from '@/lib/end-validation';
 
 type SplitUnit = 'hour' | 'day';
@@ -376,7 +376,7 @@ export default function NewProjectPage() {
               />
               <span className="min-w-0">
                 <span className="block text-sm text-ink">{t('notifyOnBookingLabel')}</span>
-                <span className="block text-xs text-ink-muted">{t('notifyOnBookingHint')}</span>
+                <span className="block text-xs text-ink-muted">{tUnit(unit === 'day', 'notifyOnBookingHint', 'notifyOnBookingHintDay')}</span>
               </span>
             </label>
 

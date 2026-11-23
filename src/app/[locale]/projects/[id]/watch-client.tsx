@@ -273,7 +273,7 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
             <TabPanel value="chain" className="pt-5">
               <FieldError>{grid.error}</FieldError>
               {grid.models.length === 0 ? (
-                <EmptyState icon={CalendarPlus} title={t('emptySlotsTitle')} description={t('emptySlotsHint')} />
+                <EmptyState icon={CalendarPlus} title={tUnit(grid.dayMode, 'emptySlotsTitle', 'emptySlotsTitleDay')} description={tUnit(grid.dayMode, 'emptySlotsHint', 'emptySlotsHintDay')} />
               ) : (
                 <>
                   <div className="mb-6 overflow-x-auto">
@@ -332,7 +332,7 @@ function ProjectPageInner({ id, initialProject }: WatchClientProps) {
 
           {inviteUrl && (
             <div className="mt-8">
-              <ProjectDangerZone projectId={project.id} />
+              <ProjectDangerZone projectId={project.id} dayMode={grid.dayMode} />
             </div>
           )}
         </>

@@ -6,14 +6,14 @@ import { deleteProject } from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { toast } from '@/components/ui/toast-store';
-import { t } from '@/lib/i18n';
+import { t, tUnit } from '@/lib/i18n';
 
 /**
  * Wache endgültig löschen (Ersteller-Lebenszyklus) — nur Organisator.
  * Muster wie DangerZone in /profil: Zwei-Schritt-Bestätigung, dann Redirect.
  * Die API verschickt vorher eine Abschieds-Mail an künftige Gebuchte.
  */
-export function ProjectDangerZone({ projectId }: { projectId: string }) {
+export function ProjectDangerZone({ projectId, dayMode = false }: { projectId: string; dayMode?: boolean }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -34,7 +34,7 @@ export function ProjectDangerZone({ projectId }: { projectId: string }) {
   return (
     <Card elevation={1} className="border-danger/40 bg-danger/5">
       <h2 className="text-sm font-semibold text-ink">{t('projectDangerZone')}</h2>
-      <p className="mt-1 text-xs text-ink-muted">{t('projectDeleteWarning')}</p>
+      <p className="mt-1 text-xs text-ink-muted">{tUnit(dayMode, 'projectDeleteWarning', 'projectDeleteWarningDay')}</p>
       {confirming ? (
         <div className="mt-4 space-y-3">
           <p className="text-sm font-medium text-danger">{t('projectDeleteConfirmText')}</p>

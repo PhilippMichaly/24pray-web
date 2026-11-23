@@ -135,3 +135,51 @@ describe('Ende ändern (Phase 2) — neue Texte', () => {
     }
   });
 });
+
+// Regressionsschutz „Stunden-Wording in Tages-Wachen": existiert zu einem Key eine Tages-Variante
+// (`<key>Day`/`<key>Days`), darf ihn keine Komponente mehr direkt per t('<key>') ziehen — sonst
+// steht in einer Tages-Wache wieder „Stunde". Solche Stellen gehören hinter tUnit(...).
+describe('Tages-Wachen: Stunden-Texte nur über tUnit', () => {
+  const NEW_DAY_KEYS = [
+    'notifyOnBookingHintDay', 'guestBookedTitleDay', 'inviteAfterBookingDay', 'inviteShareTextDay',
+    'noStatsTitleDay', 'myLocationHintDay', 'emptySlotsTitleDay', 'emptySlotsHintDay',
+    'scheduleWarningDay', 'projectDeleteWarningDay',
+  ] as const;
+
+  it('neue Tages-Texte sprechen in keiner Sprache mehr von Stunden', () => {
+    const hourWord: Record<string, RegExp> = { de: /stunde/i, en: /hour/i, es: /hora/i, he: /שעה|שעות/, ar: /ساع/ };
+    for (const locale of SUPPORTED_LOCALES) {
+      for (const key of NEW_DAY_KEYS) {
+        const text = translate(locale, key, { title: 'X' });
+        expect(text, `${locale}.${key}`).toBeTruthy();
+        expect(text, `${locale}.${key}`).not.toMatch(hourWord[locale]);
+      }
+    }
+  });
+
+  it('kein direkter t()-Aufruf eines Keys, zu dem es eine Tages-Variante gibt', async () => {
+    const { readdirSync, readFileSync, statSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const hasKey = (k: string) => typeof translate('de', k as never) === 'string';
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const name of readdirSync(dir)) {
+        const p = join(dir, name);
+        if (statSync(p).isDirectory()) walk(p);
+        else if (/\.tsx?$/.test(name) && !/\.test\.tsx?$/.test(name)) files.push(p);
+      }
+    };
+    walk(join(process.cwd(), 'src'));
+    const offenders: string[] = [];
+    for (const file of files) {
+      const src = readFileSync(file, 'utf8');
+      for (const m of src.matchAll(/(?<![\w.])t\(\s*'(\w+)'/g)) {
+        const key = m[1];
+        if (hasKey(`${key}Day`) || hasKey(`${key}Days`)) offenders.push(`${file.replace(process.cwd() + '/', '')}: t('${key}')`);
+      }
+    }
+    // Bewusste Ausnahme: steht bereits in einem unit-Ternary mit eigener Parameterliste (days vs. hours).
+    const ALLOWED = ["src/app/projects/new/page.tsx: t('summaryLine')"];
+    expect(offenders.filter((o) => !ALLOWED.includes(o))).toEqual([]);
+  });
+});

@@ -111,7 +111,7 @@ export function GuestBookingForm({
         <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-positive/15 text-positive">
           <CheckCircle2 size={24} />
         </span>
-        <p className="font-display text-lg font-semibold text-ink">{t('guestBookedTitle')}</p>
+        <p className="font-display text-lg font-semibold text-ink">{tUnit(!!dayMode, 'guestBookedTitle', 'guestBookedTitleDay')}</p>
         <p className="mt-1 text-sm text-ink-muted tnum">
           {dayMode ? (
             formatDayHeader(slot.startTime, projectTz)
@@ -127,10 +127,10 @@ export function GuestBookingForm({
         </Button>
         {(() => {
           const url = buildWatchUrl(projectId, invite);
-          const text = t('inviteShareText', { title: projectTitle });
+          const text = tUnit(!!dayMode, 'inviteShareText', 'inviteShareTextDay', { title: projectTitle });
           return (
             <div className="mt-5 border-t border-border pt-4">
-              <p className="text-sm text-ink">{t('inviteAfterBooking')}</p>
+              <p className="text-sm text-ink">{tUnit(!!dayMode, 'inviteAfterBooking', 'inviteAfterBookingDay')}</p>
               <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-xs font-medium text-ink-muted">
                 <a
                   href={waShareHref(text, url)}

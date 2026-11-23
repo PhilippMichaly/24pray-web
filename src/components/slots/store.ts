@@ -7,7 +7,7 @@ import { getSlotGrid, bookSlot, cancelSlot } from '@/lib/api';
 import { toast } from '@/components/ui/toast-store';
 import { buildViewModels, groupByDay, groupByWeek, bookedCount, isDayMode } from './logic';
 import { myCityPayload } from '@/lib/mylocation';
-import { t } from '@/lib/i18n';
+import { t, tUnit } from '@/lib/i18n';
 
 interface SlotGridState {
   slots: SlotView[];
@@ -127,7 +127,7 @@ export function useSlotGrid(
           );
         }
         toast({
-          message: t('slotBookedToast'),
+          message: tUnit(dayMode, 'slotBookedToast', 'slotBookedToastDay'),
           variant: 'positive',
           action: {
             label: t('undo'),
@@ -141,7 +141,7 @@ export function useSlotGrid(
         const msg = (e as Error).message;
         if (/409|belegt/i.test(msg)) {
           setConflict(key);
-          toast({ message: t('slotConflictToast'), variant: 'danger' });
+          toast({ message: tUnit(dayMode, 'slotConflictToast', 'slotConflictToastDay'), variant: 'danger' });
           setTimeout(() => setConflict(null), 1500);
           await reload();
         } else {
@@ -149,7 +149,7 @@ export function useSlotGrid(
         }
       }
     },
-    [project, invite, slots, patchSlot, setPending, setConflict, reload, cancelBooked],
+    [project, invite, slots, patchSlot, setPending, setConflict, reload, cancelBooked, dayMode],
   );
 
   return {

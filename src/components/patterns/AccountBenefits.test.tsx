@@ -11,7 +11,7 @@ describe('AccountBenefits (Backlog 6)', () => {
     expect(screen.getByText(/Mit einem Konto/i)).toBeTruthy();
     const items = screen.getAllByRole('listitem');
     expect(items.length).toBe(3);
-    expect(items.map((li) => li.textContent).join(' ')).toMatch(/Stunden/);
+    expect(items.map((li) => li.textContent).join(' ')).toMatch(/Gebetszeiten/);
     expect(items.map((li) => li.textContent).join(' ')).toMatch(/Erinnerung/);
     expect(items.map((li) => li.textContent).join(' ')).toMatch(/Name/);
   });

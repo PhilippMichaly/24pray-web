@@ -38,7 +38,7 @@ export function StatsPanel({ projectId, invite, models, tz, dayMode = false }: S
     return (
       <EmptyState
         icon={BarChart3}
-        title={t('noStatsTitle')}
+        title={tUnit(dayMode, 'noStatsTitle', 'noStatsTitleDay')}
         description={tUnit(dayMode, 'noStatsHint', 'noStatsHintDay')}
       />
     );

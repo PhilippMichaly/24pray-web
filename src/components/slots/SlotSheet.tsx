@@ -135,7 +135,7 @@ function MineExtras({ slot, project, onRecurred }: { slot: SlotViewModel; projec
           {t('myLocation')} <span className="text-ink-muted">({t('optional')})</span>
         </Label>
         <CityInput id="myCity" compact initialName={getMyCity()?.name ?? ''} onSelect={(c) => setMyCity(c)} />
-        <p className="mt-1 text-xs text-ink-muted">{t('myLocationHint')}</p>
+        <p className="mt-1 text-xs text-ink-muted">{tUnit(isDayMode(project.slotDurationMinutes), 'myLocationHint', 'myLocationHintDay')}</p>
       </div>
       {minutes !== null && (
         <div className="flex items-center gap-2 text-sm text-ink-muted">

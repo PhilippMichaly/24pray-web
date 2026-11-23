@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { toast } from '@/components/ui/toast-store';
-import { t, intlLocale } from '@/lib/i18n';
+import { t, tUnit, intlLocale } from '@/lib/i18n';
+import { isDayMode } from '@/components/slots/logic';
 
 /** ISO → Wert für <input type="datetime-local"> (lokale Browser-Zeit, ohne Sekunden). */
 function toDatetimeLocalValue(iso: string): string {
@@ -21,7 +22,7 @@ function toDatetimeLocalValue(iso: string): string {
 /**
  * Startzeit der Wache verschieben (Ersteller-Lebenszyklus) — nur Organisator.
  * Muster wie ConcernCard: Anzeige-Zeile mit CTA, Edit-Modus mit Erklärung + Speichern.
- * Alle gebuchten Stunden wandern serverseitig per Delta mit; die API verschickt
+ * Alle gebuchten Stunden/Tage wandern serverseitig per Delta mit; die API verschickt
  * Zeitplan-Mails an künftige Gebuchte — daher die deutliche Erklärung vor dem Speichern.
  */
 export function ScheduleCard({
@@ -86,7 +87,7 @@ export function ScheduleCard({
           onChange={(e) => setValue(e.target.value)}
         />
       </div>
-      <p className="text-xs text-ink-muted">{t('scheduleWarning')}</p>
+      <p className="text-xs text-ink-muted">{tUnit(isDayMode(project.slotDurationMinutes), 'scheduleWarning', 'scheduleWarningDay')}</p>
       <div className="flex gap-2">
         <Button size="sm" loading={saving} onClick={save}>
           {t('scheduleConfirmButton')}

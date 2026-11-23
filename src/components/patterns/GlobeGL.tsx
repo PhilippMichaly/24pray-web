@@ -391,7 +391,8 @@ export function GlobeGL({ activeChains, points, focusPoint, onSelectPoint, class
     // Vollbild-Viereck
     const quadVao = gl.createVertexArray()!;
     gl.bindVertexArray(quadVao);
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    const quadBuf = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     for (const p of [pEarth, pDown, pBlur, pComp]) gl.bindAttribLocation(p, 0, 'aPos');
     gl.enableVertexAttribArray(0);
@@ -854,7 +855,21 @@ export function GlobeGL({ activeChains, points, focusPoint, onSelectPoint, class
       cv.removeEventListener('pointermove', onMove);
       cv.removeEventListener('pointerup', onUp);
       cv.removeEventListener('pointercancel', onUp);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+      // Ressourcen gezielt freigeben, den Kontext aber NICHT verwerfen: React hängt den Effekt
+      // unter StrictMode (Dev, Client-Navigation) auf demselben Canvas erneut ein, und ein
+      // verlorener Kontext käme von getContext() unverändert verloren zurück.
+      for (const t of [scene, ...bloom]) {
+        if (!t) continue;
+        gl.deleteFramebuffer(t.fbo);
+        gl.deleteTexture(t.tex);
+      }
+      gl.deleteTexture(dayTex);
+      gl.deleteTexture(nightTex);
+      gl.deleteBuffer(quadBuf);
+      gl.deleteBuffer(netBuf);
+      gl.deleteVertexArray(quadVao);
+      gl.deleteVertexArray(netVao);
+      for (const p of [pEarth, pNet, pDown, pBlur, pComp]) gl.deleteProgram(p);
     };
   }, []);
 

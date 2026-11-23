@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { createElement } from 'react';
+import { createElement, StrictMode } from 'react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, cleanup, act } from '@testing-library/react';
 import { GlobeGL } from './GlobeGL';
@@ -9,14 +9,20 @@ vi.mock('./Globe', () => ({
   Globe: () => createElement('div', { 'data-testid': 'globe-fallback' }),
 }));
 
-/** Minimaler WebGL2-Ersatz: jede Methode liefert ein leeres Objekt, Konstanten sind 0. */
+/** Minimaler WebGL2-Ersatz: jede Methode liefert ein leeres Objekt, Konstanten sind 0.
+ *  Wie ein echter Kontext bleibt er nach `WEBGL_lose_context.loseContext()` verloren —
+ *  ab dann schlägt jedes Shader-Kompilieren fehl. */
 function stubGl(compileOk = true): unknown {
+  let lost = false;
   return new Proxy(
     {},
     {
       get(_t, prop) {
-        if (prop === 'getShaderParameter' || prop === 'getProgramParameter') return () => compileOk;
-        if (prop === 'getExtension') return () => null;
+        if (prop === 'getShaderParameter' || prop === 'getProgramParameter') return () => compileOk && !lost;
+        if (prop === 'getExtension') {
+          return (name: string) =>
+            name === 'WEBGL_lose_context' ? { loseContext: () => void (lost = true) } : null;
+        }
         if (typeof prop === 'string' && prop === prop.toUpperCase()) return 0;
         return () => ({});
       },
@@ -76,6 +82,30 @@ describe('GlobeGL — Rückfall auf die Canvas-Erde', () => {
     act(() => {
       container.querySelector('canvas')!.dispatchEvent(new Event('webglcontextlost'));
     });
+    expect(await findByTestId('globe-fallback')).toBeTruthy();
+  });
+});
+
+describe('GlobeGL — erneutes Einhängen auf demselben Canvas', () => {
+  it('StrictMode-Doppelmount (Dev, Client-Navigation) behält die WebGL-Erde', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    useContext(stubGl());
+    const { queryByTestId, container } = render(
+      <StrictMode>
+        <GlobeGL activeChains={2} points={POINTS} />
+      </StrictMode>,
+    );
+    await settle();
+    expect(queryByTestId('globe-fallback')).toBeNull();
+    expect(container.querySelector('canvas')).not.toBeNull();
+  });
+});
+
+describe('GlobeGL — Texturfehler', () => {
+  it('lädt eine Textur nicht, erscheint die alte Erde', async () => {
+    HTMLImageElement.prototype.decode = () => Promise.reject(new Error('kaputt'));
+    useContext(stubGl());
+    const { findByTestId } = render(<GlobeGL activeChains={2} points={POINTS} />);
     expect(await findByTestId('globe-fallback')).toBeTruthy();
   });
 });
